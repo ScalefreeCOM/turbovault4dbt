@@ -1,0 +1,16 @@
+{{ config(schema='@@Schema',
+          materialized='incremental') }}
+
+
+{%- set yaml_metadata -%}
+source_models: @@SourceModels
+link_hashkey: @@LinkHashkey 
+foreign_hashkeys: @@ForeignHashkeys
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ link(source_model=metadata_dict['source_models'],
+        link_hashkey=metadata_dict['link_hashkey'],
+        foreign_hashkeys=metadata_dict['foreign_hashkeys']
+        )}}

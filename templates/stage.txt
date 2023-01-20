@@ -1,0 +1,25 @@
+{{ config(materialized='view') }}
+{{ config(schema='@@SCHEMA') }}
+
+{%- set yaml_metadata -%}
+source_model: 
+  '@@SourceName': '@@SourceTable'
+hashed_columns:
+@@HashedColumns
+rsrc: '@@RecordSource' 
+ldts: '@@LoadDate'
+include_source_columns: true
+@@PrejoinedColumns
+
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ stage(include_source_columns=metadata_dict['include_source_columns'],
+                  source_table=metadata_dict['source_table'],
+                  source_schema=metadata_dict['source_schema'],
+                  hashed_columns=metadata_dict['hashed_columns'],
+                  ranked_columns=none,
+                  rsrc=metadata_dict['rsrc'],
+                  ldts=metadata_dict['ldts'],
+                  prejoined_columns=metadata_dict['prejoined_columns']) }}
