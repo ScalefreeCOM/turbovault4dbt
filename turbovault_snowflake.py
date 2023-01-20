@@ -4,22 +4,16 @@ from procs.sqlite3 import stage
 from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
-
 from logging import Logger
-
 import pandas as pd
 import sqlite3
-
 from gooey import Gooey
-from gooey import GooeyParser, local_resource_path
-
+from gooey import GooeyParser
 from datetime import datetime
 import snowflake.connector
-
+import time
 
 image_path = os.path.join(os.path.dirname(__file__),"images")
-log = Logger('log')
-
 
 def connect_snowflake():
     config = ConfigParser()
@@ -106,7 +100,7 @@ def main():
     config.read(os.path.join(os.path.dirname(__file__),"config.ini"))
 
     model_path = config.get('Snowflake','model_path')
-
+    hashdiff_naming = config.get('Snowflake','hashdiff_naming')
     cursor = connect_snowflake()
     cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
     results = cursor.fetchall()
@@ -128,16 +122,16 @@ def main():
         todo = args.Tasks[4]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
-        todo = ""
-    #print(args.Sources)        
+        todo = ""     
 
     rdv_default_schema =  config.get('Snowflake', 'rdv_schema')
     stage_default_schema = config.get('Snowflake', 'stage_schema')
 
-   
+
+
     for source in args.Sources[0]:
         if 'Stage' in todo:
-            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path)
+            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
         
         if 'Hub' in todo: 
             hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
@@ -146,10 +140,13 @@ def main():
             link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
         if 'Satellite' in todo: 
-            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
 
-if __name__ == '__main__':
-    print("Script begins")
+if __name__ == "__main__":
+    print("Starting Script.")
+    start = time.time()
     main()
-    print("Script ends")
+    end = time.time()
+    print("Script ends.")
+    print("Total Runtime: " + str(round(end - start, 2)) + "s")

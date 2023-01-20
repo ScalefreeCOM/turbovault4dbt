@@ -2,7 +2,7 @@ import codecs
 from datetime import datetime
 import os
 
-def gen_hashed_columns(cursor,source):
+def gen_hashed_columns(cursor,source, hashdiff_naming):
   command = ""
 
   source_name, source_object = source.split("_")
@@ -16,17 +16,17 @@ def gen_hashed_columns(cursor,source):
               ORDER BY h.Target_Column_Sort_Order) 
               GROUP BY Target_Primary_Key_Physical_Name
               UNION ALL
-              SELECT Target_link_table_physical_name,GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
-              (SELECT 'hk_' || l.Target_link_table_physical_name as Target_link_table_physical_name ,l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
               FROM link_entities l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               ORDER BY l.Target_Column_Sort_Order)
-              group by Target_link_table_physical_name
+              group by Target_Primary_Key_Physical_Name
               
               UNION ALL
               SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
-              (SELECT 'hd_' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
               FROM hub_satellites s
               inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -34,7 +34,7 @@ def gen_hashed_columns(cursor,source):
               group by Target_Satellite_Table_Physical_Name
               UNION ALL
               SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM
-              (SELECT 'hd_' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
               FROM link_satellites s
               inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -103,9 +103,9 @@ def gen_prejoin_columns(cursor, source):
   return command
   
 
-def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path):
+def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path,hashdiff_naming):
 
-  hashed_columns = gen_hashed_columns(cursor, source)
+  hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming)
   prejoins = gen_prejoin_columns(cursor, source)
 
   source_name, source_object = source.split("_")
@@ -128,7 +128,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   with open(os.path.join(".","templates","stage.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
-  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema)
+  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema)
 
   filename = os.path.join(model_path, timestamp , f"{source_table_name.lower()}.sql")
           

@@ -46,7 +46,7 @@ SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Link_p
     return results
         
 
-def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path):
+def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming):
     
     satellite_list = generate_satellite_list(cursor=cursor, source=source)
 
@@ -54,12 +54,10 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
     model_path_v0 = model_path.replace('@@entitytype','Satellites_v0').replace('@@SourceSystem',source_name)
     model_path_v1 = model_path.replace('@@entitytype','Satellites_v1').replace('@@SourceSystem',source_name)
 
-
     for satellite in satellite_list:
-        satellite_id = satellite[0]
         satellite_name = satellite[1]
         hashkey_column = satellite[2]
-        hashdiff_column = "hd_" + satellite_name
+        hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
         payload_list = satellite[3].split(',')
         source_model = satellite[4]
         loaddate = satellite[5]

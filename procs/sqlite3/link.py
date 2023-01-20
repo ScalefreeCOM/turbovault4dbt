@@ -1,6 +1,7 @@
 import os
 
-from procs.excel.hub import generate_source_models
+from procs.sqlite3.hub import generate_source_models
+
 
 def generate_link_list(cursor, source):
 

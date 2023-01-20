@@ -11,9 +11,8 @@ import sqlite3
 from gooey import Gooey
 from gooey import GooeyParser
 from datetime import datetime
+import time
 
-
-log = Logger('log')
 image_path = os.path.join(os.path.dirname(__file__),"images")
 
 def connect_bigquery(credential_path,metadata_dataset):
@@ -63,6 +62,7 @@ def main():
     config = ConfigParser()
     config.read(os.path.join(os.path.dirname(__file__),"config.ini"))
 
+    hashdiff_naming = config.get('BigQuery','hashdiff_naming')
     model_path = config.get('BigQuery','model_path')
     credential_path = config.get('BigQuery', 'credential_path')
     metadata_dataset = config.get('BigQuery','metadata_dataset')
@@ -96,7 +96,7 @@ def main():
    
     for source in args.Sources[0]:
         if 'Stage' in todo:
-            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path)
+            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
         
         if 'Hub' in todo: 
             hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
@@ -105,9 +105,14 @@ def main():
             link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
         if 'Satellite' in todo: 
-            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
    
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    print("Starting Script.")
+    start = time.time()
     main()
+    end = time.time()
+    print("Script ends.")
+    print("Total Runtime: " + str(round(end - start, 2)) + "s")

@@ -1,0 +1,9 @@
+CREATE TABLE hub_satellites  (
+"Satellite_Identifier" STRING,
+"Target_Satellite_Table_Physical_Name" STRING,	
+"Source_Table_Identifier" STRING,	
+"Source_Column_Physical_Name" STRING,	
+"Hub_Primary_Key_Physical_Name" STRING,	
+"Target_Column_Physical_Name" STRING,	
+"Target_Column_Sort_Order" STRING
+)

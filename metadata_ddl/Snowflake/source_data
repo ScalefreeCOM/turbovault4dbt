@@ -1,0 +1,10 @@
+CREATE TABLE source_data  (
+  "Source_Table_Identifier" STRING,
+  "Source_System" STRING,
+  "Source_Object" STRING,
+  "Source_Schema_Physical_Name" STRING,
+  "Source_Table_Physical_Name" STRING,
+  "Record_Source_Column" STRING,
+  "Static_Part_of_Record_Source_Column" STRING,
+  "Load_Date_Column" STRING
+)

@@ -6,7 +6,6 @@ source_sat: '@@SatName'
 src_hk: "@@Hashkey"
 src_hd: '@@Hashdiff'
 src_ldts: "@@LoadDate"
-ledts_alias='@@LedtsAlias'
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
@@ -15,4 +14,4 @@ ledts_alias='@@LedtsAlias'
           src_hk=metadata_dict['src_hk'],
           src_hd=metadata_dict['src_hd'],
           src_ldts=metadata_dict['src_ldts'],
-          ledts_alias=metadata_dict['ledts_alias']) }}
+          ledts_alias=none) }}
