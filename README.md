@@ -1,4 +1,4 @@
-<h1 align=center>Welcome to turbovault4dbt!</h1>
+<h1 align=center>Welcome to TurboVault4dbt!</h1>
 <img src="https://user-images.githubusercontent.com/81677440/214857459-13fb4674-06e7-40d1-abb6-1b43133f2f8b.png" width=100% align=center>
 
 ***
