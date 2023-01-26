@@ -1,7 +1,6 @@
 {{ config(schema='@@Schema',
           materialized='incremental') }}
 
-
 {%- set yaml_metadata -%}
 source_models: @@SourceModels
 link_hashkey: @@LinkHashkey 

@@ -53,7 +53,6 @@ def generate_source_models(cursor, link_id):
             fk_col_output = "'" + fk_columns[0] + "'"
         
         command += f"\n\t{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
-
         rsrc_static = source_table_row[2]
 
         if rsrc_static != '':

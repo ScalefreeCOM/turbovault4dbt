@@ -1,4 +1,5 @@
-CREATE TABLE hub_satellites  (
+CREATE TABLE hub_satellites  
+(
 "Satellite_Identifier" STRING,
 "Target_Satellite_Table_Physical_Name" STRING,	
 "Source_Table_Identifier" STRING,	

@@ -86,7 +86,6 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
         hub_name = hub[1]
         hub_id = hub[0]
         bk_list = hub[2].split(',')
-
         bk_string = ""
         for bk in bk_list:
             bk_string += f"\n\t- '{bk}'"

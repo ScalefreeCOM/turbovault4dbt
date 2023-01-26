@@ -1,4 +1,5 @@
-CREATE TABLE source_data  (
+CREATE TABLE source_data  
+(
   "Source_Table_Identifier" STRING,
   "Source_System" STRING,
   "Source_Object" STRING,

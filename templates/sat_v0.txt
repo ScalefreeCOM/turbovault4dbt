@@ -2,8 +2,6 @@
            materialized='incremental',
            unique_key=['@@Hashkey', '@@Hashdiff', '@@LoadDate']) }} 
 
-
-
 {%- set yaml_metadata -%}
 source_model: "@@SourceModel" 
 src_pk: "@@Hashkey"

@@ -3,6 +3,7 @@ import os
 
 def gen_payload(payload_list):
     payload_string = ''
+    
     for column in payload_list:
         payload_string = payload_string + f'\t- {column.lower()}\n'
     

@@ -10,7 +10,6 @@ import sqlite3
 import time
 from gooey import Gooey
 from gooey import GooeyParser
-
 from datetime import datetime
 
 image_path = os.path.join(os.path.dirname(__file__),"images")

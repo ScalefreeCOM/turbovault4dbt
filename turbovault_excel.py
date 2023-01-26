@@ -12,7 +12,6 @@ from gooey import GooeyParser
 from datetime import datetime
 import time
 
-
 image_path = os.path.join(os.path.dirname(__file__),"images")
 log = Logger('log')
 

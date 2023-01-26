@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 def gen_hashed_columns(cursor,source, hashdiff_naming):
+  
   command = ""
 
   source_name, source_object = source.split("_")
