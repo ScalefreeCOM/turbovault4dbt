@@ -10,6 +10,7 @@ import sqlite3
 from gooey import Gooey
 from gooey import GooeyParser
 from datetime import datetime
+
 import snowflake.connector
 import time
 

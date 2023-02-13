@@ -1,4 +1,5 @@
-CREATE TABLE link_entities  (
+CREATE TABLE link_entities  
+(
 Link_Identifier STRING,
 Target_Link_Table_Physical_Name STRING,	
 Source_Table_Identifier STRING,	

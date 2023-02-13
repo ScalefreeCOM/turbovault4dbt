@@ -1,4 +1,5 @@
-CREATE TABLE hub_entities  (
+CREATE TABLE hub_entities  
+(
 Hub_Identifier STRING,
 Target_Hub_Table_Physical_Name STRING,	
 Source_Table_Identifier STRING,	

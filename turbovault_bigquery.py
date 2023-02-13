@@ -13,6 +13,7 @@ from gooey import GooeyParser
 from datetime import datetime
 import time
 
+
 image_path = os.path.join(os.path.dirname(__file__),"images")
 
 def connect_bigquery(credential_path,metadata_dataset):

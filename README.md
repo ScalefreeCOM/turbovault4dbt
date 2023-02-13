@@ -1,4 +1,4 @@
-<h1 align=center>Welcome to turbovault4dbt</h1>
+<h1 align=center>Welcome to TurboVault4dbt!</h1>
 <img src="https://user-images.githubusercontent.com/81677440/214857459-13fb4674-06e7-40d1-abb6-1b43133f2f8b.png" width=100% align=center>
 
 ***
@@ -21,11 +21,11 @@ To use the generated models, a [dbt project](https://docs.getdbt.com/docs/get-st
 You can find DDL scripts and templates for the metadata tables and the excel sheet [here]((https://github.com/ScalefreeCOM/turbovault4dbt/tree/main/metadata_ddl)). 
 
 Your metadata needs to be stored in the following five tables/worksheets: 
-- [source_data](Source-Data.md)
-- [hub_entities](Hubs.md)
-- [link_entities](Links.md)
-- [hub_satellites](Hub-Satellites.md)
-- [link_satellites](Link-Satellites.md)
+- [source_data](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/source-data)
+- [hub_entities](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/hubs)
+- [link_entities](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/links)
+- [hub_satellites](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/hub-satellites)
+- [link_satellites](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/link-satellites)
 
 
 

@@ -10,7 +10,6 @@ rsrc: '@@RecordSource'
 ldts: '@@LoadDate'
 include_source_columns: true
 @@PrejoinedColumns
-
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
