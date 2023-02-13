@@ -15,11 +15,9 @@ include_source_columns: true
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
 
-{{ stage(include_source_columns=metadata_dict['include_source_columns'],
-                  source_table=metadata_dict['source_table'],
-                  source_schema=metadata_dict['source_schema'],
+{{ datavault4dbt.stage(include_source_columns=metadata_dict['include_source_columns'],
+                  source_model=metadata_dict['source_model'],
                   hashed_columns=metadata_dict['hashed_columns'],
-                  ranked_columns=none,
                   rsrc=metadata_dict['rsrc'],
                   ldts=metadata_dict['ldts'],
                   prejoined_columns=metadata_dict['prejoined_columns']) }}

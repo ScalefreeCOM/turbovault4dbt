@@ -59,7 +59,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
         payload_list = satellite[3].split(',')
-        source_model = satellite[4]
+        source_model = satellite[4].lower()
         loaddate = satellite[5]
 
         payload = gen_payload(payload_list)

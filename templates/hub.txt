@@ -9,8 +9,6 @@ business_keys: @@BusinessKeys
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
 
-{{ dbtvault.hub(source_models=metadata_dict["source_models"],
+{{ datavault4dbt.hub(source_models=metadata_dict["source_models"],
                 hashkey=metadata_dict["hashkey"],
-                business_keys=metadata_dict["business_keys"],
-                ldts=none,
-                rsrc=none) }} 
+                business_keys=metadata_dict["business_keys"]) }} 

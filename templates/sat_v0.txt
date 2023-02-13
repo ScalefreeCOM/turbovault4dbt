@@ -6,7 +6,7 @@
 
 {%- set yaml_metadata -%}
 source_model: "@@SourceModel" 
-src_pk: "@@Hashkey"
+parent_hashkey: "@@Hashkey"
 src_hashdiff: '@@Hashdiff'
 src_payload: 
 @@Payload
@@ -14,7 +14,7 @@ src_payload:
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
 
-{{ sat_v0(src_pk=metadata_dict["src_pk"],
+{{ datavault4dbt.sat_v0(parent_hashkey=metadata_dict["parent_hashkey"],
                 src_hashdiff=metadata_dict["src_hashdiff"],
                 src_payload=metadata_dict["src_payload"],
                 source_model=metadata_dict["source_model"])   }}

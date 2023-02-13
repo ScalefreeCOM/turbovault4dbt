@@ -40,7 +40,7 @@ def generate_source_models(cursor, hub_id):
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = source_table_row[0]
+        source_table_name = source_table_row[0].lower()
         bk_columns = source_table_row[1].split(',')
 
         if len(bk_columns) > 1: 
