@@ -1,6 +1,6 @@
 {{ config(schema='@@Schema',
            materialized='incremental',
-           unique_key=['@@Hashkey', '@@Hashdiff', '@@LoadDate']) }} 
+           unique_key=['@@Hashkey', 'ldts']) }} 
 
 {%- set yaml_metadata -%}
 source_model: "@@SourceModel" 
