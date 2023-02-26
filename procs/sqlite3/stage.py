@@ -99,7 +99,7 @@ def gen_prejoin_columns(cursor, source):
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_schema: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
   
