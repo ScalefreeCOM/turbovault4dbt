@@ -99,7 +99,7 @@ def gen_prejoin_columns(cursor, source):
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_schema:"{schema}"\n\t\tsrc_table:"{table}"\n\t\tbk:"{bk_column}"\n\t\tthis_column_name:"{this_column_name}"\n\t\tref_column_name:"{ref_column_name}"\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_schema: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
   
@@ -115,7 +115,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
 
   query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column  FROM source_data src
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
-  
+
   cursor.execute(query)
   sources = cursor.fetchall()
 
