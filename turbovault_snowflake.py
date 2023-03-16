@@ -49,35 +49,30 @@ def connect_snowflake():
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_hub_entities = "SELECT * FROM hub_entities"
+    sql_hub_entities = "SELECT * FROM standard_hub"
     cursor.execute(sql_hub_entities)
     df_hub_entities = cursor.fetch_pandas_all()    
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_hub_satellites = "SELECT * FROM hub_satellites"
-    cursor.execute(sql_hub_satellites)
-    df_hub_satellites = cursor.fetch_pandas_all()    
+    sql_standard_satellite = "SELECT * FROM standard_satellite"
+    cursor.execute(sql_standard_satellite)
+    df_standard_satellite = cursor.fetch_pandas_all()    
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_link_entities = "SELECT * FROM link_entities"
+    sql_link_entities = "SELECT * FROM standard_link"
     cursor.execute(sql_link_entities)
     df_link_entities = cursor.fetch_pandas_all()    
     cursor.close()
-    
-    cursor = ctx.cursor()
-    sql_link_satellites = "SELECT * FROM link_satellites"
-    cursor.execute(sql_link_satellites)
-    df_link_satellites = cursor.fetch_pandas_all()    
+     
     cursor.close()
     ctx.close()
     
     dfs = { "source_data": df_source_data, 
             "hub_entities": df_hub_entities,
             "link_entities": df_link_entities, 
-            "hub_satellites": df_hub_satellites, 
-            "link_satellites": df_link_satellites}
+            "hub_satellites": df_standard_satellite}
 
 
     db = sqlite3.connect(':memory:')

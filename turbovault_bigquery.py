@@ -23,23 +23,20 @@ def connect_bigquery(credential_path,metadata_dataset):
     sql_source_data = f"SELECT * FROM {metadata_dataset}.source_data"
     df_source_data = bigquery_client.query(sql_source_data).to_dataframe()
 
-    sql_hub_entities = f"SELECT * FROM {metadata_dataset}.hub_entities"
+    sql_hub_entities = f"SELECT * FROM {metadata_dataset}.standard_hub"
     df_hub_entities = bigquery_client.query(sql_hub_entities).to_dataframe() 
 
-    sql_hub_satellites = f"SELECT * FROM {metadata_dataset}.hub_satellites"
+    sql_hub_satellites = f"SELECT * FROM {metadata_dataset}.standard_satellite"
     df_hub_satellites = bigquery_client.query(sql_hub_satellites).to_dataframe() 
 
-    sql_link_entities = f"SELECT * FROM {metadata_dataset}.link_entities"
+    sql_link_entities = f"SELECT * FROM {metadata_dataset}.standard_link"
     df_link_entities = bigquery_client.query(sql_link_entities).to_dataframe() 
 
-    sql_link_satellites = f"SELECT * FROM {metadata_dataset}.link_satellites"
-    df_link_satellites = bigquery_client.query(sql_link_satellites).to_dataframe()   
     
     dfs = { "source_data": df_source_data, 
             "hub_entities": df_hub_entities,
             "link_entities": df_link_entities, 
-            "hub_satellites": df_hub_satellites, 
-            "link_satellites": df_link_satellites}
+            "hub_satellites": df_hub_satellites}
 
 
     db = sqlite3.connect(':memory:')

@@ -6,7 +6,7 @@ def generate_hub_list(cursor, source):
 
     query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(Business_Key_Physical_Name)  
                 from 
-                (SELECT h.Hub_Identifier,h.Target_Hub_table_physical_name,(Business_Key_Physical_Name)  FROM hub_entities h
+                (SELECT h.Hub_Identifier,h.Target_Hub_table_physical_name,(Business_Key_Physical_Name)  FROM standard_hub h
                 inner join source_data src on src.Source_table_identifier = h.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
@@ -28,7 +28,7 @@ def generate_source_models(cursor, hub_id):
 
     query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),Static_Part_of_Record_Source_Column
                 FROM 
-                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,src.Static_Part_of_Record_Source_Column FROM hub_entities h
+                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,src.Static_Part_of_Record_Source_Column FROM standard_hub h
                 inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
                 and Hub_Identifier = '{hub_id}'
@@ -63,7 +63,7 @@ def generate_source_models(cursor, hub_id):
 def generate_hashkey(cursor, hub_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Physical_Name 
-                FROM hub_entities
+                FROM standard_hub
                 WHERE hub_identifier = '{hub_id}'"""
 
     cursor.execute(query)

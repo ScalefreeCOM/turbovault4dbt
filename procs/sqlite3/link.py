@@ -9,7 +9,7 @@ def generate_link_list(cursor, source):
 
     query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(Target_column_physical_name) FROM
                 (SELECT l.Link_Identifier,Target_link_table_physical_name,Target_column_physical_name
-                from link_entities l
+                from standard_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'

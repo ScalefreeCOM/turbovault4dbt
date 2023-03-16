@@ -13,33 +13,17 @@ def generate_satellite_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Hub_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
+    query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
                 Source_Table_Physical_Name,Load_Date_Column
                 from 
-                (SELECT DISTINCT hs.Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Hub_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
-                src.Source_Table_Physical_Name,src.Load_Date_Column FROM hub_satellites hs
+                (SELECT DISTINCT hs.Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
+                src.Source_Table_Physical_Name,src.Load_Date_Column FROM standard_satellite hs
                 inner join source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}'
                 order by Target_Column_Sort_Order asc)
-                group by Satellite_Identifier,Target_Satellite_Table_Physical_Name,Hub_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column
-
-UNION
-
-SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Link_primary_key_physical_name,GROUP_CONCAT(Target_Column_Physical_Name),
-                Source_Table_Physical_Name,Load_Date_Column
-                FROM(
-                SELECT DISTINCT ls.Satellite_Identifier,ls.Target_Satellite_Table_Physical_Name,ls.Link_primary_key_physical_name,ls.Target_Column_Physical_Name,
-                src.Source_Table_Physical_Name,src.Load_Date_Column
-                from link_satellites ls
-                inner join source_data src on src.Source_table_identifier = ls.Source_Table_Identifier
-                where 1=1
-                and src.Source_System = '{source_name}'
-                and src.Source_Object = '{source_object}'
-                order by Target_Column_Sort_Order asc)
-                group by Satellite_Identifier,Target_Satellite_Table_Physical_Name,Link_primary_key_physical_name,Source_Table_Physical_Name,Load_Date_Column
-                """
+                group by Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column"""
 
     cursor.execute(query)
     results = cursor.fetchall()

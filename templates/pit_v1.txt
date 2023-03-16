@@ -5,8 +5,7 @@
 pit_type: 'Regular PIT'
 tracked_entity: @@TrackedEntity
 hashkey: @@PK
-sat_names:
-@@SatNames
+sat_names:@@SatNames
 snapshot_relation: @@SnapshotModelName
 snapshot_trigger_column: @@SnapshotTriggerColumn
 dimension_key: @@DimensionKey

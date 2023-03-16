@@ -35,18 +35,16 @@ def main():
 
     sh = gc.open_by_url(sheet_url)
     
-    hub_entities_df = pd.DataFrame(sh.worksheet('hub_entities').get_all_records())
-    link_entities_df = pd.DataFrame(sh.worksheet('link_entities').get_all_records())
-    hub_satellite_df = pd.DataFrame(sh.worksheet('hub_satellites').get_all_records())
-    link_satellite_df = pd.DataFrame(sh.worksheet('link_satellites').get_all_records())
+    hub_entities_df = pd.DataFrame(sh.worksheet('standard_hub').get_all_records())
+    link_entities_df = pd.DataFrame(sh.worksheet('standard_hub').get_all_records())
+    hub_satellite_df = pd.DataFrame(sh.worksheet('standard_satellite').get_all_records())
     source_data_df = pd.DataFrame(sh.worksheet('source_data').get_all_records())
 
     db = sqlite3.connect(':memory:')
     
-    hub_entities_df.to_sql('hub_entities', db)
-    link_entities_df.to_sql('link_entities', db)
-    hub_satellite_df.to_sql('hub_satellites', db)
-    link_satellite_df.to_sql('link_satellites', db)
+    hub_entities_df.to_sql('standard_hub', db)
+    link_entities_df.to_sql('standard_link', db)
+    hub_satellite_df.to_sql('standard_satellite', db)
     source_data_df.to_sql('source_data',db)
     
     cursor = db.cursor()
