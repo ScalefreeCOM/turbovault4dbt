@@ -1,0 +1,16 @@
+{{ config(schema='@@Schema',
+           materialized='incremental',
+           unique_key=['@@Hashkey', 'ldts']) }} 
+
+{%- set yaml_metadata -%}
+parent_hashkey: "@@Hashkey"
+src_payload:
+@@Payload
+source_model: "@@SourceModel" 
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ datavault4dbt.nh_sat(parent_hashkey=metadata_dict["parent_hashkey"],
+                src_payload=metadata_dict["src_payload"],
+                source_model=metadata_dict["source_model"])   }}

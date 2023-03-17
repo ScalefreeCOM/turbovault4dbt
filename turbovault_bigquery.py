@@ -4,6 +4,8 @@ from procs.sqlite3 import stage
 from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
+from procs.sqlite3 import pit
+from procs.sqlite3 import nh_satellite
 from google.cloud import bigquery
 from logging import Logger
 import pandas as pd
@@ -31,12 +33,20 @@ def connect_bigquery(credential_path,metadata_dataset):
 
     sql_link_entities = f"SELECT * FROM {metadata_dataset}.standard_link"
     df_link_entities = bigquery_client.query(sql_link_entities).to_dataframe() 
+    
+    sql_pit_entities = f"SELECT * FROM {metadata_dataset}.pit"
+    df_pit_entities = bigquery_client.query(sql_pit_entities).to_dataframe() 
+    
+    sql_non_historized_satellite_entities = f"SELECT * FROM {metadata_dataset}.non_historized_satellite"
+    df_non_historized_satellite_entities = bigquery_client.query(sql_non_historized_satellite_entities).to_dataframe() 
 
     
     dfs = { "source_data": df_source_data, 
             "hub_entities": df_hub_entities,
             "link_entities": df_link_entities, 
-            "hub_satellites": df_hub_satellites}
+            "hub_satellites": df_hub_satellites,
+            "pit": df_pit_entities,
+            "non_historized_satellite": df_non_historized_satellite_entities}
 
 
     db = sqlite3.connect(':memory:')
@@ -77,13 +87,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link'],default=['Stage','Hub','Satellite','Link'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process")
     args = parser.parse_args()
    
     try:
-        todo = args.Tasks[4]
+        todo = args.Tasks[6]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""      
@@ -104,6 +114,12 @@ def main():
 
         if 'Satellite' in todo: 
             satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            
+        if 'Pit' in todo:
+            pit.generate_pit(cursor,source, generated_timestamp, model_path)
+            
+        if 'Non Historized Satellite' in todo: 
+            nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
 
    
 

@@ -30,7 +30,7 @@ def generate_source_models(cursor, link_id):
 
     query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Hub_primary_key_physical_name),Static_Part_of_Record_Source_Column FROM
                 (SELECT src.Source_Table_Physical_Name,l.Hub_primary_key_physical_name,src.Static_Part_of_Record_Source_Column 
-                FROM link_entities l
+                FROM standard_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
                 and Link_Identifier = '{link_id}'
@@ -64,7 +64,7 @@ def generate_source_models(cursor, link_id):
 def generate_link_hashkey(cursor, link_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Physical_Name 
-                FROM link_entities
+                FROM standard_link
                 WHERE link_identifier = '{link_id}'"""
 
     cursor.execute(query)

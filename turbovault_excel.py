@@ -5,6 +5,7 @@ from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
 from procs.sqlite3 import pit
+from procs.sqlite3 import nh_satellite
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -47,13 +48,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit'],default=['Stage','Hub','Satellite','Link','Pit'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[5]
+        todo = args.Tasks[6]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""     
@@ -74,8 +75,12 @@ def main():
 
         if 'Satellite' in todo: 
             satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            
         if 'Pit' in todo:
-            pit.generate_pit(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+            pit.generate_pit(cursor,source, generated_timestamp, model_path)
+            
+        if 'Non Historized Satellite' in todo: 
+            nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
 
 if __name__ == "__main__":
     print("Starting Script.")

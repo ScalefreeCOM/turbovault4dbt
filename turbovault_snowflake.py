@@ -4,6 +4,8 @@ from procs.sqlite3 import stage
 from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
+from procs.sqlite3 import pit
+from procs.sqlite3 import nh_satellite
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -65,6 +67,18 @@ def connect_snowflake():
     cursor.execute(sql_link_entities)
     df_link_entities = cursor.fetch_pandas_all()    
     cursor.close()
+    
+    cursor = ctx.cursor()
+    sql_pit_entities = "SELECT * FROM pit"
+    cursor.execute(sql_pit_entities)
+    df_pit_entities = cursor.fetch_pandas_all()    
+    cursor.close()
+    
+    cursor = ctx.cursor()
+    sql_non_historized_satellite = "SELECT * FROM non_historized_satellite"
+    cursor.execute(sql_non_historized_satellite)
+    df_non_historized_satellite_entities = cursor.fetch_pandas_all()    
+    cursor.close()
      
     cursor.close()
     ctx.close()
@@ -72,7 +86,9 @@ def connect_snowflake():
     dfs = { "source_data": df_source_data, 
             "hub_entities": df_hub_entities,
             "link_entities": df_link_entities, 
-            "hub_satellites": df_standard_satellite}
+            "hub_satellites": df_standard_satellite,
+            "pit": df_pit_entities,
+            "nh_satellite": df_non_historized_satellite_entities}
 
 
     db = sqlite3.connect(':memory:')
@@ -109,13 +125,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link'],default=['Stage','Hub','Satellite','Link'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process")
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[4]
+        todo = args.Tasks[6]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""     
@@ -137,6 +153,11 @@ def main():
 
         if 'Satellite' in todo: 
             satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+        if 'Pit' in todo:
+            pit.generate_pit(cursor,source, generated_timestamp, model_path)
+            
+        if 'Non Historized Satellite' in todo: 
+            nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
 
 
 if __name__ == "__main__":
