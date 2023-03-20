@@ -6,6 +6,7 @@ from procs.sqlite3 import hub
 from procs.sqlite3 import link
 from procs.sqlite3 import pit
 from procs.sqlite3 import nh_satellite
+from procs.sqlite3 import ma_satellite
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -48,13 +49,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[6]
+        todo = args.Tasks[7]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""     
@@ -81,6 +82,9 @@ def main():
             
         if 'Non Historized Satellite' in todo: 
             nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+            
+        if 'Multi Active Satellite' in todo: 
+            ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
 if __name__ == "__main__":
     print("Starting Script.")

@@ -1,0 +1,18 @@
+{{ config(schema='@@Schema',
+           materialized='incremental') }} 
+
+{%- set yaml_metadata -%}
+source_model: "@@SourceModel" 
+parent_hashkey: "@@Hashkey"
+src_hashdiff: "@@Hashdiff"
+src_ma_key: "@@MaAttribute"
+src_payload: "@@Payload"
+{%- endset -%}
+
+{%- set metadata_dict = fromyaml(yaml_metadata) -%}
+
+{{ datavault4dbt.ma_sat_v0(source_model=metadata_dict['source_model'],
+                        parent_hashkey=metadata_dict['parent_hashkey'],
+                        src_hashdiff=metadata_dict['src_hashdiff'],
+                        src_ma_key=metadata_dict['src_ma_key'],
+                        src_payload=metadata_dict['src_payload']) }}

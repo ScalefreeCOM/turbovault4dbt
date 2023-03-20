@@ -33,6 +33,15 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               order by s.Target_Column_Sort_Order)
               group by Target_Satellite_Table_Physical_Name
+              
+              UNION ALL
+              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              FROM multiactive_satellite s
+              inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              order by s.Target_Column_Sort_Order)
+              group by Target_Satellite_Table_Physical_Name
               """
   cursor.execute(query)
   results = cursor.fetchall()

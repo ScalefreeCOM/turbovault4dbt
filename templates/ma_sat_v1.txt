@@ -1,0 +1,20 @@
+{{ config(schema='@@Schema', materialized='view') }} 
+
+{%- set yaml_metadata -%}
+sat_v0: '@@SatName'
+hashkey: '@@Hashkey'
+hashdiff: '@@Hashdiff' 
+ma_attribute: '@@MaAttribute'
+ledts_alias: 'valid_to'
+add_is_current_flag: true
+{%- endset -%}    
+
+{%- set metadata_dict = fromyaml(yaml_metadata) -%}
+
+
+{{ datavault4dbt.ma_sat_v1(sat_v0=sat_v0,
+                        hashkey=hashkey,
+                        hashdiff=hashdiff,
+                        ma_attribute=ma_attribute,
+                        ledts_alias=ledts_alias,
+                        add_is_current_flag=add_is_current_flag) }}
