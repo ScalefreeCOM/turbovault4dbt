@@ -103,19 +103,40 @@ def gen_prejoin_columns(cursor, source):
     command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
-  
+
+
+def gen_multiactive_columns(cursor,source):
+  command = ""
+  source_name, source_object = source.split("_")
+  query = f"""SELECT DISTINCT Multi_Active_Attributes,Parent_primary_key_physical_name from multiactive_satellite mas
+                inner join source_data src on mas.Source_Table_Identifier = src.Source_table_identifier
+                WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
+  cursor.execute(query)
+  multiactive_column = cursor.fetchall()
+  for row in multiactive_column:
+    if command == "":
+      command = "multiactive_config:\n\tmulti_active_key:\n"
+    
+    ma_key = row[0]
+    parent_hk = row[1]
+
+    for key in ma_key.split(';'):
+      command = command + f"\t- {key}\n"
+    command = command + f"\tmain_hashkey_column:\n\t- {parent_hk}"
+  return command
 
 def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path,hashdiff_naming):
 
   hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming)
   prejoins = gen_prejoin_columns(cursor, source)
-
+  multiactive = gen_multiactive_columns(cursor,source)
   source_name, source_object = source.split("_")
   
   model_path = model_path.replace("@@entitytype", "Stage").replace("@@SourceSystem", source_name)
 
   query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column  FROM source_data src
-                WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
+                WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+                """
 
   cursor.execute(query)
   sources = cursor.fetchall()
@@ -130,7 +151,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   with open(os.path.join(".","templates","stage.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
-  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema)
+  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
   filename = os.path.join(model_path, timestamp , f"{source_table_name.lower()}.sql")
           

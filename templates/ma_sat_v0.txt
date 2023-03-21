@@ -5,8 +5,10 @@
 source_model: "@@SourceModel" 
 parent_hashkey: "@@Hashkey"
 src_hashdiff: "@@Hashdiff"
-src_ma_key: "@@MaAttribute"
-src_payload: "@@Payload"
+src_ma_key: 
+@@MaAttribute
+src_payload: 
+@@Payload
 {%- endset -%}
 
 {%- set metadata_dict = fromyaml(yaml_metadata) -%}

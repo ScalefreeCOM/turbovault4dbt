@@ -7,6 +7,8 @@ from procs.sqlite3 import link
 from procs.sqlite3 import pit
 from procs.sqlite3 import nh_satellite
 from procs.sqlite3 import ma_satellite
+from procs.sqlite3 import nh_link
+
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -49,13 +51,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[7]
+        todo = args.Tasks[8]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""     
@@ -68,13 +70,13 @@ def main():
         if 'Stage' in todo:
             stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
         
-        if 'Hub' in todo: 
+        if 'Standard Hub' in todo: 
             hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
     
-        if 'Link' in todo: 
+        if 'Standard Link' in todo: 
             link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
-        if 'Satellite' in todo: 
+        if 'Standard Satellite' in todo: 
             satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
             
         if 'Pit' in todo:
@@ -85,6 +87,9 @@ def main():
             
         if 'Multi Active Satellite' in todo: 
             ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+        
+        if 'Non Historized Link' in todo:
+            nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
 if __name__ == "__main__":
     print("Starting Script.")
