@@ -4,6 +4,10 @@ import os
 def gen_tests(cursor,source,generated_timestamp,model_path):
     command = "models:"
     source_name, source_object = source.split("_")
+
+
+
+    #Generating Hub Tests
     hub_query = f"""SELECT DISTINCT Target_Hub_table_physical_name,Target_Primary_Key_Physical_Name 
     from standard_hub h
     INNER JOIN source_data src on src.Source_table_identifier = h.Source_Table_Identifier
@@ -21,7 +25,7 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
         command_tmp = command_tmp.replace("@@HubName",hub_name).replace("@@HubHK",hub_hk)
         command = command + '\n'+command_tmp
 
-
+    #Generating Link Tests
     link_query = f"""SELECT Target_link_table_physical_name,Target_Primary_Key_Physical_Name, GROUP_CONCAT(RefHub) FROM(
     SELECT DISTINCT l.Target_link_table_physical_name,l.Target_Primary_Key_Physical_Name,(h.Target_Hub_table_physical_name || ';' || l.Hub_primary_key_physical_name) as RefHub
     FROM standard_link l
@@ -60,8 +64,39 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
         command = command + '\n' + command_tmp
 
 
+    #Generating Satellite Tests
+    sat_query = f"""SELECT DISTINCT Target_Satellite_Table_Physical_Name
+    ,COALESCE(sh.Target_Hub_table_physical_name,sl.Target_link_table_physical_name,nhl.Target_link_table_physical_name) as Parent_Table_Name
+    ,Parent_Primary_Key_Physical_Name
+    FROM 
+    (
+    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_Identifier,Parent_Primary_Key_Physical_Name FROM standard_satellite
+    UNION ALL
+    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_primary_key_physical_name FROM multiactive_satellite
+    UNION ALL
+    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_Primary_Key_Physical_Name FROM non_historized_satellite
+    ) s
+    INNER JOIN source_data src on src.Source_Table_Identifier = s.Source_Table_Identifier
+    LEFT JOIN standard_link sl on sl.Link_Identifier = s.Parent_Identifier
+    LEFT JOIN standard_hub sh on sh.Hub_Identifier = s.Parent_Identifier
+    LEFT JOIN non_historized_link nhl on nhl.Link_Identifier = s.Parent_Identifier
 
+    WHERE 1=1
+    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
 
+    """
+    cursor.execute(sat_query)
+    results = cursor.fetchall()
+
+    for sat in results:
+        sat_name = sat[0]
+        parent_name = sat[1]
+        parent_hk = sat[2]
+        with open(os.path.join(".","templates","sat_test.txt"),"r") as f:
+            command_tmp = f.read()
+        f.close()
+        command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name)
+        command = command + '\n' + command_tmp
 
 
 
