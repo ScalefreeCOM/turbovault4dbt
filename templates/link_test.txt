@@ -1,0 +1,7 @@
+  - name: @@LinkName
+    columns:
+      - name: @@LinkHK
+        tests:
+          - unique
+          - not_null     
+      @@HubRef
