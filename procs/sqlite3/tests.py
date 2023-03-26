@@ -98,8 +98,43 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
         command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name)
         command = command + '\n' + command_tmp
 
+    #Generating Pit Tests
+    pit_query = f"""SELECT DISTINCT
+    p.Pit_Physical_Table_Name
+    ,h.Target_Hub_table_physical_name
+    ,h.Target_Primary_Key_Physical_Name
+    FROM pit p
+    inner join standard_hub h on p.Tracked_Entity = h.Hub_Identifier
+    inner join source_data src on h.Source_table_identifier = src.Source_table_identifier
+    WHERE 1=1
+    and src.Source_System = '{source_name}'
+    and src.Source_Object = '{source_object}'
+    
+    UNION ALL
 
+    SELECT DISTINCT
+    p.Pit_Physical_Table_Name
+    ,l.Target_Link_table_physical_name
+    ,l.Target_Primary_Key_Physical_Name
+    FROM pit p
+    inner join standard_link l on p.Tracked_Entity = l.Link_Identifier
+    inner join source_data src on l.Source_table_identifier = src.Source_table_identifier
+    WHERE 1=1
+    and src.Source_System = '{source_name}'
+    and src.Source_Object = '{source_object}'
+    """
+    cursor.execute(pit_query)
+    results = cursor.fetchall()
 
+    for pit in results:
+        pit_name = pit[0]
+        entity_name = pit[1]
+        entity_hk = pit[2]
+        with open(os.path.join(".","templates","pit_test.txt"),"r") as f:
+            command_tmp = f.read()
+        f.close()
+        command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
+        command = command + '\n' + command_tmp
 
     model_path = model_path.replace("@@SourceSystem","dbt_project")
     filename = os.path.join(model_path, generated_timestamp , f"{source_object.lower()}.yml")

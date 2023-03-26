@@ -56,8 +56,8 @@ def main():
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
-    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate sources.yml?") #Create external Table (Y/N)
-    parser.add_argument("--Test",default=False,action="store_true",  help="Do You want to generate the test.yml for each source?") #Create external Table (Y/N)
+    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml?") #Create external Table (Y/N)
+    parser.add_argument("--Test",default=False,action="store_true",  help="Do You want to generate YML-Files for Standard DataVault tests?") #Create external Table (Y/N)
 
     args = parser.parse_args()
 
