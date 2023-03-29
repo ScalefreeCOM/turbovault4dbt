@@ -6,7 +6,10 @@ from procs.sqlite3 import hub
 from procs.sqlite3 import link
 from procs.sqlite3 import pit
 from procs.sqlite3 import nh_satellite
+from procs.sqlite3 import nh_link
+from procs.sqlite3 import ma_satellite
 from google.cloud import bigquery
+from google.oauth2 import service_account
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -18,11 +21,13 @@ import time
 
 image_path = os.path.join(os.path.dirname(__file__),"images")
 
-def connect_bigquery(credential_path,metadata_dataset):
+def connect_bigquery(credential_path,metadata_dataset,project_id):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = credential_path
-    bigquery_client = bigquery.Client()
+    credentials = service_account.Credentials.from_service_account_file(credential_path)
+    
+    bigquery_client = bigquery.Client(project = project_id,credentials = credentials)
 
-    sql_source_data = f"SELECT * FROM {metadata_dataset}.source_data"
+    sql_source_data = f"""SELECT * FROM `{metadata_dataset}.source_data`"""
     df_source_data = bigquery_client.query(sql_source_data).to_dataframe()
 
     sql_hub_entities = f"SELECT * FROM {metadata_dataset}.standard_hub"
@@ -38,15 +43,23 @@ def connect_bigquery(credential_path,metadata_dataset):
     df_pit_entities = bigquery_client.query(sql_pit_entities).to_dataframe() 
     
     sql_non_historized_satellite_entities = f"SELECT * FROM {metadata_dataset}.non_historized_satellite"
-    df_non_historized_satellite_entities = bigquery_client.query(sql_non_historized_satellite_entities).to_dataframe() 
+    df_non_historized_satellite_entities = bigquery_client.query(sql_non_historized_satellite_entities).to_dataframe()
+    
+    sql_non_historized_link_entities = f"SELECT * FROM {metadata_dataset}.non_historized_link"
+    df_non_historized_link_entities = bigquery_client.query(sql_non_historized_link_entities).to_dataframe()  
+    
+    sql_multiactiv_satellite_entities = f"SELECT * FROM {metadata_dataset}.multiactive_satellite"
+    df_multiactiv_satellite_entities = bigquery_client.query(sql_multiactiv_satellite_entities).to_dataframe()
 
     
     dfs = { "source_data": df_source_data, 
-            "hub_entities": df_hub_entities,
-            "link_entities": df_link_entities, 
-            "hub_satellites": df_hub_satellites,
+            "standard_hub": df_hub_entities,
+            "standard_link": df_link_entities, 
+            "standard_satellite": df_hub_satellites,
             "pit": df_pit_entities,
-            "non_historized_satellite": df_non_historized_satellite_entities}
+            "non_historized_satellite": df_non_historized_satellite_entities,
+            "non_historized_link": df_non_historized_link_entities,
+            "multiactive_satellite": df_multiactiv_satellite_entities}
 
 
     db = sqlite3.connect(':memory:')
@@ -72,9 +85,10 @@ def main():
 
     hashdiff_naming = config.get('BigQuery','hashdiff_naming')
     model_path = config.get('BigQuery','model_path')
+    project_id = config.get('BigQuery','project_id')
     credential_path = config.get('BigQuery', 'credential_path')
     metadata_dataset = config.get('BigQuery','metadata_dataset')
-    cursor = connect_bigquery(credential_path,metadata_dataset)
+    cursor = connect_bigquery(credential_path,metadata_dataset,project_id)
 
     cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
     results = cursor.fetchall()
@@ -87,13 +101,13 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],default=['Stage','Hub','Satellite','Link','Pit','Non Historized Satellite'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process")
     args = parser.parse_args()
    
     try:
-        todo = args.Tasks[6]
+        todo = args.Tasks[8]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""      
@@ -106,13 +120,13 @@ def main():
         if 'Stage' in todo:
             stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
         
-        if 'Hub' in todo: 
+        if 'Standard Hub' in todo: 
             hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
     
-        if 'Link' in todo: 
+        if 'Standard Link' in todo: 
             link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
-        if 'Satellite' in todo: 
+        if 'Standard Satellite' in todo: 
             satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
             
         if 'Pit' in todo:
@@ -120,6 +134,12 @@ def main():
             
         if 'Non Historized Satellite' in todo: 
             nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+            
+        if 'Multi Active Satellite' in todo: 
+            ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            
+        if 'Non Historized Link' in todo:
+            nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
    
 
