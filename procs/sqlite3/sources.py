@@ -12,12 +12,12 @@ def gen_sources(cursor,generated_timestamp, model_path):
     for source in results:
         source_system = source[0]
         source_schema = source[1]
-        print(source[2])
+        #print(source[2])
         source_tables = source[2].split(',')
         if command == "":
-            command = command + 'sources:\n'
+            command = command + 'version: 2\nsources:\n'
         
-        command = command + f'\t- name: {source_system}\n\t database: @@DB\n\t schema: {source_schema}\n\t tables:\n'
+        command = command + f'\t- name: {source_system}\n\t  schema: {source_schema}\n\t  tables:\n'
         for table in source_tables:
             command = command + f'\t\t-  {table}\n'
     model_path = model_path.replace("@@SourceSystem","dbt_project")

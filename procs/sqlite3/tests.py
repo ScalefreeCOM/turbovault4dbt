@@ -2,7 +2,7 @@ import os
 
 
 def gen_tests(cursor,source,generated_timestamp,model_path):
-    command = "models:"
+    command = "version: 2\nmodels:"
     source_name, source_object = source.split("_")
 
 
