@@ -64,7 +64,7 @@ def generate_source_models(cursor, link_id):
                 FROM non_historized_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
-                and Link_Identifier = '{link_id}'
+                and NH_Link_Identifier = '{link_id}'
                 and Hub_primary_key_physical_name <> ""
                 ORDER BY Target_Column_Sort_Order)
                 group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
@@ -104,7 +104,7 @@ def generate_link_hashkey(cursor, link_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Physical_Name 
                 FROM non_historized_link
-                WHERE link_identifier = '{link_id}'
+                WHERE NH_link_identifier = '{link_id}'
                 AND Target_Primary_Key_Physical_Name <> ''"""
 
     cursor.execute(query)
