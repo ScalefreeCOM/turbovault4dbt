@@ -13,16 +13,16 @@ def generate_nh_satellite_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
+    query = f"""SELECT DISTINCT NH_Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
                 Source_Table_Physical_Name,Load_Date_Column
                 from 
-                (SELECT DISTINCT hs.Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
+                (SELECT DISTINCT hs.NH_Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
                 src.Source_Table_Physical_Name,src.Load_Date_Column FROM non_historized_satellite hs
                 inner join source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}')
-                group by Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column"""
+                group by NH_Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column"""
 
     cursor.execute(query)
     results = cursor.fetchall()
