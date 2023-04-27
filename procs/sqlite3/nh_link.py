@@ -7,9 +7,9 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(Target_column_physical_name)
+    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(Target_column_physical_name)
                 FROM
-                (SELECT l.Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Hub_primary_key_physical_name
+                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Hub_primary_key_physical_name
                 from non_historized_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
@@ -17,7 +17,7 @@ def generate_link_list(cursor, source):
                 and src.Source_Object = '{source_object}'
                 and l.Hub_primary_key_physical_name <> ''
                 order by l.Target_Column_Sort_Order)
-                group by Link_Identifier,Target_link_table_physical_name
+                group by NH_Link_Identifier,Target_link_table_physical_name
                 """
 
     cursor.execute(query)
@@ -64,7 +64,7 @@ def generate_source_models(cursor, link_id):
                 FROM non_historized_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
-                and Link_Identifier = '{link_id}'
+                and NH_Link_Identifier = '{link_id}'
                 and Hub_primary_key_physical_name <> ""
                 ORDER BY Target_Column_Sort_Order)
                 group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
@@ -104,7 +104,7 @@ def generate_link_hashkey(cursor, link_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Physical_Name 
                 FROM non_historized_link
-                WHERE link_identifier = '{link_id}'
+                WHERE NH_link_identifier = '{link_id}'
                 AND Target_Primary_Key_Physical_Name <> ''"""
 
     cursor.execute(query)

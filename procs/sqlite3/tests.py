@@ -79,7 +79,7 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
     INNER JOIN source_data src on src.Source_Table_Identifier = s.Source_Table_Identifier
     LEFT JOIN standard_link sl on sl.Link_Identifier = s.Parent_Identifier
     LEFT JOIN standard_hub sh on sh.Hub_Identifier = s.Parent_Identifier
-    LEFT JOIN non_historized_link nhl on nhl.Link_Identifier = s.Parent_Identifier
+    LEFT JOIN non_historized_link nhl on nhl.NH_Link_Identifier = s.Parent_Identifier
 
     WHERE 1=1
     AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
