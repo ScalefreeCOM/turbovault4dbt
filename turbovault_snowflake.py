@@ -7,6 +7,7 @@ from procs.sqlite3 import link
 from procs.sqlite3 import pit
 from procs.sqlite3 import nh_satellite
 from procs.sqlite3 import ma_satellite
+from procs.sqlite3 import rt_satellite
 from procs.sqlite3 import nh_link
 from procs.sqlite3 import sources
 from procs.sqlite3 import tests
@@ -143,7 +144,9 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml?") #Create external Table (Y/N)
@@ -152,13 +155,13 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[8]
+        todo = args.Tasks[9]
     except IndexError:
         print("Keine Entitäten ausgesucht.")
         todo = ""     
 
-    rdv_default_schema = config.get('Excel',"rdv_schema")
-    stage_default_schema = config.get('Excel',"stage_schema")
+    rdv_default_schema = config.get('Snowflake',"rdv_schema")
+    stage_default_schema = config.get('Snowflake',"stage_schema")
 
     if args.SourceYML:
         sources.gen_sources(cursor,generated_timestamp,model_path)
@@ -190,10 +193,13 @@ def main():
             if 'Multi Active Satellite' in todo: 
                 ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
             
+            if 'Record Tracking Satellite' in todo: 
+                rt_satellite.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
             if 'Non Historized Link' in todo:
                 nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
-    except IndexError:
+    except IndexError as e:
         print("Keine Quelle ausgesucht.")
 
 if __name__ == "__main__":

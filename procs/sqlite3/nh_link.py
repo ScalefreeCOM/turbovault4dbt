@@ -7,15 +7,15 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(Target_column_physical_name)
+    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name))
                 FROM
-                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Hub_primary_key_physical_name
+                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name,Hub_primary_key_physical_name
                 from non_historized_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}'
-                and l.Hub_primary_key_physical_name <> ''
+                and l.Target_Primary_Key_Physical_Name <> ''
                 order by l.Target_Column_Sort_Order)
                 group by NH_Link_Identifier,Target_link_table_physical_name
                 """
@@ -32,7 +32,7 @@ def gen_payload(cursor,source_table_identifier):
     FROM non_historized_link l 
     WHERE 1=1
     AND l.Source_Table_Identifier = '{source_table_identifier}'
-    AND l.Hub_primary_key_physical_name IS NULL
+    AND l.Target_Primary_Key_Physical_Name IS NULL
     GROUP BY Source_table_identifier"""
 
     cursor.execute(query)
@@ -58,14 +58,14 @@ def generate_source_models(cursor, link_id):
     command = ""
 
     query = f"""SELECT Source_Table_Physical_Name, Source_table_identifier,
-                GROUP_CONCAT(Hub_primary_key_physical_name)
+                GROUP_CONCAT(Target_column_physical_name)
                 ,Static_Part_of_Record_Source_Column FROM
-                (SELECT src.Source_Table_Physical_Name,src.Source_table_identifier,l.Hub_primary_key_physical_name,src.Static_Part_of_Record_Source_Column 
+                (SELECT src.Source_Table_Physical_Name,src.Source_table_identifier,l.Target_column_physical_name,src.Static_Part_of_Record_Source_Column 
                 FROM non_historized_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
                 and NH_Link_Identifier = '{link_id}'
-                and Hub_primary_key_physical_name <> ""
+                and Target_Primary_Key_Physical_Name <> ""
                 ORDER BY Target_Column_Sort_Order)
                 group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
                 """
