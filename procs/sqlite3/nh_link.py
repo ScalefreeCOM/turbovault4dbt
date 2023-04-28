@@ -7,9 +7,9 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name))
+    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name))
                 FROM
-                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name,Hub_primary_key_physical_name
+                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Hub_primary_key_physical_name,Source_column_physical_name,Hub_primary_key_physical_name
                 from non_historized_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
