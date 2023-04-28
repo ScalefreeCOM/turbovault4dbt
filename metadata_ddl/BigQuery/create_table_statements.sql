@@ -40,7 +40,7 @@ Target_Column_Sort_Order STRING
 
 CREATE TABLE multiactive_satellite  
 (
-Satellite_Identifier STRING,
+MA_Satellite_Identifier STRING,
 Target_Satellite_Table_Physical_Name STRING,	
 Source_Table_Identifier STRING,	
 Source_Column_Physical_Name STRING,	
@@ -54,7 +54,7 @@ Target_Column_Sort_Order STRING
 
 CREATE TABLE non_historized_link  
 (
-Link_Identifier STRING,
+NH_Link_Identifier STRING,
 Target_Link_Table_Physical_Name STRING,	
 Source_Table_Identifier STRING,	
 Source_Column_Physical_Name	 STRING,
@@ -71,7 +71,7 @@ Target_Primary_Key_Physical_Name STRING
 
 CREATE TABLE non_historized_satellite  
 (
-Satellite_Identifier STRING,
+NH_Satellite_Identifier STRING,
 Target_Satellite_Table_Physical_Name STRING,	
 Source_Table_Identifier STRING,	
 Source_Column_Physical_Name STRING,	
