@@ -73,13 +73,11 @@ def main():
     rdv_default_schema = config.get('Excel',"rdv_schema")
     stage_default_schema = config.get('Excel',"stage_schema")
 
-    if args.SourceYML:
-        sources.gen_sources(cursor,generated_timestamp,model_path)
-
-
 
     try:
         for source in args.Sources[0]:
+            if args.SourceYML:
+                sources.gen_sources(cursor,source,generated_timestamp,model_path)
             if args.Test:
                 tests.gen_tests(cursor,source,generated_timestamp,model_path)
             if 'Stage' in todo:

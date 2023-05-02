@@ -75,7 +75,7 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         all_satellite_names += f"\n\t- {sat}"
 
     source_name, source_object = source.split("_")
-    model_path_v1 = model_path.replace('@@entitytype','Pit_v1').replace('@@SourceSystem',source_name)
+    model_path_v1 = model_path.replace('@@entitytype','Pit').replace('@@SourceSystem',source_name)
     with open(os.path.join(".","templates","pit_v1.txt"),"r") as f:
         command_tmp = f.read()
     f.close()

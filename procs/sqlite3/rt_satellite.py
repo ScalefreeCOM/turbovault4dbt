@@ -26,7 +26,7 @@ def get_object_list(cursor,source):
 def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,model_path):
 
     source_name, source_object = source.split("_")
-    model_path = model_path.replace('@@entitytype','RTS').replace('@@SourceSystem',source_name)
+    model_path = model_path.replace('@@entitytype','Record_Tracking_Satellite').replace('@@SourceSystem',source_name)
 
     object_list = get_object_list(cursor,source)
 
@@ -55,7 +55,7 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
             tracked_hk = rt_sat[0]
             tracked_entity = rt_sat[1]
             sources = ""
-            print(list(set(rt_sat[2].split(','))))
+
             for source in list(set(rt_sat[2].split(','))):
                 query2 = f"""SELECT Source_Table_Physical_Name,Static_Part_of_Record_Source_Column 
                             from source_data

@@ -36,8 +36,8 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
     satellite_list = generate_satellite_list(cursor=cursor, source=source)
 
     source_name, source_object = source.split("_")
-    model_path_v0 = model_path.replace('@@entitytype','Satellites_v0').replace('@@SourceSystem',source_name)
-    model_path_v1 = model_path.replace('@@entitytype','Satellites_v1').replace('@@SourceSystem',source_name)
+    model_path_v0 = model_path.replace('@@entitytype','Satellite_v0').replace('@@SourceSystem',source_name)
+    model_path_v1 = model_path.replace('@@entitytype','Satellite_v1').replace('@@SourceSystem',source_name)
 
     for satellite in satellite_list:
         satellite_name = satellite[1]

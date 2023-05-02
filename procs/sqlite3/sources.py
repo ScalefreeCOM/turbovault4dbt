@@ -1,9 +1,13 @@
 import os
 
-def gen_sources(cursor,generated_timestamp, model_path):
+def gen_sources(cursor,source,generated_timestamp, model_path):
+    source_name, source_object = source.split("_")
     command = ""
     query = f"""SELECT DISTINCT Source_System, Source_Schema_Physical_Name, GROUP_CONCAT(Source_Table_Physical_Name) 
     FROM source_data
+    WHERE 1=1
+    and Source_System = '{source_name}'
+    and Source_Object = '{source_object}'
     GROUP BY Source_System, Source_Schema_Physical_Name"""
     cursor.execute(query)
     results = cursor.fetchall()
@@ -20,7 +24,7 @@ def gen_sources(cursor,generated_timestamp, model_path):
         command = command + f'\t- name: {source_system}\n\t  schema: {source_schema}\n\t  tables:\n'
         for table in source_tables:
             command = command + f'\t\t-  {table}\n'
-    model_path = model_path.replace("@@SourceSystem","dbt_project")
+    model_path = model_path.replace("@@SourceSystem","").replace("@@entitytype","Sources")
     filename = os.path.join(model_path, timestamp , "sources.yml")
           
     path = os.path.join(model_path, timestamp)

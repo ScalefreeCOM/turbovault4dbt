@@ -136,7 +136,7 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
         command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
         command = command + '\n' + command_tmp
 
-    model_path = model_path.replace("@@SourceSystem","dbt_project")
+    model_path = model_path.replace("@@SourceSystem","").replace("@@entitytype","Test")
     filename = os.path.join(model_path, generated_timestamp , f"{source_object.lower()}.yml")
           
     path = os.path.join(model_path, generated_timestamp)
