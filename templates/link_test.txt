@@ -1,4 +1,5 @@
   - name: @@LinkName
+    tags: ['LINK']
     columns:
       - name: @@LinkHK
         tests:

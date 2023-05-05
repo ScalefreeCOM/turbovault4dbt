@@ -1,4 +1,15 @@
 import os
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME,Is_Primary_Source
+    from standard_hub 
+    where Hub_Identifier = '{object_id}' 
+    UNION ALL
+    SELECT DISTINCT GROUP_NAME, Target_Column_Sort_Order
+    from standard_link 
+    where Link_Identifier = '{object_id}' 
+    ORDER BY Is_Primary_Source LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def get_object_list(cursor,source):
     
@@ -26,7 +37,6 @@ def get_object_list(cursor,source):
 def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,model_path):
 
     source_name, source_object = source.split("_")
-    model_path = model_path.replace('@@entitytype','RTS').replace('@@SourceSystem',source_name)
 
     object_list = get_object_list(cursor,source)
 
@@ -51,12 +61,16 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
         cursor.execute(query)
         results = cursor.fetchall()
 
+
+        group_name = get_groupname(cursor,object[0])
+        model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+
         for rt_sat in results:
             tracked_hk = rt_sat[0]
             tracked_entity = rt_sat[1]
             sources = ""
-            print(list(set(rt_sat[2].split(','))))
-            for source in list(set(rt_sat[2].split(','))):
+
+            for source in list(dict.fromkeys(rt_sat[2].split(','))):
                 query2 = f"""SELECT Source_Table_Physical_Name,Static_Part_of_Record_Source_Column 
                             from source_data
                             WHERE 1=1
@@ -70,9 +84,9 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
             f.close()
             command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@Tracked_HK', tracked_hk).replace('@@Source_Models', sources)
 
-            filename = os.path.join(model_path, generated_timestamp , f"{tracked_entity}_rts.sql")
+            filename = os.path.join(model_path , f"{tracked_entity}_rts.sql")
                     
-            path = os.path.join(model_path, generated_timestamp)
+            path = os.path.join(model_path)
 
             # Check whether the specified path exists or not
             isExist = os.path.exists(path)

@@ -1,6 +1,11 @@
 from numpy import object_
 import os
 
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from non_historized_satellite where NH_Satellite_Identifier = '{object_id}' ORDER BY Target_Column_Physical_Name LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
+
 def gen_payload(payload_list):
     payload_string = ''
     
@@ -45,16 +50,17 @@ def generate_nh_satellite(cursor,source, generated_timestamp, rdv_default_schema
         payload = gen_payload(payload_list)
         
         source_name, source_object = source.split("_")
-        model_path = model_path.replace('@@entitytype','Non Historized Satellite').replace('@@SourceSystem',source_name)
+        group_name = get_groupname(cursor,nh_satellite[0])
+        model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         
         with open(os.path.join(".","templates","nh_sat.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
 
-        filename = os.path.join(model_path, generated_timestamp , f"{nh_satellite_name}.sql")
+        filename = os.path.join(model_path , f"{nh_satellite_name}.sql")
                 
-        path = os.path.join(model_path, generated_timestamp)
+        path = os.path.join(model_path)
 
         # Check whether the specified path exists or not
         isExist = os.path.exists(path)

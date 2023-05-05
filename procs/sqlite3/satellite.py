@@ -1,5 +1,9 @@
 from numpy import object_
 import os
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from standard_satellite where Satellite_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def gen_payload(payload_list):
     payload_string = ''
@@ -14,10 +18,10 @@ def generate_satellite_list(cursor, source):
     source_name, source_object = source.split("_")
 
     query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
-                Source_Table_Physical_Name,Load_Date_Column
+                Source_Table_Physical_Name,Load_Date_Column,Group_Name
                 from 
                 (SELECT DISTINCT hs.Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
-                src.Source_Table_Physical_Name,src.Load_Date_Column FROM standard_satellite hs
+                src.Source_Table_Physical_Name,src.Load_Date_Column,hs.Group_Name FROM standard_satellite hs
                 inner join source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
@@ -36,16 +40,17 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
     satellite_list = generate_satellite_list(cursor=cursor, source=source)
 
     source_name, source_object = source.split("_")
-    model_path_v0 = model_path.replace('@@entitytype','Satellites_v0').replace('@@SourceSystem',source_name)
-    model_path_v1 = model_path.replace('@@entitytype','Satellites_v1').replace('@@SourceSystem',source_name)
 
     for satellite in satellite_list:
         satellite_name = satellite[1]
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
         payload_list = satellite[3].split(',')
-        source_model = satellite[4].lower()
+        source_model = 'stg_'+satellite[4].lower()
         loaddate = satellite[5]
+        group_name = get_groupname(cursor,satellite[0])
+        model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+        model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
         payload = gen_payload(payload_list)
         
@@ -60,9 +65,9 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
         satellite_model_name_splitted_list[-2] += '0'
         satellite_model_name_v0 = '_'.join(satellite_model_name_splitted_list)
 
-        filename = os.path.join(model_path_v0, generated_timestamp , f"{satellite_model_name_v0}.sql")
+        filename = os.path.join(model_path_v0 , f"{satellite_model_name_v0}.sql")
                 
-        path = os.path.join(model_path_v0, generated_timestamp)
+        path = os.path.join(model_path_v0)
 
         # Check whether the specified path exists or not
         isExist = os.path.exists(path)
@@ -83,9 +88,9 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
             
   
 
-        filename_v1 = os.path.join(model_path_v1, generated_timestamp , f"{satellite_name}.sql")
+        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}.sql")
                 
-        path_v1 = os.path.join(model_path_v1, generated_timestamp)
+        path_v1 = os.path.join(model_path_v1)
 
         # Check whether the specified path exists or not
         isExist_v1 = os.path.exists(path_v1)

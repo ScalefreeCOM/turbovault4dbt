@@ -2,6 +2,10 @@ import os
 
 from procs.sqlite3.hub import generate_source_models
 
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from non_historized_link where NH_Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def generate_link_list(cursor, source):
 
@@ -133,7 +137,8 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
     source_models,target_payload = generate_source_models(cursor, link_id)
     link_hashkey = generate_link_hashkey(cursor, link_id)
     source_name, source_object = source.split("_")
-    model_path = model_path.replace('@@entitytype','Link').replace('@@SourceSystem',source_name)
+    group_name = get_groupname(cursor,link_id)
+    model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
 
 
@@ -144,9 +149,9 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
     command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@Payload',target_payload)
 
 
-    filename = os.path.join(model_path, generated_timestamp , f"{link_name}.sql")
+    filename = os.path.join(model_path , f"{link_name}.sql")
             
-    path = os.path.join(model_path, generated_timestamp)
+    path = os.path.join(model_path)
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)

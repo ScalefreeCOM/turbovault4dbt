@@ -2,6 +2,10 @@ import os
 
 from procs.sqlite3.hub import generate_source_models
 
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from standard_link where Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def generate_link_list(cursor, source):
 
@@ -42,7 +46,7 @@ def generate_source_models(cursor, link_id):
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = source_table_row[0].lower()
+        source_table_name = 'stg_' + source_table_row[0].lower()
         fk_columns = source_table_row[1].split(',')
 
         if len(fk_columns) > 1: 
@@ -85,7 +89,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     link_name = link[1]
     link_id = link[0]
     fk_list = link[2].split(',')
-
+    group_name = get_groupname(cursor,link_id)
     fk_string = ""
     for fk in fk_list:
       fk_string += f"\n\t- '{fk}'"
@@ -94,7 +98,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     link_hashkey = generate_link_hashkey(cursor, link_id)
 
     source_name, source_object = source.split("_")
-    model_path = model_path.replace('@@entitytype','Link').replace('@@SourceSystem',source_name)
+    model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
 
 
@@ -105,9 +109,9 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string)
     
 
-    filename = os.path.join(model_path, generated_timestamp , f"{link_name}.sql")
+    filename = os.path.join(model_path , f"{link_name}.sql")
             
-    path = os.path.join(model_path, generated_timestamp)
+    path = os.path.join(model_path)
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)

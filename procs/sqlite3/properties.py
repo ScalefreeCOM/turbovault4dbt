@@ -1,9 +1,15 @@
 import os
+def get_groupname(cursor,source_name,source_object):
+    query = f"""SELECT DISTINCT GROUP_NAME from source_data 
+    where Source_System = '{source_name}' and Source_Object = '{source_object}'
+    LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
-
-def gen_tests(cursor,source,generated_timestamp,model_path):
+def gen_properties(cursor,source,generated_timestamp,model_path):
     command = "version: 2\nmodels:"
     source_name, source_object = source.split("_")
+    group_name = get_groupname(cursor,source_name,source_object)
 
 
 
@@ -136,10 +142,10 @@ def gen_tests(cursor,source,generated_timestamp,model_path):
         command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
         command = command + '\n' + command_tmp
 
-    model_path = model_path.replace("@@SourceSystem","dbt_project")
-    filename = os.path.join(model_path, generated_timestamp , f"{source_object.lower()}.yml")
+    model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName",group_name).replace('@@timestamp',generated_timestamp)
+    filename = os.path.join(model_path , f"{source_object.lower()}.yml")
           
-    path = os.path.join(model_path, generated_timestamp)
+    path = os.path.join(model_path)
 
 
     # Check whether the specified path exists or not

@@ -1,5 +1,9 @@
 from numpy import object_
 import os
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from multiactive_satellite where MA_Satellite_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def gen_payload(payload_list):
     payload_string = ''
@@ -36,8 +40,6 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
     satellite_list = generate_ma_satellite_list(cursor=cursor, source=source)
 
     source_name, source_object = source.split("_")
-    model_path_v0 = model_path.replace('@@entitytype','Multi_Active_Satellites_v0').replace('@@SourceSystem',source_name)
-    model_path_v1 = model_path.replace('@@entitytype','Multi_Active_Satellites_v1').replace('@@SourceSystem',source_name)
 
     for satellite in satellite_list:
         satellite_name = satellite[1]
@@ -47,6 +49,9 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         source_model = satellite[4].lower()
         loaddate = satellite[5]
         ma_attribute_list = satellite[6].split(';')
+        group_name = get_groupname(cursor,satellite[0])
+        model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+        model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
         payload = gen_payload(payload_list)
         ma_attribute = gen_payload(ma_attribute_list)
@@ -63,9 +68,9 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         satellite_model_name_splitted_list[-2] += '0'
         satellite_model_name_v0 = '_'.join(satellite_model_name_splitted_list)
 
-        filename = os.path.join(model_path_v0, generated_timestamp , f"{satellite_model_name_v0}.sql")
+        filename = os.path.join(model_path_v0 , f"{satellite_model_name_v0}.sql")
                 
-        path = os.path.join(model_path_v0, generated_timestamp)
+        path = os.path.join(model_path_v0)
 
         # Check whether the specified path exists or not
         isExist = os.path.exists(path)
@@ -86,9 +91,9 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
             
   
 
-        filename_v1 = os.path.join(model_path_v1, generated_timestamp , f"{satellite_name}.sql")
+        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}.sql")
                 
-        path_v1 = os.path.join(model_path_v1, generated_timestamp)
+        path_v1 = os.path.join(model_path_v1)
 
         # Check whether the specified path exists or not
         isExist_v1 = os.path.exists(path_v1)

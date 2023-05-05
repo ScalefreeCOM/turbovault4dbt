@@ -1,6 +1,9 @@
 import os
 
-
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT GROUP_NAME from pit where Pit_Identifier = '{object_id}' LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
 
 def get_sat_names(cursor,sat_ids):
     sat_names = []
@@ -70,21 +73,26 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         sat_ids = satellites.split(';')
         sat_names = get_sat_names(cursor = cursor,sat_ids = sat_ids)
 
+        group_name = get_groupname(cursor,pit[0])
+        
+        source_name, source_object = source.split("_")
+        model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+
     all_satellite_names = ''
     for sat in sat_names:
         all_satellite_names += f"\n\t- {sat}"
 
-    source_name, source_object = source.split("_")
-    model_path_v1 = model_path.replace('@@entitytype','Pit_v1').replace('@@SourceSystem',source_name)
+
+
     with open(os.path.join(".","templates","pit_v1.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
     command = command_tmp.replace('@@TrackedEntity', tracked_entity).replace('@@PK', pk).replace('@@SnapshotModelName', snapshot_model_name).replace('@@SnapshotTriggerColumn', snapshot_trigger_column).replace('@@DimensionKey',dimension_key_name).replace('@@SatNames',all_satellite_names)
     
     if sat_names != '':
-        filename = os.path.join(model_path_v1, generated_timestamp , f"{pit_name}.sql")
+        filename = os.path.join(model_path_v1 , f"{pit_name}.sql")
                 
-        path = os.path.join(model_path_v1, generated_timestamp)
+        path = os.path.join(model_path_v1)
 
         # Check whether the specified path exists or not
         isExist = os.path.exists(path)

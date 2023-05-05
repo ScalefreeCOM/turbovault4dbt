@@ -2,6 +2,13 @@ import codecs
 from datetime import datetime
 import os
 
+def get_groupname(cursor,source_name,source_object):
+    query = f"""SELECT DISTINCT GROUP_NAME from source_data 
+    where Source_System = '{source_name}' and Source_Object = '{source_object}'
+    LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
+
 def gen_hashed_columns(cursor,source, hashdiff_naming):
   
   command = ""
@@ -131,8 +138,8 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   prejoins = gen_prejoin_columns(cursor, source)
   multiactive = gen_multiactive_columns(cursor,source)
   source_name, source_object = source.split("_")
-  
-  model_path = model_path.replace("@@entitytype", "Stage").replace("@@SourceSystem", source_name)
+  group_name = get_groupname(cursor,source_name,source_object)
+  model_path = model_path.replace("@@GroupName", group_name).replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
   query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column  FROM source_data src
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -153,9 +160,9 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   f.close()
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
-  filename = os.path.join(model_path, timestamp , f"{source_table_name.lower()}.sql")
+  filename = os.path.join(model_path , f"stg_{source_table_name.lower()}.sql")
           
-  path = os.path.join(model_path, timestamp)
+  path = os.path.join(model_path)
 
 
   # Check whether the specified path exists or not
@@ -167,4 +174,4 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   with open(filename, 'w') as f:
     f.write(command.expandtabs(2))
 
-  print(f"Created model \'{source_table_name.lower()}.sql\'")
+  print(f"Created stage model \'stg_{source_table_name.lower()}.sql\'")
