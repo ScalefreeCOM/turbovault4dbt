@@ -18,6 +18,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     from standard_hub h
     INNER JOIN source_data src on src.Source_table_identifier = h.Source_Table_Identifier
     WHERE 1=1
+    AND h.Is_Primary_Source = '1'
     AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
     cursor.execute(hub_query)
     results = cursor.fetchall()
