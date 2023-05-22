@@ -11,6 +11,6 @@ source_model: "@@SourceModel"
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
 
-{{ datavault4dbt.nh_sat(parent_hashkey=metadata_dict["parent_hashkey"],
-                src_payload=metadata_dict["src_payload"],
-                source_model=metadata_dict["source_model"])   }}
+{{ datavault4dbt.nh_sat(parent_hashkey=metadata_dict.get("parent_hashkey"),
+                src_payload=metadata_dict.get("src_payload"),
+                source_model=metadata_dict.get("source_model"))   }}

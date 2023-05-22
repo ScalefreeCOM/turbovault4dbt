@@ -9,5 +9,5 @@ source_models:@@Source_Models
 
 {%- set metadata_dict = fromyaml(yaml_metadata) -%}
 
-{{ datavault4dbt.rec_track_sat(tracked_hashkey=metadata_dict['tracked_hashkey'],
-                                source_models=metadata_dict['source_models']) }}
+{{ datavault4dbt.rec_track_sat(tracked_hashkey=metadata_dict.get('tracked_hashkey'),
+                                source_models=metadata_dict.get('source_models')) }}

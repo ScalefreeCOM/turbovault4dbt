@@ -13,9 +13,9 @@ add_is_current_flag: true
 {%- set metadata_dict = fromyaml(yaml_metadata) -%}
 
 
-{{ datavault4dbt.ma_sat_v1(sat_v0=sat_v0,
-                        hashkey=hashkey,
-                        hashdiff=hashdiff,
-                        ma_attribute=ma_attribute,
-                        ledts_alias=ledts_alias,
-                        add_is_current_flag=add_is_current_flag) }}
+{{ datavault4dbt.ma_sat_v1(sat_v0=metadata_dict.get("sat_v0"),
+                        hashkey=metadata_dict.get("hashkey"),
+                        hashdiff=metadata_dict.get("hashdiff"),
+                        ma_attribute=metadata_dict.get("ma_attribute"),
+                        ledts_alias=metadata_dict.get("ledts_alias"),
+                        add_is_current_flag=metadata_dict.get("add_is_current_flag")) }}
