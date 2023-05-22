@@ -6,7 +6,10 @@ CREATE TABLE standard_hub
 "Source_Column_Physical_Name" STRING,	
 "Business_Key_Physical_Name" STRING,	
 "Target_Column_Sort_Order" STRING,	
-"Target_Primary_Key_Physical_Name" STRING
+"Target_Primary_Key_Physical_Name" STRING,
+"Record_Tracking_Satellite" STRING,
+"Is_Primary_Source" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE standard_link  
@@ -23,7 +26,9 @@ CREATE TABLE standard_link
 "Hub_Primary_Key_Physical_Name" STRING,	
 "Target_Column_Physical_Name" STRING,	
 "Target_Column_Sort_Order" STRING,	
-"Target_Primary_Key_Physical_Name" STRING
+"Target_Primary_Key_Physical_Name" STRING,
+"Record_Tracking_Satellite" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE standard_satellite  
@@ -35,7 +40,8 @@ CREATE TABLE standard_satellite
 "Parent_Identifier" STRING,
 "Parent_Primary_Key_Physical_Name" STRING,	
 "Target_Column_Physical_Name" STRING,	
-"Target_Column_Sort_Order" STRING
+"Target_Column_Sort_Order" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE multiactive_satellite  
@@ -48,7 +54,8 @@ CREATE TABLE multiactive_satellite
 "Parent_Primary_Key_Physical_Name" STRING,	
 "Multi_Active_Attributes" STRING,
 "Target_Column_Physical_Name" STRING,	
-"Target_Column_Sort_Order" STRING
+"Target_Column_Sort_Order" STRING,
+"Group_Name" STRING
 );
 
 
@@ -66,7 +73,9 @@ CREATE TABLE non_historized_link
 "Hub_Primary_Key_Physical_Name" STRING,	
 "Target_Column_Physical_Name" STRING,	
 "Target_Column_Sort_Order" STRING,	
-"Target_Primary_Key_Physical_Name" STRING
+"Target_Primary_Key_Physical_Name" STRING,
+"Record_Tracking_Satellite" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE non_historized_satellite  
@@ -77,7 +86,8 @@ CREATE TABLE non_historized_satellite
 "Source_Column_Physical_Name" STRING,	
 "Parent_Identifier" STRING,
 "Parent_Primary_Key_Physical_Name" STRING,	
-"Target_Column_Physical_Name" STRING	
+"Target_Column_Physical_Name" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE pit  
@@ -88,7 +98,8 @@ CREATE TABLE pit
 "Satellite_Identifiers" STRING,	
 "Snapshot_Model_Name" STRING,
 "Snapshot_Trigger_Column" STRING,	
-"Dimension_Key_Name" STRING	
+"Dimension_Key_Name" STRING,
+"Group_Name" STRING
 );
 
 CREATE TABLE source_data  
@@ -100,5 +111,6 @@ CREATE TABLE source_data
   "Source_Table_Physical_Name" STRING,
   "Record_Source_Column" STRING,
   "Static_Part_of_Record_Source_Column" STRING,
-  "Load_Date_Column" STRING
+  "Load_Date_Column" STRING,
+  "Group_Name" STRING
 );
