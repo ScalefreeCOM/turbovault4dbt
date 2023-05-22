@@ -78,7 +78,7 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
                             """
                 cursor.execute(query2)
                 result = cursor.fetchone()
-                sources = sources + f"\n\t{result[0].lower()}:\n\t\trsrc_static: '{result[1]}'"
+                sources = sources + f"\n\tstg_{result[0].lower()}:\n\t\trsrc_static: '{result[1]}'"
             with open(os.path.join(".","templates","record_tracking_sat.txt"),"r") as f:
                 command_tmp = f.read()
             f.close()

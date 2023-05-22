@@ -6,7 +6,7 @@
 parent_hashkey: "@@Hashkey"
 src_payload:
 @@Payload
-source_model: "@@SourceModel" 
+source_model: "stg_@@SourceModel" 
 {%- endset -%}
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}

@@ -141,7 +141,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   group_name = get_groupname(cursor,source_name,source_object)
   model_path = model_path.replace("@@GroupName", group_name).replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
-  query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column  FROM source_data src
+  query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column, Source_System  FROM source_data src
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
                 """
 
@@ -153,12 +153,13 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
     source_table_name = row[1]  
     rs = row[2]
     ldts = row[3]
+    source_system_name = row[4]
   timestamp = generated_timestamp
   
   with open(os.path.join(".","templates","stage.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
-  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_schema_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
+  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
   filename = os.path.join(model_path , f"stg_{source_table_name.lower()}.sql")
           

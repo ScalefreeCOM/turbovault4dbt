@@ -2,7 +2,7 @@
            materialized='incremental') }} 
 
 {%- set yaml_metadata -%}
-source_model: "@@SourceModel" 
+source_model: "stg_@@SourceModel" 
 parent_hashkey: "@@Hashkey"
 src_hashdiff: "@@Hashdiff"
 src_ma_key: 
