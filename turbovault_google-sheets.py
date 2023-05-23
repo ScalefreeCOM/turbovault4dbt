@@ -14,11 +14,13 @@ from procs.sqlite3 import properties
 from procs.sqlite3 import generate_erd
 import pandas as pd
 import gspread as gs
+from google.oauth2.service_account import Credentials
 import sqlite3
 import time
 from gooey import Gooey
 from gooey import GooeyParser
 from datetime import datetime
+import numpy as np
 
 image_path = os.path.join(os.path.dirname(__file__),"images")
 
@@ -42,22 +44,39 @@ def main():
     gc = gs.oauth(credentials_filename=credential_path)
 
     sh = gc.open_by_url(sheet_url)
-    
+
     hub_entities_df = pd.DataFrame(sh.worksheet('standard_hub').get_all_records())
-    link_entities_df = pd.DataFrame(sh.worksheet('standard_hub').get_all_records())
-    hub_satellite_df = pd.DataFrame(sh.worksheet('standard_satellite').get_all_records())
-    source_data_df = pd.DataFrame(sh.worksheet('source_data').get_all_records())
-    pit_df = pd.DataFrame(sh.worksheet('pit').get_all_records())
+    link_entities_df = pd.DataFrame(sh.worksheet('standard_link').get_all_records())
+    standard_satellite_df = pd.DataFrame(sh.worksheet('standard_satellite').get_all_records())
+    mas_satellite_df = pd.DataFrame(sh.worksheet('multiactive_satellite').get_all_records())
+    nh_link_df = pd.DataFrame(sh.worksheet('non_historized_link').get_all_records())
     non_historized_satellite_df = pd.DataFrame(sh.worksheet('non_historized_satellite').get_all_records())
+    pit_df = pd.DataFrame(sh.worksheet('pit').get_all_records())
+    source_data_df = pd.DataFrame(sh.worksheet('source_data').get_all_records())
 
     db = sqlite3.connect(':memory:')
     
+
+    hub_entities_df = hub_entities_df.replace(r'^\s*$', np.nan, regex=True)
+    link_entities_df = link_entities_df.replace(r'^\s*$', np.nan, regex=True)
+    standard_satellite_df = standard_satellite_df.replace(r'^\s*$', np.nan, regex=True)
+    mas_satellite_df = mas_satellite_df.replace(r'^\s*$', np.nan, regex=True)
+    nh_link_df = nh_link_df.replace(r'^\s*$', np.nan, regex=True)
+    non_historized_satellite_df = non_historized_satellite_df.replace(r'^\s*$', np.nan, regex=True)
+    pit_df = pit_df.replace(r'^\s*$', np.nan, regex=True)
+    source_data_df = source_data_df.replace(r'^\s*$', np.nan, regex=True)
+    
+
     hub_entities_df.to_sql('standard_hub', db)
     link_entities_df.to_sql('standard_link', db)
-    hub_satellite_df.to_sql('standard_satellite', db)
-    source_data_df.to_sql('source_data',db)
-    pit_df.to_sql('pit',db)
+    standard_satellite_df.to_sql('standard_satellite', db)
+    mas_satellite_df.to_sql('multiactive_satellite',db)
+    nh_link_df.to_sql('non_historized_link',db)
     non_historized_satellite_df.to_sql('non_historized_satellite',db)
+    pit_df.to_sql('pit',db)
+    source_data_df.to_sql('source_data',db)
+
+
     
     cursor = db.cursor()
     cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
