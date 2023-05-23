@@ -91,7 +91,7 @@ def generate_source_models(cursor, link_id):
         else:
             fk_col_output = "'" + fk_columns[0] + "'"
         
-        command += f"\n\t{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
+        command += f"\n\tstg_{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
         rsrc_static = source_table_row[3]
         if src_payload != "":
            command = command + src_payload

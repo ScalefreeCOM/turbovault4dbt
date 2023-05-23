@@ -77,7 +77,7 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         
         source_name, source_object = source.split("_")
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
-
+        model_path_control = model_path.replace('@@GroupName','control').replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
     all_satellite_names = ''
     for sat in sat_names:
         all_satellite_names += f"\n\t- {sat}"
@@ -104,3 +104,47 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
         print(f"Created Pit Model {pit_name}")
+
+
+        #control_snap_v0
+        with open('templates/control_snap_v0.txt') as f1:
+            control_snap = f1.read()
+        f1.close()
+
+        filename_snap1 = os.path.join(model_path_control , f"control_snap_v0.sql")
+                
+        snap_path = os.path.join(model_path_control)
+
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(snap_path)
+
+        if not isExist:   
+        # Create a new directory because it does not exist 
+            os.makedirs(snap_path)
+
+        with open(filename_snap1, 'w') as f:
+            f.write(control_snap.expandtabs(2))
+
+
+
+        #control_snap_v1
+        with open('templates/control_snap_v1.txt') as f1:
+            control_snap = f1.read()
+        f1.close()
+
+        filename_snap0 = os.path.join(model_path_control , f"control_snap_v1.sql")
+                
+        snap_path = os.path.join(model_path_control)
+
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(snap_path)
+
+        if not isExist:   
+        # Create a new directory because it does not exist 
+            os.makedirs(snap_path)
+
+        with open(filename_snap0, 'w') as f:
+            f.write(control_snap.expandtabs(2))
+
+        
+
