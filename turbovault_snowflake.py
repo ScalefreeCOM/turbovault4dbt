@@ -4,6 +4,14 @@ from procs.sqlite3 import stage
 from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
+from procs.sqlite3 import pit
+from procs.sqlite3 import nh_satellite
+from procs.sqlite3 import ma_satellite
+from procs.sqlite3 import rt_satellite
+from procs.sqlite3 import nh_link
+from procs.sqlite3 import sources
+from procs.sqlite3 import properties
+from procs.sqlite3 import generate_erd
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -49,35 +57,58 @@ def connect_snowflake():
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_hub_entities = "SELECT * FROM hub_entities"
+    sql_hub_entities = "SELECT * FROM standard_hub"
     cursor.execute(sql_hub_entities)
     df_hub_entities = cursor.fetch_pandas_all()    
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_hub_satellites = "SELECT * FROM hub_satellites"
-    cursor.execute(sql_hub_satellites)
-    df_hub_satellites = cursor.fetch_pandas_all()    
+    sql_standard_satellite = "SELECT * FROM standard_satellite"
+    cursor.execute(sql_standard_satellite)
+    df_standard_satellite = cursor.fetch_pandas_all()    
     cursor.close()
 
     cursor = ctx.cursor()
-    sql_link_entities = "SELECT * FROM link_entities"
+    sql_link_entities = "SELECT * FROM standard_link"
     cursor.execute(sql_link_entities)
     df_link_entities = cursor.fetch_pandas_all()    
     cursor.close()
     
     cursor = ctx.cursor()
-    sql_link_satellites = "SELECT * FROM link_satellites"
-    cursor.execute(sql_link_satellites)
-    df_link_satellites = cursor.fetch_pandas_all()    
+    sql_pit_entities = "SELECT * FROM pit"
+    cursor.execute(sql_pit_entities)
+    df_pit = cursor.fetch_pandas_all()    
+    cursor.close()
+    
+    cursor = ctx.cursor()
+    sql_non_historized_satellite = "SELECT * FROM non_historized_satellite"
+    cursor.execute(sql_non_historized_satellite)
+    df_non_historized_satellite = cursor.fetch_pandas_all()    
+    cursor.close()
+
+    cursor = ctx.cursor()
+    sql_multiactive_satellite = "SELECT * FROM multiactive_satellite"
+    cursor.execute(sql_multiactive_satellite)
+    df_multiactive_satellite = cursor.fetch_pandas_all()    
+    cursor.close()
+
+    cursor = ctx.cursor()
+    sql_non_historized_link = "SELECT * FROM non_historized_link"
+    cursor.execute(sql_non_historized_link)
+    df_non_historized_link = cursor.fetch_pandas_all()    
+    cursor.close()
+
     cursor.close()
     ctx.close()
     
     dfs = { "source_data": df_source_data, 
-            "hub_entities": df_hub_entities,
-            "link_entities": df_link_entities, 
-            "hub_satellites": df_hub_satellites, 
-            "link_satellites": df_link_satellites}
+            "standard_hub": df_hub_entities,
+            "standard_link": df_link_entities, 
+            "standard_satellite": df_standard_satellite,
+            "pit": df_pit,
+            "non_historized_satellite": df_non_historized_satellite,
+            "multiactive_satellite": df_multiactive_satellite,
+            "non_historized_link" : df_non_historized_link}
 
 
     db = sqlite3.connect(':memory:')
@@ -114,34 +145,67 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link'],default=['Stage','Hub','Satellite','Link'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
-                       help="Select the sources which You want to process")
+                       help="Select the sources which You want to process", default=[])
+    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
+    parser.add_argument("--Properties",default=False,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
+    parser.add_argument("--DBDocs",help="Please make sure to have DBDocs installed and that You are logged in.",default=False,action="store_true") #Create ER-Diagram (Y/N)
+
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[4]
+        todo = args.Tasks[9]
     except IndexError:
-        print("Keine Entitäten ausgesucht.")
+        print("No tasks selected.")
         todo = ""     
 
-    rdv_default_schema =  config.get('Snowflake', 'rdv_schema')
-    stage_default_schema = config.get('Snowflake', 'stage_schema')
+    rdv_default_schema = config.get('Snowflake',"rdv_schema")
+    stage_default_schema = config.get('Snowflake',"stage_schema")
+
+    if args.SourceYML:
+        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
 
 
 
-    for source in args.Sources[0]:
-        if 'Stage' in todo:
-            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
+    try:
+        for source in args.Sources[0]:
+            if args.Properties:
+                properties.gen_properties(cursor,source,generated_timestamp,model_path)
+            if 'Stage' in todo:
+                stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
+            
+            if 'Standard Hub' in todo: 
+                hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
         
-        if 'Hub' in todo: 
-            hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
-    
-        if 'Link' in todo: 
-            link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+            if 'Standard Link' in todo: 
+                link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
-        if 'Satellite' in todo: 
-            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            if 'Standard Satellite' in todo: 
+                satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+                
+            if 'Pit' in todo:
+                pit.generate_pit(cursor,source, generated_timestamp, model_path)
+                
+            if 'Non Historized Satellite' in todo: 
+                nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+                
+            if 'Multi Active Satellite' in todo: 
+                ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            
+            if 'Record Tracking Satellite' in todo: 
+                rt_satellite.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Non Historized Link' in todo:
+                nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+
+    except IndexError as e:
+        print("No source selected.")
+
+    if args.DBDocs:
+        generate_erd.generate_erd(cursor,args.Sources[0],generated_timestamp,model_path,hashdiff_naming)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,14 @@ from procs.sqlite3 import stage
 from procs.sqlite3 import satellite
 from procs.sqlite3 import hub
 from procs.sqlite3 import link
+from procs.sqlite3 import pit
+from procs.sqlite3 import nh_satellite
+from procs.sqlite3 import ma_satellite
+from procs.sqlite3 import rt_satellite
+from procs.sqlite3 import nh_link
+from procs.sqlite3 import sources
+from procs.sqlite3 import properties
+from procs.sqlite3 import generate_erd
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -46,33 +54,68 @@ def main():
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     parser = GooeyParser(description='Config')
-    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',choices=['Stage','Hub','Satellite','Link'],default=['Stage','Hub','Satellite','Link'],nargs='*',gooey_options={'height': 300})
+    parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
+    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
+    parser.add_argument("--Properties",default=False,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
+    parser.add_argument("--DBDocs",help="Please make sure to have DBDocs installed and that You are logged in.",default=False,action="store_true") #Create ER-Diagram (Y/N)
+
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[4]
+        todo = args.Tasks[9]
     except IndexError:
-        print("Keine Entitäten ausgesucht.")
+        print("No tasks selected.")
         todo = ""     
 
     rdv_default_schema = config.get('Excel',"rdv_schema")
     stage_default_schema = config.get('Excel',"stage_schema")
 
-   
-    for source in args.Sources[0]:
-        if 'Stage' in todo:
-            stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
-        
-        if 'Hub' in todo: 
-            hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
-    
-        if 'Link' in todo: 
-            link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+    if args.SourceYML:
+        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
 
-        if 'Satellite' in todo: 
-            satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+
+
+    try:
+        for source in args.Sources[0]:
+            if args.Properties:
+                properties.gen_properties(cursor,source,generated_timestamp,model_path)
+            if 'Stage' in todo:
+                stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
+            
+            if 'Standard Hub' in todo: 
+                hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+        
+            if 'Standard Link' in todo: 
+                link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Standard Satellite' in todo: 
+                satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+                
+            if 'Pit' in todo:
+                pit.generate_pit(cursor,source, generated_timestamp, model_path)
+                
+            if 'Non Historized Satellite' in todo: 
+                nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+                
+            if 'Multi Active Satellite' in todo: 
+                ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+            
+            if 'Record Tracking Satellite' in todo: 
+                rt_satellite.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Non Historized Link' in todo:
+                nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+
+    except IndexError as e:
+        print("No source selected.")
+
+    if args.DBDocs:
+        generate_erd.generate_erd(cursor,args.Sources[0],generated_timestamp,model_path,hashdiff_naming)
+
 
 if __name__ == "__main__":
     print("Starting Script.")

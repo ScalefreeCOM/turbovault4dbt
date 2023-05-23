@@ -1,0 +1,25 @@
+{{ config(materialized='incremental',
+        post_hook="{{ datavault4dbt.clean_up_pit('control_snap_v1') }}") }}
+
+{%- set yaml_metadata -%}
+pit_type: 'Regular PIT'
+tracked_entity: @@TrackedEntity
+hashkey: @@PK
+sat_names:@@SatNames
+snapshot_relation: @@SnapshotModelName
+snapshot_trigger_column: @@SnapshotTriggerColumn
+dimension_key: @@DimensionKey
+custom_rsrc: ''
+{%- endset -%}    
+
+{%- set metadata_dict = fromyaml(yaml_metadata) -%}
+
+
+{{ datavault4dbt.pit(pit_type=metadata_dict.get("pit_type"),
+                                tracked_entity=metadata_dict.get("tracked_entity"),
+                                hashkey=metadata_dict.get("hashkey"),
+                                sat_names=metadata_dict.get("sat_names"),
+                                snapshot_relation=metadata_dict.get("snapshot_relation"),
+                                snapshot_trigger_column=metadata_dict.get("snapshot_trigger_column"),
+                                dimension_key=metadata_dict.get("dimension_key"),
+                                custom_rsrc=metadata_dict.get("custom_rsrc")) }}
