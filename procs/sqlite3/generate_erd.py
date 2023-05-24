@@ -140,14 +140,31 @@ def generate_erd(cursor,source_list, generated_timestamp,model_path,hashdiff_nam
     ##Links
     link_list = generate_link_list(cursor,source_name_list,source_object_list)
     for link in link_list:
-        query2 = f"SELECT DISTINCT Target_link_table_physical_name, GROUP_CONCAT(Target_column_physical_name) from standard_link l where l.Link_Identifier = '{link[0]}' and l.Hub_identifier IS NULL GROUP BY Target_link_table_physical_name ORDER BY Target_Column_Sort_Order"
+        query2 = f"""SELECT DISTINCT 
+        Target_link_table_physical_name, GROUP_CONCAT(Target_column_physical_name)
+        from standard_link l 
+        where l.Link_Identifier = '{link[0]}' 
+        and l.Hub_identifier IS NULL 
+
+        UNION ALL
+
+        SELECT DISTINCT 
+        Target_link_table_physical_name, GROUP_CONCAT(Target_column_physical_name)
+        from non_historized_link l 
+        where l.NH_Link_Identifier = '{link[0]}' 
+        and l.Hub_identifier IS NULL 
+        GROUP BY Target_link_table_physical_name 
+        """
         cursor.execute(query2)
         results2 = cursor.fetchall()
         #print(results2)
         bks = ""
         for bk_list in results2:
-            for bk in bk_list[1].split(','):
-                bks += f"{bk} text\n"
+            if not all(bk_list):
+                pass
+            else:
+                for bk in bk_list[1].split(','):
+                    bks += f"{bk} text\n"
         query = f"""
 
                 SELECT DISTINCT Target_link_table_physical_name, GROUP_CONCAT(Target_column_physical_name ||';'|| Target_Hub_Table_Physical_Name),Target_Primary_Key_Physical_Name,Target_Column_Sort_Order
