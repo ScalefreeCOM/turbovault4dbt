@@ -23,12 +23,15 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               ORDER BY h.Target_Column_Sort_Order) 
               GROUP BY Target_Primary_Key_Physical_Name
+
               UNION ALL
+
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
               (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
               FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
               ORDER BY l.Target_Column_Sort_Order)
               group by Target_Primary_Key_Physical_Name
               
@@ -49,6 +52,26 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               order by s.Target_Column_Sort_Order)
               group by Target_Satellite_Table_Physical_Name
+
+              UNION ALL
+              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              FROM non_historized_satellite s
+              inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              )
+              group by Target_Satellite_Table_Physical_Name
+
+              UNION ALL
+
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
+              FROM non_historized_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              ORDER BY l.Target_Column_Sort_Order)
+              group by Target_Primary_Key_Physical_Name
               """
   cursor.execute(query)
   results = cursor.fetchall()
