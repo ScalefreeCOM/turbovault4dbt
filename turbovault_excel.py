@@ -1,17 +1,6 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage
-from procs.sqlite3 import satellite
-from procs.sqlite3 import hub
-from procs.sqlite3 import link
-from procs.sqlite3 import pit
-from procs.sqlite3 import nh_satellite
-from procs.sqlite3 import ma_satellite
-from procs.sqlite3 import rt_satellite
-from procs.sqlite3 import nh_link
-from procs.sqlite3 import sources
-from procs.sqlite3 import properties
-from procs.sqlite3 import generate_erd
+from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -55,8 +44,8 @@ def main():
 
     parser = GooeyParser(description='Config')
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
-                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
-                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
@@ -66,7 +55,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[9]
+        todo = args.Tasks[10]
     except IndexError:
         print("No tasks selected.")
         todo = ""     
@@ -110,7 +99,11 @@ def main():
             if 'Non Historized Link' in todo:
                 nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
+            if 'Reference Table' in todo:
+                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+
     except IndexError as e:
+        print(e)
         print("No source selected.")
 
     if args.DBDocs:
