@@ -71,6 +71,10 @@ def connect_sqlserver(connection_string,metadata_schema):
     for table, df in dfs.items():
         df.to_sql(table, db)
 
+    db_file = sqlite3.connect('sqlserver_db.db')
+    db.backup(db_file)
+    db_file.close()
+
     sqlite_cursor = db.cursor()
 
     return sqlite_cursor
