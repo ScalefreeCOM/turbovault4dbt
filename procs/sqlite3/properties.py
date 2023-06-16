@@ -160,14 +160,14 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
           
     path = os.path.join(model_path)
 
+    if command != "version: 2\nmodels:":
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(path)
+        if not isExist:   
+        # Create a new directory because it does not exist 
+            os.makedirs(path)
 
-    # Check whether the specified path exists or not
-    isExist = os.path.exists(path)
-    if not isExist:   
-    # Create a new directory because it does not exist 
-        os.makedirs(path)
+        with open(filename, 'w') as f:
+            f.write(command.expandtabs(2))
 
-    with open(filename, 'w') as f:
-        f.write(command.expandtabs(2))
-
-    print(f"Created {source_object.lower()}.yml")
+        print(f"Created {source_object.lower()}.yml")
