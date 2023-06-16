@@ -11,8 +11,8 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name)) FROM
-                (SELECT l.Link_Identifier,Target_link_table_physical_name,Hub_primary_key_physical_name,Source_column_physical_name
+    query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name)) FROM
+                (SELECT l.Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name
                 from standard_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
@@ -32,8 +32,8 @@ def generate_source_models(cursor, link_id):
 
     command = ""
 
-    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name)),Static_Part_of_Record_Source_Column FROM
-                (SELECT src.Source_Table_Physical_Name,l.Hub_primary_key_physical_name,Source_column_physical_name,src.Static_Part_of_Record_Source_Column 
+    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name)),Static_Part_of_Record_Source_Column FROM
+                (SELECT src.Source_Table_Physical_Name,l.Target_column_physical_name,Source_column_physical_name,src.Static_Part_of_Record_Source_Column 
                 FROM standard_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
@@ -46,7 +46,7 @@ def generate_source_models(cursor, link_id):
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = 'stg_' + source_table_row[0].lower()
+        source_table_name = '- name: stg_' + source_table_row[0].lower()
         fk_columns = source_table_row[1].split(',')
 
         if len(fk_columns) > 1: 
@@ -56,7 +56,7 @@ def generate_source_models(cursor, link_id):
         else:
             fk_col_output = "'" + fk_columns[0] + "'"
         
-        command += f"\n\t{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
+        command += f"\n\t{source_table_name}\n\t\tfk_columns: {fk_col_output}"
         rsrc_static = source_table_row[2]
 
         if rsrc_static != '':

@@ -8,7 +8,7 @@ def generate_hub_list(cursor, source):
 
     source_name, source_object = source.split("_")
 
-    query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(Business_Key_Physical_Name)
+    query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(distinct Business_Key_Physical_Name)
                 from 
                 (SELECT h.Hub_Identifier,h.Target_Hub_table_physical_name,(Business_Key_Physical_Name),h.Group_Name    
                 FROM standard_hub h
@@ -32,23 +32,25 @@ def generate_source_models(cursor, hub_id):
 
     command = ""
 
-    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),Static_Part_of_Record_Source_Column
+    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),Hashkey,Static_Part_of_Record_Source_Column
                 FROM 
-                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,src.Static_Part_of_Record_Source_Column FROM standard_hub h
+                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,COALESCE(h.Target_Role_Primary_Key_Physical_Name,Target_Primary_Key_Physical_Name) as Hashkey,
+                src.Static_Part_of_Record_Source_Column 
+                FROM standard_hub h
                 inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
                 and Hub_Identifier = '{hub_id}'
                 ORDER BY h.Target_Column_Sort_Order)
-                group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
+                group by Source_Table_Physical_Name,Hashkey,Static_Part_of_Record_Source_Column
                 """
 
     cursor.execute(query)
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = 'stg_' + source_table_row[0].lower()
+        source_table_name = '- name: stg_' + source_table_row[0].lower()
         bk_columns = source_table_row[1].split(',')
-
+        hk_column = source_table_row[2]
         if len(bk_columns) > 1: 
             bk_col_output = ""
             for bk in bk_columns: 
@@ -56,7 +58,9 @@ def generate_source_models(cursor, hub_id):
         else:
             bk_col_output = "'" + bk_columns[0] + "'"
         
-        command += f"\n\t{source_table_name}:\n\t\tbk_columns: {bk_col_output}"
+        command += f"\n\t{source_table_name}\n\t\tbk_columns: {bk_col_output}"
+
+        command += f"\n\t\thk_column: {hk_column}"
 
         rsrc_static = source_table_row[2]
 

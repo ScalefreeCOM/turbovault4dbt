@@ -13,4 +13,4 @@ hashdiff: '@@Hashdiff'
 		hashkey=metadata_dict.get('hashkey'),
 		hashdiff=metadata_dict.get('hashdiff'),
 		ledts_alias=metadata_dict.get('ledts_alias'),
-		add_is_current_flag=metadata_dict.get('add_is_current_flag')) }}
+		add_is_current_flag=true) }}
