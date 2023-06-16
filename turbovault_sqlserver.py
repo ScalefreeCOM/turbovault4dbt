@@ -52,8 +52,8 @@ def connect_sqlserver(connection_string,metadata_schema):
     sql_non_historized_link_entities = f"SELECT * FROM {metadata_schema}.non_historized_link"
     df_non_historized_link_entities = pd.read_sql(sql=sql_non_historized_link_entities, con=sqlserver_client)
     
-    sql_multiactiv_satellite_entities = f"SELECT * FROM {metadata_schema}.multiactive_satellite"
-    df_multiactiv_satellite_entities = pd.read_sql(sql=sql_multiactiv_satellite_entities, con=sqlserver_client)
+    sql_multiactive_satellite_entities = f"SELECT * FROM {metadata_schema}.multiactive_satellite"
+    df_multiactive_satellite_entities = pd.read_sql(sql=sql_multiactive_satellite_entities, con=sqlserver_client)
 
     
     dfs = { "source_data": df_source_data, 
@@ -63,7 +63,7 @@ def connect_sqlserver(connection_string,metadata_schema):
             "pit": df_pit_entities,
             "non_historized_satellite": df_non_historized_satellite_entities,
             "non_historized_link": df_non_historized_link_entities,
-            "multiactive_satellite": df_multiactiv_satellite_entities}
+            "multiactive_satellite": df_multiactive_satellite_entities}
 
 
     db = sqlite3.connect(':memory:')
@@ -117,7 +117,7 @@ def main():
     print(f"Connection String: {conn_str}")
     cursor = connect_sqlserver(connection_string=conn_str, metadata_schema=metadata_schema)
 
-    cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
+    cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '__' || SOURCE_OBJECT FROM source_data")
     results = cursor.fetchall()
     available_sources = []
 
@@ -145,8 +145,8 @@ def main():
         print("No tasks selected.")
         todo = ""     
 
-    rdv_default_schema = config.get('BigQuery',"rdv_schema")
-    stage_default_schema = config.get('BigQuery',"stage_schema")
+    rdv_default_schema = config.get('SQLServer',"rdv_schema")
+    stage_default_schema = config.get('SQLServer',"stage_schema")
 
     if args.SourceYML:
         sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)

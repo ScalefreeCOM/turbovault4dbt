@@ -16,7 +16,7 @@ def get_sat_names(cursor,sat_ids):
     return sat_names
 
 def get_pit_list(cursor, source):
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
     query = f"""SELECT 
     p.Pit_Identifier
     ,p.Pit_Physical_Table_Name
@@ -75,7 +75,7 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
 
         group_name = get_groupname(cursor,pit[0])
         
-        source_name, source_object = source.split("_")
+        source_name, source_object = source.split("__")
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_control = model_path.replace('@@GroupName','control').replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
     all_satellite_names = ''

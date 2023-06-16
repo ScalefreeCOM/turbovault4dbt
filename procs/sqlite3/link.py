@@ -9,7 +9,7 @@ def get_groupname(cursor,object_id):
 
 def generate_link_list(cursor, source):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
 
     query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name)) FROM
                 (SELECT l.Link_Identifier,Target_link_table_physical_name,Hub_primary_key_physical_name,Source_column_physical_name
@@ -97,7 +97,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     source_models = generate_source_models(cursor, link_id)
     link_hashkey = generate_link_hashkey(cursor, link_id)
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
     model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
 

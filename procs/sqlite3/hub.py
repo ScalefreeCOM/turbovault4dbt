@@ -6,7 +6,7 @@ def get_groupname(cursor,object_id):
 
 def generate_hub_list(cursor, source):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
 
     query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(Business_Key_Physical_Name)
                 from 
@@ -85,7 +85,7 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
     hub_list = generate_hub_list(cursor=cursor, source=source)
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
 
     for hub in hub_list:
 

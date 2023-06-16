@@ -5,7 +5,7 @@ def gen_sources(cursor,source_list,generated_timestamp, model_path):
     source_object_list = []
     for source in source_list:
         #print(source)
-        source_name,source_object = source.split('_')
+        source_name,source_object = source.split('__')
         source_name_list.append(source_name)
         source_object_list.append(source_object)
     

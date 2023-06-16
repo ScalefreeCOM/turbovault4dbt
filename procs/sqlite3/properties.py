@@ -3,12 +3,20 @@ def get_groupname(cursor,source_name,source_object):
     query = f"""SELECT DISTINCT GROUP_NAME from source_data 
     where Source_System = '{source_name}' and Source_Object = '{source_object}'
     LIMIT 1"""
-    cursor.execute(query)
-    return cursor.fetchone()[0]
+
+    result = ''
+
+    try:
+        cursor.execute(query)
+        result = cursor.fetchone()[0]
+    except TypeError: 
+        print(f"TypeError in get_groupname() called by gen_properties(). No group found for source {source_name} and object {source_object}.")
+
+    return result
 
 def gen_properties(cursor,source,generated_timestamp,model_path):
     command = "version: 2\nmodels:"
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
     group_name = get_groupname(cursor,source_name,source_object)
 
 
@@ -102,8 +110,12 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","sat_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name)
-        command = command + '\n' + command_tmp
+
+        try:
+            command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name)
+            command = command + '\n' + command_tmp
+        except TypeError:
+            print(f"TypeError in generating properties for Satellite Tests: {Exception}")
 
     #Generating Pit Tests
     pit_query = f"""SELECT DISTINCT

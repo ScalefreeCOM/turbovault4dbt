@@ -16,7 +16,7 @@ def gen_payload(payload_list):
 
 def generate_nh_satellite_list(cursor, source):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("__")
 
     query = f"""SELECT DISTINCT NH_Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
                 Source_Table_Physical_Name,Load_Date_Column
@@ -49,7 +49,7 @@ def generate_nh_satellite(cursor,source, generated_timestamp, rdv_default_schema
 
         payload = gen_payload(payload_list)
         
-        source_name, source_object = source.split("_")
+        source_name, source_object = source.split("__")
         group_name = get_groupname(cursor,nh_satellite[0])
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         

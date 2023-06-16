@@ -13,7 +13,7 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
   
   command = ""
 
-  source_name, source_object = source.split("_")
+  source_name, source_object = source.split("__")
 
   query = f"""
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM 
@@ -100,7 +100,7 @@ def gen_prejoin_columns(cursor, source):
   
   command = ""  
 
-  source_name, source_object = source.split("_")
+  source_name, source_object = source.split("__")
   
   query = f"""SELECT 
               COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
@@ -137,7 +137,7 @@ def gen_prejoin_columns(cursor, source):
 
 def gen_multiactive_columns(cursor,source):
   command = ""
-  source_name, source_object = source.split("_")
+  source_name, source_object = source.split("__")
   query = f"""SELECT DISTINCT Multi_Active_Attributes,Parent_primary_key_physical_name from multiactive_satellite mas
                 inner join source_data src on mas.Source_Table_Identifier = src.Source_table_identifier
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
@@ -160,7 +160,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming)
   prejoins = gen_prejoin_columns(cursor, source)
   multiactive = gen_multiactive_columns(cursor,source)
-  source_name, source_object = source.split("_")
+  source_name, source_object = source.split("__")
   group_name = get_groupname(cursor,source_name,source_object)
   model_path = model_path.replace("@@GroupName", 'stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
