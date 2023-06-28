@@ -81,6 +81,7 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
             print(f"Created Reference Table Model {ref_name}")  
 
 
+
 def get_groupname(cursor,object_id):
     query = f"""SELECT DISTINCT IFNULL(GROUP_NAME,'') from ref_table where Reference_Table_Identifier = '{object_id}' LIMIT 1"""
     cursor.execute(query)
@@ -136,7 +137,7 @@ def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
 ##RefHubs
 
-
+    generate_ref_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list)
 
 ##RefSats
 
