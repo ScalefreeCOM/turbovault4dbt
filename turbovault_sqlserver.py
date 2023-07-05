@@ -137,8 +137,8 @@ def main():
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
-    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
-    parser.add_argument("--Properties",default=False,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
+    parser.add_argument("--SourceYML",default=True,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
+    parser.add_argument("--Properties",default=True,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
     parser.add_argument("--DBDocs",help="Please make sure to have DBDocs installed and that You are logged in.",default=False,action="store_true") #Create ER-Diagram (Y/N)
 
     args = parser.parse_args()
@@ -152,9 +152,12 @@ def main():
     rdv_default_schema = config.get('SQLServer',"rdv_schema")
     stage_default_schema = config.get('SQLServer',"stage_schema")
 
-    if args.SourceYML:
-        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
+    if args.Sources == []:
+        args.Sources = [available_sources]
 
+    if args.SourceYML:
+        print(args.Sources)
+        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
 
 
     try:

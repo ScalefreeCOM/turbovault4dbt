@@ -14,11 +14,19 @@ def gen_sources(cursor,source_list,generated_timestamp, model_path):
 
 
     command = ""
-    query = f"""SELECT DISTINCT Source_System, Source_Schema_Physical_Name, GROUP_CONCAT(Source_Table_Physical_Name)
-    FROM source_data
+    query = f"""SELECT DISTINCT Source_System, Source_Schema_Physical_Name, 
+Source_Table_Physical_Name,
+GROUP_CONCAT(Source_Table_Physical_Name)
+    FROM 
+    (SELECT distinct 
+    Source_System, 
+    Source_Schema_Physical_Name, 
+    Source_Table_Physical_Name
+    FROM  source_data
     WHERE 1=1
     and Source_System in ({str(source_name_list).replace('[','').replace(']','')})
     and Source_Object in ({str(source_object_list).replace('[','').replace(']','')})
+    ) x
     GROUP BY Source_System, Source_Schema_Physical_Name"""
     cursor.execute(query)
     results = cursor.fetchall()
