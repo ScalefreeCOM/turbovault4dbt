@@ -1,5 +1,81 @@
 import os
 
+def generate_ref_sat(cursor,source):
+        source_name, source_object = source.split("_")
+        query = f"""SELECT DISTINCT src.Source_Object,rs.Target_Reference_table_physical_name,GROUP_CONCAT(rs.Source_Column_Physical_Name)
+        FROM ref_sat rs
+        inner join ref_hub rh on rs.Parent_Table_Identifier = rh.Reference_Hub_Identifier
+        inner join source_data src on rs.Source_Table_Identifier = src.Source_table_identifier
+        WHERE 1=1
+        AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+        GROUP BY src.Source_Object,rs.Target_Reference_table_physical_name
+        ORDER BY rs.Target_Column_Sort_Order asc
+"""
+        cursor.execute(query)
+        return cursor.fetchall()
+def generate_source_model(cursor,source_name,source_object,ref_hub_id):
+        query = f""" SELECT DISTINCT ('stg_' || src.Source_Object ), src.Static_Part_of_Record_Source_Column
+        from ref_hub rh
+        inner join source_data src on rh.Source_Table_Identifier = src.Source_table_identifier
+        WHERE 1=1
+        AND rh.Reference_Hub_Identifier= '{ref_hub_id}'
+        AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return results
+
+def get_hub_source(cursor,source_name,source_object):
+        query = f"""SELECT DISTINCT rh.Reference_Hub_Identifier,rh.Target_Reference_table_physical_name,rh.Source_Column_Physical_Name
+    from ref_hub rh
+    inner join source_data src on rh.Source_Table_Identifier = src.Source_Table_Identifier
+    WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+    ORDER BY  rh.Target_Column_Sort_Order asc"""
+        cursor.execute(query)
+        return cursor.fetchall()
+
+def get_groupname(cursor,object_id):
+    query = f"""SELECT DISTINCT IFNULL(GROUP_NAME,'') from ref_table where Reference_Table_Identifier = '{object_id}' LIMIT 1"""
+    cursor.execute(query)
+    return cursor.fetchone()[0]
+
+def get_ref_hub(cursor,ref_id):
+    query = f"""
+    SELECT DISTINCT rh.Target_Reference_table_physical_name
+    from ref_table rt
+    inner join ref_hub rh on rt.Referenced_Hub = rh.Reference_Hub_Identifier
+    where Reference_Table_Identifier = '{ref_id}'"""
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def get_ref_sat(cursor,ref_id):
+    query = f"""
+    SELECT DISTINCT (rs.Target_Reference_table_physical_name||'|'||IFNULL(Included_Columns,'')||'|'||IFNULL(Excluded_Columns,'')) 
+    from ref_table rt
+    inner join ref_sat rs on rt.Referenced_Satellite = rs.Reference_Satellite_Identifier
+    where Reference_Table_Identifier = '{ref_id}'"""
+    cursor.execute(query)
+    return cursor.fetchall()
+
+def generate_ref_list(cursor, source):
+
+    source_name, source_object = source.split("_")
+
+    query = f"""SELECT  rt.Reference_Table_Identifier,rt.Target_Reference_table_physical_name,rt.Historized
+                from ref_table rt
+                inner join ref_hub rh on rt.Referenced_Hub = rh.Reference_Hub_Identifier
+                inner join source_data src on rh.Source_Table_Identifier = src.Source_table_identifier
+
+                where 1=1
+                and src.Source_System = '{source_name}'
+                and src.Source_Object = '{source_object}'
+                GROUP BY rt.Reference_Table_Identifier,rt.Target_Reference_table_physical_name,rt.Historized
+                """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    return results
+
 def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list):
     source_name, source_object = source.split("_")
     for ref in ref_list:
@@ -48,7 +124,7 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
                     sat_name += f'\n\t\t\t\t- {column}'
                 ref_sat_string_list.append(sat_name)
             else:
-                sat_name = f'\n\t- {sat_name}: {{}}\n'
+                sat_name = f'\n\t- {sat_name}: \n'
                 ref_sat_string_list.append(sat_name)
         ref_sat_string_list = list(dict.fromkeys(ref_sat_string_list))
         ref_sat_string = ""
@@ -57,7 +133,7 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
 
         ##@@Historized
         if(historized != 'full' and historized != 'latest'):
-            historized = f"'snapshot'\nsnapshot_relation:{historized}"
+            historized = f"snapshot'\nsnapshot_relation:'{historized}"
 
         with open(os.path.join(".","templates","ref_table.txt"),"r") as f:
             command_tmp = f.read()
@@ -82,48 +158,59 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
 
 
 
-def get_groupname(cursor,object_id):
-    query = f"""SELECT DISTINCT IFNULL(GROUP_NAME,'') from ref_table where Reference_Table_Identifier = '{object_id}' LIMIT 1"""
-    cursor.execute(query)
-    return cursor.fetchone()[0]
 
-def get_ref_hub(cursor,ref_id):
-    query = f"""
-    SELECT DISTINCT rh.Target_Reference_table_physical_name
-    from ref_table rt
-    inner join ref_hub rh on rt.Referenced_Hub = rh.Reference_Hub_Identifier
-    where Reference_Table_Identifier = '{ref_id}'"""
-    cursor.execute(query)
-    return cursor.fetchall()
+        #Reference Hub
+        relevant_hubs = get_hub_source(cursor,source_name,source_object)
+        bk = []
+        for key in relevant_hubs:
+            bk.append(key[2])
+        bk_str = ','.join(bk)
+        source_models = ''
 
-def get_ref_sat(cursor,ref_id):
-    query = f"""
-    SELECT DISTINCT (rs.Target_Reference_table_physical_name||'|'||IFNULL(Included_Columns,'')||'|'||IFNULL(Excluded_Columns,'')) 
-    from ref_table rt
-    inner join ref_sat rs on rt.Referenced_Satellite = rs.Reference_Satellite_Identifier
-    where Reference_Table_Identifier = '{ref_id}'"""
-    cursor.execute(query)
-    return cursor.fetchall()
 
-def generate_ref_list(cursor, source):
+        for hub in relevant_hubs:
+            ref_hub_id = hub[0]
+            ref_hub_name = hub[1]
+            ref_keys = hub[2]
 
-    source_name, source_object = source.split("_")
 
-    query = f"""SELECT  rt.Reference_Table_Identifier,rt.Target_Reference_table_physical_name,rt.Historized
-                from ref_table rt
-                inner join ref_hub rh on rt.Referenced_Hub = rh.Reference_Hub_Identifier
-                inner join source_data src on rh.Source_Table_Identifier = src.Source_table_identifier
+            source_model_list = generate_source_model(cursor,source_name,source_object,ref_hub_id)
+            for source in source_model_list:
+                source_name = source[0]
+                rsrc_static = source[1]
+                source_models += f"\n\t\t- name: {source_name.lower()}\n\t\t\tref_keys: '{ref_keys}'\n\t\t\trsrc_static: '{rsrc_static}'"
 
-                where 1=1
-                and src.Source_System = '{source_name}'
-                and src.Source_Object = '{source_object}'
-                GROUP BY rt.Reference_Table_Identifier,rt.Target_Reference_table_physical_name,rt.Historized
-                """
+        with open(os.path.join(".","templates","ref_hub.txt"),"r") as f:
+            command_tmp = f.read()
+        f.close()
+        command = command_tmp.replace('@@SourceModel', source_models).replace('@@RefKeys',bk_str)
+           
+        model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+        filename = os.path.join(model_path,  f"{ref_hub_name}.sql")
+                
+        path = os.path.join(model_path)
 
-    cursor.execute(query)
-    results = cursor.fetchall()
+        # Check whether the specified path exists or not
+        isExist = os.path.exists(path)
 
-    return results
+        if not isExist:   
+        # Create a new directory because it does not exist 
+            os.makedirs(path)
+
+        with open(filename, 'w') as f:
+            f.write(command.expandtabs(2))
+            print(f"Created Reference Hub Model {ref_hub_name}")  
+
+
+
+
+
+        #Ref Satellites
+
+        ref_sat_list = generate_ref_sat(cursor,source)
+        print(ref_sat_list)
+
+
 
 
 ##RefTable
@@ -137,7 +224,6 @@ def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
 ##RefHubs
 
-    generate_ref_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list)
 
 ##RefSats
 

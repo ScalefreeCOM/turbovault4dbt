@@ -3,7 +3,7 @@
 {%- set yaml_metadata -%}
 ref_hub: '@@RefHub'
 ref_satellites: @@RefSat
-historized: @@Historized
+historized: '@@Historized'
 
 {%- endset -%}
 

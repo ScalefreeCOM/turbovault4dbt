@@ -3,7 +3,6 @@
 
 {%- set yaml_metadata -%}
 source_models: @@SourceModel
-ref_keys: @@RefKeys
 {%- endset -%}      
 
 {% set metadata_dict = fromyaml(yaml_metadata) %}
