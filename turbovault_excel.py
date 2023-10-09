@@ -70,6 +70,7 @@ def main():
 
     try:
         for source in args.Sources[0]:
+            source = source.replace('_','_.._')
             if args.Properties:
                 properties.gen_properties(cursor,source,generated_timestamp,model_path)
             if 'Stage' in todo:
@@ -100,7 +101,7 @@ def main():
                 nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
 
             if 'Reference Table' in todo:
-                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
     except IndexError as e:
         print(e)

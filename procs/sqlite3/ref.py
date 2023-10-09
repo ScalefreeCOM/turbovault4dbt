@@ -1,16 +1,18 @@
 import os
 
 def generate_ref_sat(cursor,source):
-        source_name, source_object = source.split("_")
-        query = f"""SELECT DISTINCT src.Source_Object,rs.Target_Reference_table_physical_name,GROUP_CONCAT(rs.Source_Column_Physical_Name)
+        source_name, source_object = source.split("_.._")
+        query = f"""
+        SELECT DISTINCT 'stg_' || LOWER(src.Source_Object),rh.Source_Column_Physical_Name,rs.Target_Reference_table_physical_name,GROUP_CONCAT(rs.Source_Column_Physical_Name)
         FROM ref_sat rs
-        inner join ref_hub rh on rs.Parent_Table_Identifier = rh.Reference_Hub_Identifier
+        inner join ref_hub rh on rs.Parent_Table_Identifier = rh.Reference_Hub_Identifier and rs.Source_Table_Identifier = rh.Source_Table_Identifier
         inner join source_data src on rs.Source_Table_Identifier = src.Source_table_identifier
         WHERE 1=1
         AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
         GROUP BY src.Source_Object,rs.Target_Reference_table_physical_name
         ORDER BY rs.Target_Column_Sort_Order asc
 """
+
         cursor.execute(query)
         return cursor.fetchall()
 def generate_source_model(cursor,source_name,source_object,ref_hub_id):
@@ -58,7 +60,7 @@ def get_ref_sat(cursor,ref_id):
 
 def generate_ref_list(cursor, source):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
 
     query = f"""SELECT  rt.Reference_Table_Identifier,rt.Target_Reference_table_physical_name,rt.Historized
                 from ref_table rt
@@ -76,8 +78,8 @@ def generate_ref_list(cursor, source):
 
     return results
 
-def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list):
-    source_name, source_object = source.split("_")
+def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming):
+    source_name, source_object = source.split("_.._")
     for ref in ref_list:
 
         ref_id = ref[0]
@@ -138,7 +140,7 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
         with open(os.path.join(".","templates","ref_table.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command = command_tmp.replace('@@RefHub', ref_hub_string).replace('@@RefSat',ref_sat_string).replace('@@Historized',historized)
+        command = command_tmp.replace('@@Schema',rdv_default_schema).replace('@@RefHub', ref_hub_string).replace('@@RefSat',ref_sat_string).replace('@@Historized',historized)
            
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         filename = os.path.join(model_path,  f"{ref_name}.sql")
@@ -175,15 +177,15 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
 
 
             source_model_list = generate_source_model(cursor,source_name,source_object,ref_hub_id)
-            for source in source_model_list:
-                source_name = source[0]
-                rsrc_static = source[1]
+            for src in source_model_list:
+                source_name = src[0]
+                rsrc_static = src[1]
                 source_models += f"\n\t\t- name: {source_name.lower()}\n\t\t\tref_keys: '{ref_keys}'\n\t\t\trsrc_static: '{rsrc_static}'"
 
         with open(os.path.join(".","templates","ref_hub.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command = command_tmp.replace('@@SourceModel', source_models).replace('@@RefKeys',bk_str)
+        command = command_tmp.replace('@@Schema',rdv_default_schema).replace('@@SourceModel', source_models).replace('@@RefKeys',bk_str)
            
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         filename = os.path.join(model_path,  f"{ref_hub_name}.sql")
@@ -208,23 +210,75 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
         #Ref Satellites
 
         ref_sat_list = generate_ref_sat(cursor,source)
-        print(ref_sat_list)
+        command_tmp = ''
+        #Satellite v0
+        with open(os.path.join(".","templates","ref_sat_v0.txt"),"r") as f:
+            command_tmp = f.read()
+        f.close()
+
+        for sat in ref_sat_list:
+            sat_source = sat[0]
+            sat_key = sat[1]
+            sat_name = sat[2]
+            hashdiff_column = hashdiff_naming.replace('@@SatName',sat_name)
+            sat_payload = sat[3]
+            payload = ''
+            payload_column_list = sat_payload.split(',')
+            for col in payload_column_list:
+                payload += f'\n\t\t- {col}'
+            satellite_model_name_splitted_list = sat_name.split('_')
+            satellite_model_name_splitted_list[-2] += '_0'
+            satellite_model_name_v0 = '_'.join(satellite_model_name_splitted_list)
+
+            command = command_tmp.replace('@@Schema',rdv_default_schema).replace('@@SourceModel', sat_source).replace('@@RefKeys',sat_key).replace('@@HashDiff',hashdiff_column).replace('@@Payload',payload)
+
+            model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
+            filename = os.path.join(model_path,  f"{satellite_model_name_v0}.sql")
+                    
+            path = os.path.join(model_path)
+
+            # Check whether the specified path exists or not
+            isExist = os.path.exists(path)
+
+            if not isExist:   
+            # Create a new directory because it does not exist 
+                os.makedirs(path)
+
+            with open(filename, 'w') as f:
+                f.write(command.expandtabs(2))
+                print(f"Created Reference Sat Model {sat_name}")  
+
+            #Satellite_v1
+            with open(os.path.join(".","templates","ref_sat_v1.txt"),"r") as f:
+                command_tmp = f.read()
+            f.close()
+            command_v1 = command_tmp.replace('@@Schema',rdv_default_schema).replace('@@RefSat', satellite_model_name_v0).replace('@@RefKeys', sat_key).replace('@@HashDiff', hashdiff_column).replace('@@Schema', rdv_default_schema)
+                
+    
+
+            filename_v1 = os.path.join(model_path , f"{sat_name}.sql")
+                    
+            path_v1 = os.path.join(model_path)
+
+            # Check whether the specified path exists or not
+            isExist_v1 = os.path.exists(path_v1)
+
+            if not isExist_v1:   
+            # Create a new directory because it does not exist 
+                os.makedirs(path_v1)
+
+            with open(filename_v1, 'w') as f:
+                f.write(command_v1.expandtabs(2))
+                print(f"Created Ref Sat Model {sat_name}")
 
 
-
-
-##RefTable
-
-def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_path):
+def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_path, hashdiff_naming):
     
     ref_list = generate_ref_list(cursor=cursor,source=source)
 
 
-    generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list)
-
-##RefHubs
+    generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming)
 
 
-##RefSats
 
 

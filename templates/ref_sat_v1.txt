@@ -1,5 +1,5 @@
 {{ config(materialized='view',
-          schema='Core') }}
+          schema='@@Schema') }}
 
 {%- set yaml_metadata -%}
 ref_sat_v0: @@RefSat

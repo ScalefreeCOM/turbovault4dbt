@@ -12,6 +12,7 @@ from procs.sqlite3 import nh_link
 from procs.sqlite3 import sources
 from procs.sqlite3 import properties
 from procs.sqlite3 import generate_erd
+from procs.sqlite3 import ref
 import pandas as pd
 import gspread as gs
 from google.oauth2.service_account import Credentials
@@ -52,6 +53,9 @@ def main():
     nh_link_df = pd.DataFrame(sh.worksheet('non_historized_link').get_all_records())
     non_historized_satellite_df = pd.DataFrame(sh.worksheet('non_historized_satellite').get_all_records())
     pit_df = pd.DataFrame(sh.worksheet('pit').get_all_records())
+    ref_table_df = pd.DataFrame(sh.worksheet('ref_table').get_all_records())
+    ref_hub_df = pd.DataFrame(sh.worksheet('ref_hub').get_all_records())
+    ref_sat_df = pd.DataFrame(sh.worksheet('ref_sat').get_all_records())
     source_data_df = pd.DataFrame(sh.worksheet('source_data').get_all_records())
 
     db = sqlite3.connect(':memory:')
@@ -64,6 +68,9 @@ def main():
     nh_link_df = nh_link_df.replace(r'^\s*$', np.nan, regex=True)
     non_historized_satellite_df = non_historized_satellite_df.replace(r'^\s*$', np.nan, regex=True)
     pit_df = pit_df.replace(r'^\s*$', np.nan, regex=True)
+    ref_table_df = ref_table_df.replace(r'^\s*$', np.nan, regex=True)
+    ref_hub_df = ref_hub_df.replace(r'^\s*$', np.nan, regex=True)
+    ref_sat_df = ref_sat_df.replace(r'^\s*$', np.nan, regex=True)
     source_data_df = source_data_df.replace(r'^\s*$', np.nan, regex=True)
     
 
@@ -74,6 +81,9 @@ def main():
     nh_link_df.to_sql('non_historized_link',db)
     non_historized_satellite_df.to_sql('non_historized_satellite',db)
     pit_df.to_sql('pit',db)
+    ref_table_df.to_sql('ref_table',db)
+    ref_hub_df.to_sql('ref_hub',db)
+    ref_sat_df.to_sql('ref_sat',db)
     source_data_df.to_sql('source_data',db)
 
 
@@ -89,8 +99,8 @@ def main():
 
     parser = GooeyParser(description='Config')
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
-                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
-                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
@@ -115,6 +125,7 @@ def main():
 
     try:
         for source in args.Sources[0]:
+            source = source.replace('_','_.._')
             if args.Properties:
                 properties.gen_properties(cursor,source,generated_timestamp,model_path)
             if 'Stage' in todo:
@@ -143,6 +154,9 @@ def main():
 
             if 'Non Historized Link' in todo:
                 nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+                
+            if 'Reference Table' in todo:
+                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
     except IndexError as e:
         print("No source selected.")

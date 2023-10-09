@@ -15,7 +15,7 @@ def gen_payload(payload_list):
 
 def generate_satellite_list(cursor, source):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
 
     query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
                 Source_Table_Physical_Name,Load_Date_Column,Group_Name
@@ -39,7 +39,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
     
     satellite_list = generate_satellite_list(cursor=cursor, source=source)
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
 
     for satellite in satellite_list:
         satellite_name = satellite[1]

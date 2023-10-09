@@ -1,4 +1,4 @@
-{{ config(schema='core', materialized='view') }}
+{{ config(schema='@@Schema', materialized='view') }}
 
 {%- set yaml_metadata -%}
 ref_hub: '@@RefHub'

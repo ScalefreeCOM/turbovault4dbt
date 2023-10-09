@@ -1,5 +1,5 @@
 {{ config(materialized='incremental',
-          schema='Core') }}
+          schema='@@Schema') }}
 
 {%- set yaml_metadata -%}
 source_model: @@SourceModel
