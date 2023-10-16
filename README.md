@@ -13,6 +13,7 @@ TurboVault4dbt requires a metadata analysis done by hand and stored in supported
 
 
 
+
 To use the generated models, a [dbt project](https://docs.getdbt.com/docs/get-started/getting-started-dbt-core) is required. Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used, because the dbt models are calling macros of this package. 
 
 
@@ -55,7 +56,7 @@ To execute TurboVault4dbt, You need Python installed. Execute the script accordi
 Then, a GUI will open that looks like this: 
 
 <div align="center" >
-<img src="https://github.com/ScalefreeCOM/wiki-test/assets/78927659/16e841c1-0440-497f-a8c4-48c11e7c4c43" width=70% align=center>
+<img src="https://github.com/ScalefreeCOM/turbovault4dbt/assets/78927659/feab6cdf-7fcd-42f8-8f10-23848b6619fb" width=70% align=center>
 </div>
 
 On the left side, you can select which object types you want to generate. These are: 
