@@ -113,6 +113,19 @@ def gen_prejoin_columns(cursor, source):
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               inner join source_data pj_src on l.Prejoin_Table_Identifier = pj_src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              and l.Prejoin_Table_Identifier is not NULL
+              UNION ALL 
+              SELECT 
+              COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
+              pj_src.Source_Schema_Physical_Name, 
+              pj_src.Source_Table_Physical_Name,
+              l.Prejoin_Extraction_Column_Name, 
+              l.Source_column_physical_name,
+              l.Prejoin_Table_Column_Name
+              FROM non_historized_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              inner join source_data pj_src on l.Prejoin_Table_Identifier = pj_src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               and l.Prejoin_Table_Identifier is not NULL"""
   
   
