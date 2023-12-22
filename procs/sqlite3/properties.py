@@ -114,9 +114,10 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     inner join standard_hub h on p.Tracked_Entity = h.Hub_Identifier
     inner join source_data src on h.Source_table_identifier = src.Source_table_identifier
     WHERE 1=1
+    AND h.Is_Primary_Source = '1'
     and src.Source_System = '{source_name}'
     and src.Source_Object = '{source_object}'
-    
+
     UNION ALL
 
     SELECT DISTINCT
@@ -145,14 +146,14 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
 
     model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName",group_name).replace('@@timestamp',generated_timestamp)
     filename = os.path.join(model_path , f"{source_object.lower()}.yml")
-          
+
     path = os.path.join(model_path)
 
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)
-    if not isExist:   
-    # Create a new directory because it does not exist 
+    if not isExist:
+    # Create a new directory because it does not exist
         os.makedirs(path)
 
     with open(filename, 'w') as f:
