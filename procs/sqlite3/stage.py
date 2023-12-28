@@ -104,9 +104,9 @@ def gen_prejoin_columns(cursor, source):
   
   query = f"""SELECT 
               COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
-              pj_src.Source_Schema_Physical_Name, 
+              pj_src.Source_Schema_Physical_Name,
               pj_src.Source_Table_Physical_Name,
-              l.Prejoin_Extraction_Column_Name, 
+              l.Prejoin_Extraction_Column_Name,
               l.Source_column_physical_name,
               l.Prejoin_Table_Column_Name
               FROM standard_link l
@@ -143,7 +143,7 @@ def gen_prejoin_columns(cursor, source):
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_name: '{source_name}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
 
