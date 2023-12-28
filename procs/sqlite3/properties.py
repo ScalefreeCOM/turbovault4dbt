@@ -46,6 +46,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     INNER JOIN standard_hub h on l.Hub_identifier = h.Hub_Identifier
     INNER JOIN source_data src on l.Source_Table_Identifier = src.Source_table_identifier
     WHERE 1=1
+    AND h.Is_Primary_Source = '1'
     AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
     )
     GROUP BY Target_link_table_physical_name,Target_Primary_Key_Physical_Name"""
