@@ -27,11 +27,30 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               UNION ALL
 
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
-              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
+              (SELECT 
+              l.Target_Primary_Key_Physical_Name,             
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
+              FALSE as IS_SATELLITE
+              --(SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
               FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              ORDER BY l.Target_Column_Sort_Order)
+              group by Target_Primary_Key_Physical_Name
+              
+              UNION ALL
+              
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT 
+              l.Hub_primary_key_physical_name as Target_Primary_Key_Physical_Name,             
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name) as Source_Column_Physical_Name,
+              FALSE as IS_SATELLITE
+              FROM standard_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              and l.Prejoin_Table_Identifier is not NULL
               ORDER BY l.Target_Column_Sort_Order)
               group by Target_Primary_Key_Physical_Name
               
@@ -104,9 +123,9 @@ def gen_prejoin_columns(cursor, source):
   
   query = f"""SELECT 
               COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
-              pj_src.Source_Schema_Physical_Name, 
+              pj_src.Source_Schema_Physical_Name,
               pj_src.Source_Table_Physical_Name,
-              l.Prejoin_Extraction_Column_Name, 
+              l.Prejoin_Extraction_Column_Name,
               l.Source_column_physical_name,
               l.Prejoin_Table_Column_Name
               FROM standard_link l
@@ -143,7 +162,7 @@ def gen_prejoin_columns(cursor, source):
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_name: '{source_name}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
 
