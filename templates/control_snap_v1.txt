@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+
 
 {%- set yaml_metadata -%}
 control_snap_v0: 'control_snap_v0'
