@@ -8,7 +8,7 @@ def get_groupname(cursor,source_name,source_object):
 
 def gen_properties(cursor,source,generated_timestamp,model_path):
     command = "version: 2\nmodels:"
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
     group_name = get_groupname(cursor,source_name,source_object)
 
 

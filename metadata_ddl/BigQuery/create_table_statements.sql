@@ -114,3 +114,37 @@ Static_Part_of_Record_Source_Column STRING,
 Load_Date_Column STRING,
 Group_Name STRING
 );
+
+CREATE TABLE ref_table
+
+(
+Reference_Table_Identifier STRING,
+Target_Reference_table_physical_name STRING,	
+Referenced_Hub STRING,	
+Referenced_Satellite STRING,	
+Included_Columns STRING,
+Excluded_Columns STRING,	
+Historized STRING,
+Group_Name STRING
+);
+
+CREATE TABLE ref_hub
+
+(
+Reference_Hub_Identifier STRING,
+Target_Reference_table_physical_name STRING,	
+Source_Table_Identifier STRING,	
+Source_Column_Physical_Name STRING,	
+Target_Column_Sort_Order STRING
+);
+
+CREATE TABLE ref_sat
+
+(
+Reference_Satellite_Identifier STRING,
+Target_Reference_table_physical_name STRING,	
+Source_Table_Identifier STRING,	
+Parent_Table_Identifier STRING,	
+Source_Column_Physical_Name STRING,
+Target_Column_Sort_Order STRING
+);
