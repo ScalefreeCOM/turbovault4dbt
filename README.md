@@ -69,6 +69,7 @@ On the left side, you can select which object types you want to generate. These 
 - [Non_Historized_Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Non-Historized-Link)
 - [Dependent_Child_Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Link)
 - [Point_In_Time](https://github.com/ScalefreeCOM/datavault4dbt/wiki/PIT)
+- [Reference Data](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/Reference-Data)
 
 The right side lists all available source objects inside the connected metadata storage. You can select as many of them as you like.
 
