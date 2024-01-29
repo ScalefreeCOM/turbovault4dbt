@@ -110,7 +110,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[9]
+        todo = args.Tasks
     except IndexError:
         print("No tasks selected.")
         todo = ""     
@@ -120,8 +120,6 @@ def main():
 
     if args.SourceYML:
         sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
-
-
 
     try:
         for source in args.Sources[0]:
