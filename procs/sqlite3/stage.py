@@ -17,7 +17,7 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
 
   query = f"""
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM 
-              (SELECT COALESCE(h.Target_Role_Primary_Key_Physical_Name,h.Target_Primary_Key_Physical_Name) as Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name, FALSE as IS_SATELLITE
+              (SELECT h.Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name, FALSE as IS_SATELLITE
               FROM standard_hub h
               inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'

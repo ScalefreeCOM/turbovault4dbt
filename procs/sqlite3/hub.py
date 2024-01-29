@@ -34,7 +34,7 @@ def generate_source_models(cursor, hub_id):
 
     query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),Hashkey,Static_Part_of_Record_Source_Column
                 FROM 
-                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,COALESCE(h.Target_Role_Primary_Key_Physical_Name,Target_Primary_Key_Physical_Name) as Hashkey,
+                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name, h.Target_Primary_Key_Physical_Name as Hashkey,
                 src.Static_Part_of_Record_Source_Column 
                 FROM standard_hub h
                 inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
