@@ -44,13 +44,12 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
               (SELECT 
               l.Hub_primary_key_physical_name as Target_Primary_Key_Physical_Name,             
-              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name) as Source_Column_Physical_Name,
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
               FALSE as IS_SATELLITE
               FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               AND l.Target_Primary_Key_Physical_Name IS NOT NULL
-              and l.Prejoin_Table_Identifier is not NULL
               ORDER BY l.Target_Column_Sort_Order)
               group by Target_Primary_Key_Physical_Name
               
@@ -89,6 +88,21 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              ORDER BY l.Target_Column_Sort_Order)
+              group by Target_Primary_Key_Physical_Name
+
+              UNION ALL
+
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT 
+              l.Hub_primary_key_physical_name as Target_Primary_Key_Physical_Name,             
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
+              FALSE as IS_SATELLITE
+              FROM non_historized_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              and l.Hub_Identifier is not NULL
               ORDER BY l.Target_Column_Sort_Order)
               group by Target_Primary_Key_Physical_Name
               """
