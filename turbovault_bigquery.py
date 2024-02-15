@@ -12,6 +12,7 @@ from procs.sqlite3 import nh_link
 from procs.sqlite3 import sources
 from procs.sqlite3 import properties
 from procs.sqlite3 import generate_erd
+from procs.sqlite3 import ref
 
 from google.cloud import bigquery
 from google.oauth2 import service_account
@@ -52,6 +53,15 @@ def connect_bigquery(credential_path,metadata_dataset,project_id):
     
     sql_non_historized_link_entities = f"SELECT * FROM {metadata_dataset}.non_historized_link"
     df_non_historized_link_entities = bigquery_client.query(sql_non_historized_link_entities).to_dataframe()  
+
+    sql_ref_table_entities = f"SELECT * FROM {metadata_dataset}.ref_table"
+    df_ref_table_entities = bigquery_client.query(sql_ref_table_entities).to_dataframe() 
+
+    sql_ref_hub_entities = f"SELECT * FROM {metadata_dataset}.ref_hub"
+    df_ref_hub_entities = bigquery_client.query(sql_ref_hub_entities).to_dataframe() 
+
+    sql_ref_sat_entities = f"SELECT * FROM {metadata_dataset}.ref_sat"
+    df_ref_sat_entities = bigquery_client.query(sql_ref_sat_entities).to_dataframe() 
     
     sql_multiactiv_satellite_entities = f"SELECT * FROM {metadata_dataset}.multiactive_satellite"
     df_multiactiv_satellite_entities = bigquery_client.query(sql_multiactiv_satellite_entities).to_dataframe()
@@ -64,7 +74,10 @@ def connect_bigquery(credential_path,metadata_dataset,project_id):
             "pit": df_pit_entities,
             "non_historized_satellite": df_non_historized_satellite_entities,
             "non_historized_link": df_non_historized_link_entities,
-            "multiactive_satellite": df_multiactiv_satellite_entities}
+            "multiactive_satellite": df_multiactiv_satellite_entities,
+            "ref_table": df_ref_table_entities,
+            "ref_hub": df_ref_hub_entities,
+            "ref_sat": df_ref_sat_entities}
 
 
     db = sqlite3.connect(':memory:')
@@ -107,8 +120,8 @@ def main():
 
     parser = GooeyParser(description='Config')
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
-                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],
-                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
+                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],nargs='*',gooey_options={'height': 300})
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
@@ -133,6 +146,7 @@ def main():
 
     try:
         for source in args.Sources[0]:
+            source = source.replace('_','_.._')
             if args.Properties:
                 properties.gen_properties(cursor,source,generated_timestamp,model_path)
             if 'Stage' in todo:
@@ -161,6 +175,9 @@ def main():
 
             if 'Non Historized Link' in todo:
                 nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Reference Table' in todo:
+                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
 
     except IndexError as e:
         print("No source selected.")

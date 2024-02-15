@@ -13,7 +13,7 @@ def get_groupname(cursor,object_id):
 
 def get_object_list(cursor,source):
     
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
     query = f"""SELECT DISTINCT h.Hub_Identifier 
                 from standard_hub h 
                 inner join source_data src on src.Source_Table_Identifier = h.Source_Table_Identifier
@@ -36,7 +36,7 @@ def get_object_list(cursor,source):
 
 def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,model_path):
 
-    source_name, source_object = source.split("_")
+    source_name, source_object = source.split("_.._")
 
     object_list = get_object_list(cursor,source)
 
