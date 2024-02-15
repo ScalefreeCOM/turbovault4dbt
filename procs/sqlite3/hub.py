@@ -79,7 +79,23 @@ def generate_hashkey(cursor, hub_id):
         hashkey_name = hashkey_row[0] 
 
     return hashkey_name
-            
+
+def generate_primarykey_constraint(cursor, hub_id):
+
+    query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name 
+                FROM standard_hub
+                WHERE hub_identifier = '{hub_id}'
+                      AND Is_Primary_Source = 1 """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    for pk in results: #Usually a hub only has one hashkey column, so results should only return one row
+        primarykey_constraint = pk[0]
+        if primarykey_constraint == None:
+            primarykey_constraint = ""
+
+    return primarykey_constraint
 
 def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path):
 
@@ -100,11 +116,12 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
         source_models = generate_source_models(cursor, hub_id)
         hashkey = generate_hashkey(cursor, hub_id)
+        primarykey_constraint = generate_primarykey_constraint(cursor, hub_id)
     
         with open(os.path.join(".","templates","hub.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@Hashkey', hashkey).replace('@@BusinessKeys', bk_string)
+        command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@Hashkey', hashkey).replace('@@BusinessKeys', bk_string).replace('@@Target_Primary_Key_Constraint_Name', primarykey_constraint)
            
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         filename = os.path.join(model_path,  f"{hub_name}.sql")
@@ -120,4 +137,4 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
-            print(f"Created Hub Model {hub_name}")  
+            print(f"Created Hub Model {hub_name}")
