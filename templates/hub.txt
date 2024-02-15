@@ -1,5 +1,11 @@
-{{ config(schema='@@Schema',
-    materialized='incremental') }}
+
+{{
+    config({
+	  "post-hook": [
+	    "{{ datavault4dbt.primary_key(name='@@Target_Primary_Key_Constraint_Name', columns=['@@Hashkey']) }}"
+	  ]
+    })
+}}
 
 {%- set yaml_metadata -%}
 source_models: @@SourceModels

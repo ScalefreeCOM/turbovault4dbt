@@ -1,5 +1,4 @@
-{{ config(schema='@@Schema',
-           materialized='incremental') }} 
+
 
 {%- set yaml_metadata -%}
 source_model: "stg_@@SourceModel" 

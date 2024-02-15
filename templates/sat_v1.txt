@@ -1,5 +1,11 @@
-{{ config(schema='@@Schema',
-           materialized='view') }} 
+
+{{
+    config({
+	  "post-hook": [
+	    "{{ datavault4dbt.primary_key(name='@@Target_Primary_Key_Constraint_Name', columns=['@@Hashkey'], tabletype='satellite') }}"
+	  ]
+    })
+}}
 
 {%- set yaml_metadata -%}
 sat_v0: '@@SatName'

@@ -1,7 +1,7 @@
-{{ config(materialized='incremental') }}
+
 
 {%- set yaml_metadata -%}
-start_date: '2015-01-01'
+start_date: '2023-01-01'
 daily_snapshot_time: '07:30:00'
 {%- endset -%}    
 

@@ -1,5 +1,4 @@
-{{ config(materialized='incremental',
-        post_hook="{{ datavault4dbt.clean_up_pit('control_snap_v1') }}") }}
+{{ config(post_hook="{{ datavault4dbt.clean_up_pit('control_snap_v1') }}") }}
 
 {%- set yaml_metadata -%}
 pit_type: 'Regular PIT'
