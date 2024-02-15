@@ -34,6 +34,22 @@ def generate_satellite_list(cursor, source):
 
     return results
         
+def generate_primarykey_constraint(cursor, object_id):
+
+    query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name 
+                FROM standard_satellite
+                WHERE satellite_identifier = '{object_id}'
+                      AND Target_Column_Sort_Order = 1 """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    for pk in results: #Usually a hub only has one hashkey column, so results should only return one row
+        primarykey_constraint = pk[0]
+        if primarykey_constraint == None:
+            primarykey_constraint = ""
+
+    return primarykey_constraint
 
 def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming):
     
@@ -42,6 +58,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
     source_name, source_object = source.split("_")
 
     for satellite in satellite_list:
+        satellite_id = satellite[0]
         satellite_name = satellite[1]
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
@@ -53,13 +70,13 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
         payload = gen_payload(payload_list)
-        
+        primarykey_constraint = generate_primarykey_constraint(cursor, satellite_id)
+
         #Satellite_v0
         with open(os.path.join(".","templates","sat_v0.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
-            
+        command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@Target_Primary_Key_Constraint_Name', primarykey_constraint+"0")
   
         satellite_model_name_splitted_list = satellite_name.split('_')
         satellite_model_name_splitted_list[-2] += '0'
@@ -84,7 +101,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
         with open(os.path.join(".","templates","sat_v1.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
+        command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@Target_Primary_Key_Constraint_Name', primarykey_constraint)
             
   
 
