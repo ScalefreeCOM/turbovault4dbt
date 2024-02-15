@@ -78,7 +78,23 @@ def generate_link_hashkey(cursor, link_id):
         link_hashkey_name = link_hashkey_row[0] 
 
     return link_hashkey_name
-            
+
+def generate_primarykey_constraint(cursor, link_id):
+
+    query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name 
+                FROM standard_link
+                WHERE link_identifier = '{link_id}'
+                      AND Target_Column_Sort_Order = 1 """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    for pk in results: #Usually a link only has one hashkey column, so results should only return one row
+        primarykey_constraint = pk[0]
+        if primarykey_constraint == None:
+            primarykey_constraint = ""
+
+    return primarykey_constraint
 
 def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model_path):
 
@@ -96,6 +112,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
 
     source_models = generate_source_models(cursor, link_id)
     link_hashkey = generate_link_hashkey(cursor, link_id)
+    primarykey_constraint = generate_primarykey_constraint(cursor, link_id)
 
     source_name, source_object = source.split("_")
     model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
@@ -106,7 +123,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     with open(os.path.join(".","templates","link.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
-    command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string)
+    command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@Target_Primary_Key_Constraint_Name', primarykey_constraint)
     
 
     filename = os.path.join(model_path , f"{link_name}.sql")
