@@ -50,7 +50,7 @@ def generate_nh_satellite(cursor,source, generated_timestamp, rdv_default_schema
         payload = gen_payload(payload_list)
         
         source_name, source_object = source.split("_.._")
-        group_name = get_groupname(cursor,nh_satellite[0])
+        group_name = 'RDV/' + get_groupname(cursor,nh_satellite[0])
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         
         with open(os.path.join(".","templates","nh_sat.txt"),"r") as f:

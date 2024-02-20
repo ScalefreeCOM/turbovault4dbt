@@ -208,7 +208,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   multiactive = gen_multiactive_columns(cursor,source)
   source_name, source_object = source.split("_.._")
   group_name = get_groupname(cursor,source_name,source_object)
-  model_path = model_path.replace("@@GroupName", 'stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
+  model_path = model_path.replace("@@GroupName", 'Stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
   query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column, Source_System  FROM source_data src
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
