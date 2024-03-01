@@ -1,80 +1,93 @@
 CREATE TABLE standard_hub 
 (
 "Hub_Identifier" STRING,
-"Target_Hub_Table_Physical_Name" STRING,	
-"Source_Table_Identifier" STRING,	
-"Source_Column_Physical_Name" STRING,	
-"Business_Key_Physical_Name" STRING,	
-"Target_Column_Sort_Order" STRING,	
+"Target_Hub_Table_Physical_Name" STRING,
+"Target_Table_Comment" STRING,
+"Source_Table_Identifier" STRING,
+"Source_Column_Physical_Name" STRING,
+"Business_Key_Physical_Name" STRING,
+"Target_Business_Key_Comment" STRING,
+"Target_Column_Sort_Order" STRING,
 "Target_Primary_Key_Physical_Name" STRING,
+"Target_Primary_Key_Constraint_Name" STRING,
 "Record_Tracking_Satellite" STRING,
 "Is_Primary_Source" STRING,
 "Group_Name" STRING
 );
 
-CREATE TABLE standard_link  
+CREATE TABLE standard_link
 (
 "Link_Identifier" STRING,
-"Target_Link_Table_Physical_Name" STRING,	
-"Source_Table_Identifier" STRING,	
+"Target_Link_Table_Physical_Name" STRING,
+"Target_Table_Comment" STRING,
+"Source_Table_Identifier" STRING,
 "Source_Column_Physical_Name"	 STRING,
-"Prejoin_Table_Identifier" STRING,	
-"Prejoin_Table_Column_Name" STRING,	
-"Prejoin_Extraction_Column_Name" STRING,	
-"Prejoin_Target_Column_Alias" STRING,	
+"Prejoin_Table_Identifier" STRING,
+"Prejoin_Table_Column_Name" STRING,
+"Prejoin_Extraction_Column_Name" STRING,
+"Prejoin_Target_Column_Alias" STRING,
 "Hub_identifier" STRING,
-"Hub_Primary_Key_Physical_Name" STRING,	
-"Target_Column_Physical_Name" STRING,	
-"Target_Column_Sort_Order" STRING,	
+"Hub_Primary_Key_Physical_Name" STRING,
+"Target_Column_Physical_Name" STRING,
+"Target_Foreign_Key_Constraint_Name" STRING,
+"Target_Column_Sort_Order" STRING,
 "Target_Primary_Key_Physical_Name" STRING,
+"Target_Primary_Key_Constraint_Name" STRING,
 "Record_Tracking_Satellite" STRING,
 "Group_Name" STRING
 );
 
-CREATE TABLE standard_satellite  
+CREATE TABLE standard_satellite
 (
 "Satellite_Identifier" STRING,
-"Target_Satellite_Table_Physical_Name" STRING,	
-"Source_Table_Identifier" STRING,	
-"Source_Column_Physical_Name" STRING,	
+"Target_Satellite_Table_Physical_Name" STRING,
+"Target_Table_Comment" STRING,
+"Source_Table_Identifier" STRING,
+"Source_Column_Physical_Name" STRING,
 "Parent_Identifier" STRING,
-"Parent_Primary_Key_Physical_Name" STRING,	
-"Target_Column_Physical_Name" STRING,	
+"Parent_Primary_Key_Physical_Name" STRING,
+"Target_Foreign_Key_Constraint_Name" STRING,
+"Target_Column_Physical_Name" STRING,
+"Target_Column_Comment" STRING,
 "Target_Column_Sort_Order" STRING,
+"Target_Primary_Key_Constraint_Name" STRING,
 "Group_Name" STRING
 );
 
-CREATE TABLE multiactive_satellite  
+CREATE TABLE multiactive_satellite
 (
 "MA_Satellite_Identifier" STRING,
-"Target_Satellite_Table_Physical_Name" STRING,	
-"Source_Table_Identifier" STRING,	
-"Source_Column_Physical_Name" STRING,	
+"Target_Satellite_Table_Physical_Name" STRING,
+"Target_Table_Comment" STRING,
+"Source_Table_Identifier" STRING,
+"Source_Column_Physical_Name" STRING,
 "Parent_Identifier" STRING,
-"Parent_Primary_Key_Physical_Name" STRING,	
+"Parent_Primary_Key_Physical_Name" STRING,
 "Multi_Active_Attributes" STRING,
-"Target_Column_Physical_Name" STRING,	
+"Target_Column_Physical_Name" STRING,
+"Target_Column_Comment" STRING,
 "Target_Column_Sort_Order" STRING,
 "Group_Name" STRING
 );
 
 
-CREATE TABLE non_historized_link  
+CREATE TABLE non_historized_link
 (
 "NH_Link_Identifier" STRING,
-"Target_Link_Table_Physical_Name" STRING,	
-"Source_Table_Identifier" STRING,	
+"Target_Link_Table_Physical_Name" STRING,
+"Source_Table_Identifier" STRING,
 "Source_Column_Physical_Name"	 STRING,
-"Prejoin_Table_Identifier" STRING,	
-"Prejoin_Table_Column_Name" STRING,	
-"Prejoin_Extraction_Column_Name" STRING,	
-"Prejoin_Target_Column_Alias" STRING,	
+"Prejoin_Table_Identifier" STRING,
+"Prejoin_Table_Column_Name" STRING,
+"Prejoin_Extraction_Column_Name" STRING,
+"Prejoin_Target_Column_Alias" STRING,
 "Hub_identifier" STRING,
-"Hub_Primary_Key_Physical_Name" STRING,	
-"Target_Column_Physical_Name" STRING,	
-"Target_Column_Sort_Order" STRING,	
+"Hub_Primary_Key_Physical_Name" STRING,
+"Target_Column_Physical_Name" STRING,
+"Target_Column_Sort_Order" STRING,
 "Target_Primary_Key_Physical_Name" STRING,
 "Record_Tracking_Satellite" STRING,
+"Target_Table_Comment" STRING,
 "Group_Name" STRING
 );
 

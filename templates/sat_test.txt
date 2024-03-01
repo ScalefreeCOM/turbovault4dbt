@@ -1,4 +1,5 @@
   - name: @@SatName
+    @@Target_Table_Comment
     tags: ['SATELLITE']
     tests:
     - dbt_utils.unique_combination_of_columns:
