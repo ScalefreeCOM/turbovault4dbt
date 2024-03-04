@@ -1,5 +1,11 @@
-{{ config(schema='@@Schema',
-           materialized='view') }} 
+
+{{
+    config({
+	  "post-hook": [
+	    @@PrimaryKeyConstraint
+	  ]
+    })
+}}
 
 {%- set yaml_metadata -%}
 sat_v0: '@@SatName'

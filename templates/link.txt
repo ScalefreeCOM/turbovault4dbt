@@ -1,5 +1,12 @@
-{{ config(schema='@@Schema',
-          materialized='incremental') }}
+
+{{
+    config({
+	  "post-hook": [
+	    @@PrimaryKeyConstraint
+	    @@ForeignKeyConstraints
+	  ]
+    })
+}}
 
 {%- set yaml_metadata -%}
 source_models: @@SourceModels

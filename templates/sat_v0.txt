@@ -1,6 +1,11 @@
-{{ config(schema='@@Schema',
-           materialized='incremental',
-           unique_key=['@@Hashkey', 'ldts']) }} 
+
+{{
+    config({
+	  "post-hook": [
+	    @@PrimaryKeyConstraint
+	  ]
+    })
+}}
 
 {%- set yaml_metadata -%}
 source_model: "@@SourceModel" 

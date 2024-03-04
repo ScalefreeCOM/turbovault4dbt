@@ -1,4 +1,4 @@
-{{ config(schema='@@Schema', materialized='view') }} 
+
 
 {%- set yaml_metadata -%}
 sat_v0: '@@SatName'
