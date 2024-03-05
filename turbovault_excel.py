@@ -1,6 +1,6 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref
+from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, meta
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -44,8 +44,14 @@ def main():
 
     parser = GooeyParser(description='Config')
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
-                        choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],
-                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],nargs='*',gooey_options={'height': 300})
+
+                        choices=['Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non Historized Link',
+                                 'Pit', 'Non Historized Satellite', 'Multi Active Satellite',
+                                 'Record Tracking Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
+                                 'Multi Active Satellite View', 'Record Tracking Satellite View','Select Statement', 'Delete Statement', 'Drop Statement', 'Create Statement'],
+                        default=['Stage','Standard Hub','Standard Satellite','Standard Link','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
+
+
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
@@ -55,7 +61,7 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[10]
+        todo = args.Tasks[6]
     except IndexError:
         print("No tasks selected.")
         todo = ""     
@@ -102,6 +108,38 @@ def main():
 
             if 'Reference Table' in todo:
                 ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+
+            if 'Stage View' in todo:
+                stage_view.generate_stage(cursor, source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
+
+            if 'Standard Hub View' in todo:
+                hub_view.generate_hub(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Standard Link View' in todo:
+                link_view.generate_link(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Standard Satellite View' in todo:
+                satellite_view.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+
+            if 'Multi Active Satellite View' in todo:
+                ma_satellite_view.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
+
+            if 'Record Tracking Satellite View' in todo:
+                rt_satellite_view.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
+
+            if 'Select Statement' in todo:
+                meta.select(model_path)
+
+            if 'Delete Statement' in todo:
+                meta.delete(model_path)
+
+            if 'Drop Statement' in todo:
+                meta.drop(model_path)
+
+            if 'Create Statement' in todo:
+                meta.create(model_path)
+
+
 
     except IndexError as e:
         print(e)

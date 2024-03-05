@@ -1,0 +1,2 @@
+
+{{ datavault4dbt.delete_tables() }}
