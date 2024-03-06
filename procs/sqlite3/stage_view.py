@@ -187,7 +187,7 @@ def gen_multiactive_columns(cursor,source):
     command = command + f"\tmain_hashkey_column:\n\t- {parent_hk}"
   return command
 
-def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path,hashdiff_naming):
+def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path,hashdiff_naming, stage_prefix):
 
   hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming)
   prejoins = gen_prejoin_columns(cursor, source)
@@ -216,7 +216,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   f.close()
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
-  filename = os.path.join(model_path , f"stg_{source_table_name.lower()}_vi.sql")
+  filename = os.path.join(model_path , f"{stage_prefix}{source_table_name.lower()}_VI.sql")
           
   path = os.path.join(model_path)
 
@@ -230,4 +230,4 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   with open(filename, 'w') as f:
     f.write(command.expandtabs(2))
 
-  print(f"Created stage model \'stg_{source_table_name.lower()}_vi.sql\'")
+  print(f"Created stage model \'{stage_prefix}{source_table_name.lower()}_VI.sql\'")

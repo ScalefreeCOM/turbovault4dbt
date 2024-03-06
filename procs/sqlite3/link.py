@@ -28,7 +28,7 @@ def generate_link_list(cursor, source):
     return results
 
 
-def generate_source_models(cursor, link_id):
+def generate_source_models(cursor, link_id, stage_prefix):
 
     command = ""
 
@@ -46,7 +46,7 @@ def generate_source_models(cursor, link_id):
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = '- name: stg_' + source_table_row[0].lower()
+        source_table_name = '- name: '+ stage_prefix + source_table_row[0].lower()
         fk_columns = source_table_row[1].split(',')
 
         if len(fk_columns) > 1: 
@@ -139,7 +139,7 @@ def generate_foreignkey_constraints(cursor, link_id):
         i = i+1
     return foreignkey_constraints
 
-def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model_path):
+def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix):
 
   link_list = generate_link_list(cursor=cursor, source=source)
 
@@ -153,7 +153,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     for fk in fk_list:
       fk_string += f"\n\t- '{fk}'"
 
-    source_models = generate_source_models(cursor, link_id)
+    source_models = generate_source_models(cursor, link_id, stage_prefix)
     link_hashkey = generate_link_hashkey(cursor, link_id)
     primarykey_constraint = generate_primarykey_constraint(cursor, link_id)
     foreignkey_constraints = generate_foreignkey_constraints(cursor, link_id)

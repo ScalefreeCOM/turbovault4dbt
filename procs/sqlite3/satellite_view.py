@@ -59,7 +59,7 @@ def generate_primarykey_constraint(cursor, object_id, version):
 
     return primarykey_constraint
 
-def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming):
+def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming, stage_prefix):
     
     satellite_list = generate_satellite_list(cursor=cursor, source=source)
 
@@ -71,7 +71,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
         payload_list = satellite[3].split(',')
-        source_model = 'stg_'+satellite[4].lower()
+        source_model = stage_prefix+satellite[4].lower()
         loaddate = satellite[5]
         group_name = get_groupname(cursor,satellite[0])
         model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
@@ -114,7 +114,7 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
             
   
 
-        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}_VI.sql")
+        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}_vi.sql")
                 
         path_v1 = os.path.join(model_path_v1)
 
@@ -127,4 +127,4 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
 
         with open(filename_v1, 'w') as f:
             f.write(command_v1.expandtabs(2))
-            print(f"Created Satellite Model {satellite_name}_VI")
+            print(f"Created Satellite Model {satellite_name}_vi")

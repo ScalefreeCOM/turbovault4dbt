@@ -57,7 +57,7 @@ def gen_payload(cursor,source_table_identifier):
 
     return src_payload,target_payload
 
-def generate_source_models(cursor, link_id):
+def generate_source_models(cursor, link_id, stage_prefix):
 
     command = ""
 
@@ -91,7 +91,7 @@ def generate_source_models(cursor, link_id):
         else:
             fk_col_output = "'" + fk_columns[0] + "'"
         
-        command += f"\n\tstg_{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
+        command += f"\n\t{stage_prefix}{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
         rsrc_static = source_table_row[3]
         if src_payload != "":
            command = command + src_payload
@@ -120,7 +120,7 @@ def generate_link_hashkey(cursor, link_id):
     return link_hashkey_name
             
 
-def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, model_path):
+def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix):
 
   link_list = generate_link_list(cursor=cursor, source=source)
 
@@ -134,7 +134,7 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
     for fk in fk_list:
       fk_string += f"\n\t- '{fk}'"
 
-    source_models,target_payload = generate_source_models(cursor, link_id)
+    source_models,target_payload = generate_source_models(cursor, link_id, stage_prefix)
     link_hashkey = generate_link_hashkey(cursor, link_id)
     source_name, source_object = source.split("_.._")
     group_name = get_groupname(cursor,link_id)

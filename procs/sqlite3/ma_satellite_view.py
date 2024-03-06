@@ -35,7 +35,7 @@ def generate_ma_satellite_list(cursor, source):
     return results
         
 
-def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming):
+def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming, stage_prefix):
     
     satellite_list = generate_ma_satellite_list(cursor=cursor, source=source)
 
@@ -46,7 +46,7 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
         payload_list = satellite[3].split(',')
-        source_model = satellite[4].lower()
+        source_model = stage_prefix + satellite[4].lower()
         loaddate = satellite[5]
         ma_attribute_list = satellite[6].split(';')
         group_name = get_groupname(cursor,satellite[0])

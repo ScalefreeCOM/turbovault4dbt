@@ -28,7 +28,7 @@ def generate_hub_list(cursor, source):
     return results
 
 
-def generate_source_models(cursor, hub_id):
+def generate_source_models(cursor, hub_id, stage_prefix):
 
     command = ""
 
@@ -48,7 +48,7 @@ def generate_source_models(cursor, hub_id):
     results = cursor.fetchall()
 
     for source_table_row in results:
-        source_table_name = '- name: stg_' + source_table_row[0].lower()
+        source_table_name = '- name: '+ stage_prefix + source_table_row[0].lower()
         bk_columns = source_table_row[1].split(',')
         hk_column = source_table_row[2]
         if len(bk_columns) > 1: 
@@ -106,7 +106,7 @@ def generate_primarykey_constraint(cursor, hub_id):
 
     return primarykey_constraint
 
-def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path):
+def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path, stage_prefix):
 
     hub_list = generate_hub_list(cursor=cursor, source=source)
 
@@ -123,7 +123,7 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
         for bk in bk_list:
             bk_string += f"\n\t- '{bk}'"
 
-        source_models = generate_source_models(cursor, hub_id)
+        source_models = generate_source_models(cursor, hub_id, stage_prefix)
         hashkey = generate_hashkey(cursor, hub_id)
         primarykey_constraint = generate_primarykey_constraint(cursor, hub_id)
     
