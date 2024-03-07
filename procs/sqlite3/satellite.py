@@ -52,8 +52,8 @@ def generate_primarykey_constraint(cursor, object_id, version):
         if primarykey_constraint == None:
             primarykey_constraint = ""
         else:
-            if version == 0:
-                primarykey_constraint += "0"
+            if version == 1:
+                primarykey_constraint += "1"
 
             primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='"+primarykey_constraint+"', columns=['"+primarykey_column+"'], tabletype='satellite') }}\""
 
