@@ -1,6 +1,6 @@
 import os
 
-from procs.sqlite3.hub import generate_source_models
+
 
 
 def get_groupname(cursor, object_id):
@@ -87,7 +87,7 @@ def generate_primarykey_constraint(cursor, lef_sat_name):
         if primarykey_constraint == None:
             primarykey_constraint = ""
         else:
-            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='" + primarykey_constraint + "', columns=['" + primarykey_column + "']) }}\""
+            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='" + primarykey_constraint + "', columns=['" + primarykey_column + "'], tabletype='satellite') }}\""
 
     return primarykey_constraint
 
