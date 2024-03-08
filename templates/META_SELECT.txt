@@ -1,2 +1,0 @@
-
-{{ datavault4dbt.select_objects() }}

@@ -1,2 +1,0 @@
-
-{{ datavault4dbt.drop_objects() }}

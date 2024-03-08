@@ -49,7 +49,7 @@ def main():
                         choices=['Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non Historized Link',
                                  'Pit', 'Non Historized Satellite', 'Multi Active Satellite',
                                  'Record Tracking Satellite', 'Link Effectivity Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
-                                 'Multi Active Satellite View', 'Record Tracking Satellite View','Select Statement', 'Delete Statement', 'Drop Statement', 'Create Statement'],
+                                 'Multi Active Satellite View', 'Record Tracking Satellite View'],
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
 
 
@@ -131,18 +131,6 @@ def main():
 
             if 'Record Tracking Satellite View' in todo:
                 rt_satellite_view.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
-
-            if 'Select Statement' in todo:
-                meta.select(model_path)
-
-            if 'Delete Statement' in todo:
-                meta.delete(model_path)
-
-            if 'Drop Statement' in todo:
-                meta.drop(model_path)
-
-            if 'Create Statement' in todo:
-                meta.create(model_path)
 
 
 

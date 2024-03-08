@@ -1,2 +1,0 @@
-
-{{ datavault4dbt.create_db_objects() }}
