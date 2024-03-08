@@ -1,6 +1,6 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, meta
+from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, meta, lef_satellite
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -48,7 +48,7 @@ def main():
 
                         choices=['Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non Historized Link',
                                  'Pit', 'Non Historized Satellite', 'Multi Active Satellite',
-                                 'Record Tracking Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
+                                 'Record Tracking Satellite', 'Link Effectivity Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
                                  'Multi Active Satellite View', 'Record Tracking Satellite View','Select Statement', 'Delete Statement', 'Drop Statement', 'Create Statement'],
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
 
@@ -89,7 +89,10 @@ def main():
             if 'Standard Link' in todo: 
                 link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
 
-            if 'Standard Satellite' in todo: 
+            if 'Link Effectivity Satellite' in todo:
+                lef_satellite.generate_lef_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
+
+            if 'Standard Satellite' in todo:
                 satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming, stage_prefix)
                 
             if 'Pit' in todo:

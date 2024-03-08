@@ -1,0 +1,23 @@
+
+{{
+    config({
+	  "post-hook": [
+	    @@PrimaryKeyConstraint
+	    @@ForeignKeyConstraints
+	  ]
+    })
+}}
+
+{%- set yaml_metadata -%}
+source_model: @@SourceModel
+link_hashkey: @@LinkHashkey
+driving_key: @@DrivingKey
+secondary_fks: @@SecondaryForeignKeys
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ datavault4dbt.eff_sat_link_v0(link_hashkey=metadata_dict.get("link_hashkey"),
+                                 driving_key=metadata_dict.get("driving_key"),
+                                 secondary_fks=metadata_dict.get("secondary_fks"),
+                                 source_model=metadata_dict.get("source_model")) }}
