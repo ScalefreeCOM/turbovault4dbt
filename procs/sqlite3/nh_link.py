@@ -99,6 +99,7 @@ def generate_source_models(cursor, link_id, stage_prefix):
 
         if rsrc_static != '':
             command += f"\n\t\trsrc_static: '{rsrc_static}'"
+        command = stage_prefix + source_table_name
 
 
     return command,target_payload
