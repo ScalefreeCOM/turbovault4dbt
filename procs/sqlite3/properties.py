@@ -103,6 +103,25 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         command_tmp = command_tmp.replace("@@LinkName",link_name).replace("@@LinkHK",link_hk).replace("@@HubRef",ref_hub_tmp)
         command = command + '\n' + command_tmp
 
+        link_col_query = f"""
+        SELECT DISTINCT Target_Column_Physical_Name, Target_Column_Comment 
+        FROM standard_link
+        WHERE Target_link_table_physical_name= '{link_name}'
+        UNION
+        SELECT DISTINCT Target_Column_Physical_Name, Target_Column_Comment 
+        FROM non_historized_link
+        WHERE Target_link_table_physical_name= '{link_name}'
+        """
+        cursor.execute(link_col_query)
+        results = cursor.fetchall()
+
+        for link_column in results:
+            column_name =  link_column[0]
+            column_comment = link_column[1]
+            command = command + '\n' + "      - name: "+column_name
+
+            if column_comment != None:
+                command = command + '\n' + "        description: " + column_comment
 
     #Generating Satellite Tests
     sat_query = f"""SELECT DISTINCT Target_Satellite_Table_Physical_Name
