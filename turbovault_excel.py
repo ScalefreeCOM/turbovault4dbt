@@ -1,6 +1,6 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, meta, lef_satellite
+from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, lef_satellite, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, lef_satellite_view, nh_link_view, meta
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -49,7 +49,7 @@ def main():
                         choices=['Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non Historized Link',
                                  'Pit', 'Non Historized Satellite', 'Multi Active Satellite',
                                  'Record Tracking Satellite', 'Link Effectivity Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
-                                 'Multi Active Satellite View', 'Record Tracking Satellite View'],
+                                 'Multi Active Satellite View', 'Record Tracking Satellite View', 'Link Effectivity Satellite View', 'Non Historized Link View'],
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
 
 
@@ -132,7 +132,11 @@ def main():
             if 'Record Tracking Satellite View' in todo:
                 rt_satellite_view.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
 
+            if 'Link Effectivity Satellite View' in todo:
+                lef_satellite_view.generate_lef_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
 
+            if 'Non Historized Link View' in todo:
+                nh_link_view.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)
 
     except IndexError as e:
         print(e)

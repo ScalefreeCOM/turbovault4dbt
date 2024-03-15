@@ -160,7 +160,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
 
 
     if primarykey_constraint != "" and foreignkey_constraints != "":
-        foreignkey_constraints = ", "+generate_foreignkey_constraints(cursor, link_id)
+        primarykey_constraint += ", "
 
 
     source_name, source_object = source.split("_.._")

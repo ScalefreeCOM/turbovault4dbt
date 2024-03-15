@@ -1,11 +1,6 @@
 
 {{
-    config({
-	  "post-hook": [
-	    @@PrimaryKeyConstraint
-	    @@ForeignKeyConstraints
-	  ]
-    })
+    config(materialized="view")
 }}
 
 {%- set yaml_metadata -%}

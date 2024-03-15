@@ -3,6 +3,7 @@
     config({
 	  "post-hook": [
 	    @@PrimaryKeyConstraint
+	    @@ForeignKeyConstraints
 	  ]
     })
 }}

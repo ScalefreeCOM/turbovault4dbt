@@ -173,7 +173,7 @@ def generate_foreignkey_constraints(cursor, link_id):
             if i != 0:
                 foreignkey_constraints += ","
 
-            foreignkey_constraints += f"\""+"{{ datavault4dbt.foreign_key(name=\'"+Target_Foreign_Key_Constraint_Name+"', pk_table_relation='"+Target_Hub_table_physical_name+"', pk_column_names=['"+Hub_primary_key_physical_name+"'], fk_table_relation='"+Target_link_table_physical_name+"', fk_column_names=['"+Target_column_physical_name+"']) }} \""
+            foreignkey_constraints += f"\n\t\t  \""+"{{ datavault4dbt.foreign_key(name=\'"+Target_Foreign_Key_Constraint_Name+"', pk_table_relation='"+Target_Hub_table_physical_name+"', pk_column_names=['"+Hub_primary_key_physical_name+"'], fk_table_relation='"+Target_link_table_physical_name+"', fk_column_names=['"+Target_column_physical_name+"']) }} \""
             #foreignkey_constraints = ""#no bug execution
             #fk_string += f"\n\t- '{fk}'"
         i = i+1
@@ -185,7 +185,7 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
 
   for link in link_list:
     
-    link_name = link[1]
+    link_name = link[1] + "_VI"
     link_id = link[0]
     fk_list = link[2].split(',')
 
@@ -209,7 +209,7 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
 
 
 
-    with open(os.path.join(".","templates","nh_link.txt"),"r") as f:
+    with open(os.path.join(".","templates","nh_link_view.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
     command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@Payload',target_payload).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)
