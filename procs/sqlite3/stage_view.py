@@ -214,7 +214,7 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
   with open(os.path.join(".","templates","stage_view.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
-  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
+  command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',source_schema_name).replace('@@MultiActive',multiactive)
 
   filename = os.path.join(model_path , f"{stage_prefix}{source_table_name.lower()}_VI.sql")
           
