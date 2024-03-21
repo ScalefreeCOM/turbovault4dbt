@@ -1,7 +1,6 @@
 
-{{
-    config(materialized="view")
-}}
+{{ config(materialized="view") }}
+{{ config(schema='@@SCHEMA') }}
 
 
 {%- set yaml_metadata -%}
