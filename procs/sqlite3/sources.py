@@ -1,6 +1,6 @@
 import os
 
-def gen_sources(cursor,source_list,generated_timestamp, model_path):
+def gen_sources(cursor,source_list,generated_timestamp, model_path, source_database):
     source_name_list = []
     source_object_list = []
     for source in source_list:
@@ -32,7 +32,7 @@ def gen_sources(cursor,source_list,generated_timestamp, model_path):
         if command == "":
             command = command + 'version: 2\nsources:\n'
         
-        command = command + f'\t- name: {source_system}\n\t  schema: {source_schema}\n\t  tables:\n'
+        command = command + f'\t- name: {source_system}\n\t  schema: {source_schema}\n\t  database: {source_database}\n\t  tables:\n'
         for table in source_tables:
             command = command + f'\t\t-  name: {table}\n'
     model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName","Sources").replace('@@timestamp',generated_timestamp)
