@@ -110,18 +110,17 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[9]
+        todo = args.Tasks
     except IndexError:
         print("No tasks selected.")
         todo = ""     
 
     rdv_default_schema = config.get('Google Sheets',"rdv_schema")
     stage_default_schema = config.get('Google Sheets',"stage_schema")
+    source_database = config.get('Google Sheets', "source_database")
 
     if args.SourceYML:
-        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
-
-
+        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path, source_database)
 
     try:
         for source in args.Sources[0]:

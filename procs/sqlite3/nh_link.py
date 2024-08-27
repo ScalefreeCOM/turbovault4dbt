@@ -137,7 +137,7 @@ def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, mo
     source_models,target_payload = generate_source_models(cursor, link_id)
     link_hashkey = generate_link_hashkey(cursor, link_id)
     source_name, source_object = source.split("_.._")
-    group_name = get_groupname(cursor,link_id)
+    group_name = 'RDV/' + get_groupname(cursor,link_id)
     model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
 

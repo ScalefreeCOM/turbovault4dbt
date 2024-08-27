@@ -73,7 +73,7 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         sat_ids = satellites.split(';')
         sat_names = get_sat_names(cursor = cursor,sat_ids = sat_ids)
 
-        group_name = get_groupname(cursor,pit[0])
+        group_name = 'BDV/' + get_groupname(cursor,pit[0])
         
         source_name, source_object = source.split("_.._")
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)

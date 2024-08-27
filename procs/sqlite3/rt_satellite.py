@@ -62,7 +62,7 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
         results = cursor.fetchall()
 
 
-        group_name = get_groupname(cursor,object[0])
+        group_name = 'RDV/' + get_groupname(cursor,object[0])
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
         for rt_sat in results:
