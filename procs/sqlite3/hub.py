@@ -62,7 +62,7 @@ def generate_source_models(cursor, hub_id):
 
         command += f"\n\t\thk_column: {hk_column}"
 
-        rsrc_static = source_table_row[2]
+        rsrc_static = source_table_row[3]
 
         if rsrc_static != '':
             command += f"\n\t\trsrc_static: '{rsrc_static}'"
