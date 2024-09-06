@@ -1,10 +1,16 @@
 import os
 
-def gen_sources(cursor,source_list,generated_timestamp, model_path):
+def gen_sources(data_structure):
+    cursor = data_structure['cursor']
+    source = data_structure['source']
+    generated_timestamp = data_structure['generated_timestamp']
+    source_list = data_structure['source_list']
+    model_path = data_structure['model_path']
+    source_name = data_structure['source_name']   
+    source_object = data_structure['source_object'] 
     source_name_list = []
     source_object_list = []
     for source in source_list:
-        #print(source)
         source_name,source_object = source.split('_')
         source_name_list.append(source_name)
         source_object_list.append(source_object)
@@ -27,7 +33,6 @@ def gen_sources(cursor,source_list,generated_timestamp, model_path):
     for source in results:
         source_system = source[0]
         source_schema = source[1]
-        #print(source[2])
         source_tables = source[2].split(',')
         if command == "":
             command = command + 'version: 2\nsources:\n'
@@ -49,5 +54,5 @@ def gen_sources(cursor,source_list,generated_timestamp, model_path):
 
     with open(filename, 'w') as f:
         f.write(command.expandtabs(2))
-
-    print(f"Created sources.yml")
+    if data_structure['console_outputs']:    
+        print(f"Created sources.yml")

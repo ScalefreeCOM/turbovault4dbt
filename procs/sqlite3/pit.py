@@ -15,8 +15,8 @@ def get_sat_names(cursor,sat_ids):
 
     return sat_names
 
-def get_pit_list(cursor, source):
-    source_name, source_object = source.split("_.._")
+def get_pit_list(cursor, source_name, source_object):
+
     query = f"""SELECT 
     p.Pit_Identifier
     ,p.Pit_Physical_Table_Name
@@ -51,8 +51,14 @@ def get_pit_list(cursor, source):
     results = cursor.fetchall() 
     return results
 
-def generate_pit(cursor, source, generated_timestamp, model_path):
-    pit_list = get_pit_list(cursor=cursor, source=source)
+def generate_pit(data_structure):
+    cursor = data_structure['cursor']
+    source = data_structure['source']
+    generated_timestamp = data_structure['generated_timestamp']
+    model_path = data_structure['model_path']   
+    source_name = data_structure['source_name'] 
+    source_object = data_structure['source_object'] 
+    pit_list = get_pit_list(cursor=cursor, source_name= source_name, source_object= source_object)
     
     sat_names = ''
     tracked_entity = ''
@@ -72,10 +78,7 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         dimension_key_name = pit[7]
         sat_ids = satellites.split(';')
         sat_names = get_sat_names(cursor = cursor,sat_ids = sat_ids)
-
         group_name = get_groupname(cursor,pit[0])
-        
-        source_name, source_object = source.split("_.._")
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_control = model_path.replace('@@GroupName','control').replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
     all_satellite_names = ''
@@ -83,8 +86,9 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
         all_satellite_names += f"\n\t- {sat}"
 
 
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+    with open(os.path.join(root,"templates","pit_v1.txt"),"r") as f:
 
-    with open(os.path.join(".","templates","pit_v1.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
     command = command_tmp.replace('@@TrackedEntity', tracked_entity).replace('@@PK', pk).replace('@@SnapshotModelName', snapshot_model_name).replace('@@SnapshotTriggerColumn', snapshot_trigger_column).replace('@@DimensionKey',dimension_key_name).replace('@@SatNames',all_satellite_names)
@@ -103,7 +107,8 @@ def generate_pit(cursor, source, generated_timestamp, model_path):
 
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
-        print(f"Created Pit Model {pit_name}")
+        if data_structure['console_outputs']:
+            print(f"Created Pit Model {pit_name}")
 
 
         #control_snap_v0

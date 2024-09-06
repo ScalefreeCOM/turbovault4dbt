@@ -13,9 +13,7 @@ def gen_payload(payload_list):
     
     return payload_string
 
-def generate_ma_satellite_list(cursor, source):
-
-    source_name, source_object = source.split("_.._")
+def generate_ma_satellite_list(cursor, source, source_name, source_object):
 
     query = f"""SELECT DISTINCT MA_Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
                 Source_Table_Physical_Name,Load_Date_Column,Multi_Active_Attributes
@@ -35,11 +33,16 @@ def generate_ma_satellite_list(cursor, source):
     return results
         
 
-def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming):
-    
-    satellite_list = generate_ma_satellite_list(cursor=cursor, source=source)
-
-    source_name, source_object = source.split("_.._")
+def generate_ma_satellite(data_structure):
+    cursor = data_structure['cursor']
+    source = data_structure['source']
+    generated_timestamp = data_structure['generated_timestamp']
+    rdv_default_schema = data_structure['rdv_default_schema']
+    model_path = data_structure['model_path']  
+    hashdiff_naming = data_structure['hashdiff_naming']        
+    source_name = data_structure['source_name'] 
+    source_object = data_structure['source_object'] 
+    satellite_list = generate_ma_satellite_list(cursor=cursor, source=source, source_name= source_name, source_object= source_object)
 
     for satellite in satellite_list:
         satellite_name = satellite[1]
@@ -58,7 +61,8 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         
         
         #Satellite_v0
-        with open(os.path.join(".","templates","ma_sat_v0.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","ma_sat_v0.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@MaAttribute', ma_attribute).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
@@ -81,10 +85,12 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
 
         with open(filename, 'w') as f:
             f.write(command_v0.expandtabs(2))
-            print(f"Created Multi Active Satellite Model {satellite_model_name_v0}")
+            if data_structure['console_outputs']:
+                print(f"Created Multi Active Satellite Model {satellite_model_name_v0}")
 
         #Satellite_v1
-        with open(os.path.join(".","templates","ma_sat_v1.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","ma_sat_v1.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@MaAttribute', ma_attribute).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
@@ -104,4 +110,5 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
 
         with open(filename_v1, 'w') as f:
             f.write(command_v1.expandtabs(2))
-            print(f"Created Multi Active Satellite Model {satellite_name}")
+            if data_structure['console_outputs']:
+                print(f"Created Multi Active Satellite Model {satellite_name}")

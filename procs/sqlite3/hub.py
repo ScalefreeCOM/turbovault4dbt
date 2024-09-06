@@ -4,10 +4,8 @@ def get_groupname(cursor,object_id):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def generate_hub_list(cursor, source):
-
-    source_name, source_object = source.split("_.._")
-
+def generate_hub_list(cursor, source, source_name, source_object):
+    
     query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(distinct Business_Key_Physical_Name)
                 from 
                 (SELECT h.Hub_Identifier,h.Target_Hub_table_physical_name,(Business_Key_Physical_Name),h.Group_Name    
@@ -85,11 +83,15 @@ def generate_hashkey(cursor, hub_id):
     return hashkey_name
             
 
-def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path):
-
-    hub_list = generate_hub_list(cursor=cursor, source=source)
-
-    source_name, source_object = source.split("_.._")
+def generate_hub(data_structure):
+    cursor = data_structure['cursor']
+    source = data_structure['source']
+    generated_timestamp = data_structure['generated_timestamp']
+    rdv_default_schema = data_structure['rdv_default_schema']
+    model_path = data_structure['model_path']
+    source_name = data_structure['source_name'] 
+    source_object = data_structure['source_object'] 
+    hub_list = generate_hub_list(cursor=cursor, source=source, source_name= source_name, source_object= source_object)
 
     for hub in hub_list:
 
@@ -105,7 +107,9 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
         source_models = generate_source_models(cursor, hub_id)
         hashkey = generate_hashkey(cursor, hub_id)
     
-        with open(os.path.join(".","templates","hub.txt"),"r") as f:
+        #with open(os.path.join(".","templates","hub.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","hub.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@Hashkey', hashkey).replace('@@BusinessKeys', bk_string)
@@ -113,15 +117,14 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         filename = os.path.join(model_path,  f"{hub_name}.sql")
                 
-        path = os.path.join(model_path)
-
         # Check whether the specified path exists or not
-        isExist = os.path.exists(path)
+        isExist = os.path.exists(model_path)
 
         if not isExist:   
         # Create a new directory because it does not exist 
-            os.makedirs(path)
+            os.makedirs(model_path)
 
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
-            print(f"Created Hub Model {hub_name}")  
+            if data_structure['console_outputs']:
+                print(f"Created Hub Model {hub_name}")  
