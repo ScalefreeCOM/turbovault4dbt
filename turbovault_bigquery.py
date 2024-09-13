@@ -152,9 +152,12 @@ def main():
             dataStructure['source_name']   = seperatedNameAsList[0]
             dataStructure['source_object'] = ''.join(seperatedNameAsList[1:])
             generate_selected_entities.generate_selected_entities(todo, dataStructure)
-            if args.Properties:
-                properties.gen_properties(dataStructure)
-                
+            try:
+                if args.Properties:
+                    properties.gen_properties(dataStructure)                 
+            except Exception as e:
+                print(e)
+                print("Failed to generate {0}.yml properties file.".format(dataStructure['source']))
     except IndexError as e:
         print("No source selected.")
     if args.DBDocs:

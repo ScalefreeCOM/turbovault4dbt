@@ -3,3 +3,4 @@
 *.sty
 /tvdb-venv/
 install_packages.bat
+config.ini
