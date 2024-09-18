@@ -1,19 +1,9 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage
-from procs.sqlite3 import satellite
-from procs.sqlite3 import hub
-from procs.sqlite3 import link
-from procs.sqlite3 import pit
-from procs.sqlite3 import nh_satellite
-from procs.sqlite3 import ma_satellite
-from procs.sqlite3 import rt_satellite
-from procs.sqlite3 import nh_link
 from procs.sqlite3 import sources
-from procs.sqlite3 import properties
 from procs.sqlite3 import generate_erd
-from procs.sqlite3 import ref
-
+from procs.sqlite3 import generate_selected_entities
+from procs.sqlite3 import properties
 from google.cloud import bigquery
 from google.oauth2 import service_account
 from logging import Logger
@@ -92,10 +82,12 @@ def connect_bigquery(credential_path,metadata_dataset,project_id):
         
 @Gooey(
     navigation='TABBED',
-    program_name='DBT Automation',
+    program_name='TurboVault4dbt',
     default_size=(800,800),
     advanced=True,
-    image_dir=image_path)
+    image_dir=image_path
+)
+
 def main():
 
     config = ConfigParser()
@@ -110,11 +102,10 @@ def main():
 
     cursor.execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
     results = cursor.fetchall()
-    available_sources = []
+    source_list = []
 
     for row in results:
-        available_sources.append(row[0])
-
+        source_list.append(row[0])
 
     generated_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -122,7 +113,7 @@ def main():
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
                         choices=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Non Historized Link','Pit','Non Historized Satellite','Multi Active Satellite','Record Tracking Satellite','Reference Table'],nargs='*',gooey_options={'height': 300})
-    parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
+    parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=source_list, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
     parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
     parser.add_argument("--Properties",default=False,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
@@ -131,57 +122,44 @@ def main():
     args = parser.parse_args()
 
     try:
-        todo = args.Tasks[9]
+        todo = args.Tasks[-1]
     except IndexError:
         print("No tasks selected.")
         todo = ""     
 
-    rdv_default_schema = config.get('BigQuery',"rdv_schema")
-    stage_default_schema = config.get('BigQuery',"stage_schema")
+
+    dataStructure ={
+        'console_outputs' : True,
+        'cursor': cursor,
+        'source': None,
+        'generated_timestamp': datetime.now().strftime("%Y%m%d%H%M%S"),
+        'rdv_default_schema': config.get('BigQuery',"rdv_schema"),
+        'model_path': config.get('BigQuery','model_path'),
+        'hashdiff_naming': config.get('BigQuery','hashdiff_naming'),
+        'stage_default_schema': config.get('BigQuery',"stage_schema"),  
+        'source_list': args.Sources[0]  ,
+        'generateSources': False,
+        'source_name' : None, # "Source" field splits into this field
+        'source_object' : None, # "Source" field splits into this field
+        }   
 
     if args.SourceYML:
-        sources.gen_sources(cursor,args.Sources[0],generated_timestamp, model_path)
-
-
-
+        sources.gen_sources(dataStructure)
     try:
-        for source in args.Sources[0]:
-            source = source.replace('_','_.._')
-            if args.Properties:
-                properties.gen_properties(cursor,source,generated_timestamp,model_path)
-            if 'Stage' in todo:
-                stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming)
-            
-            if 'Standard Hub' in todo: 
-                hub.generate_hub(cursor,source, generated_timestamp, rdv_default_schema, model_path)
-        
-            if 'Standard Link' in todo: 
-                link.generate_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
-
-            if 'Standard Satellite' in todo: 
-                satellite.generate_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
-                
-            if 'Pit' in todo:
-                pit.generate_pit(cursor,source, generated_timestamp, model_path)
-                
-            if 'Non Historized Satellite' in todo: 
-                nh_satellite.generate_nh_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
-                
-            if 'Multi Active Satellite' in todo: 
-                ma_satellite.generate_ma_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
-            
-            if 'Record Tracking Satellite' in todo: 
-                rt_satellite.generate_rt_satellite(cursor, source, generated_timestamp, rdv_default_schema, model_path)
-
-            if 'Non Historized Link' in todo:
-                nh_link.generate_nh_link(cursor,source, generated_timestamp, rdv_default_schema, model_path)
-
-            if 'Reference Table' in todo:
-                ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming)
-
+        for dataStructure['source'] in dataStructure['source_list']:
+            dataStructure['source'] = dataStructure['source'].replace('_','_.._')
+            seperatedNameAsList = dataStructure['source'].split('_.._')
+            dataStructure['source_name']   = seperatedNameAsList[0]
+            dataStructure['source_object'] = ''.join(seperatedNameAsList[1:])
+            generate_selected_entities.generate_selected_entities(todo, dataStructure)
+            try:
+                if args.Properties:
+                    properties.gen_properties(dataStructure)                 
+            except Exception as e:
+                print(e)
+                print("Failed to generate {0}.yml properties file.".format(dataStructure['source']))
     except IndexError as e:
         print("No source selected.")
-
     if args.DBDocs:
         generate_erd.generate_erd(cursor,args.Sources[0],generated_timestamp,model_path,hashdiff_naming)
 

@@ -1,2 +1,6 @@
 /procs/sqlite3/__pycache__/
-/config.ini
+*.pyc
+*.sty
+/tvdb-venv/
+install_packages.bat
+config.ini
