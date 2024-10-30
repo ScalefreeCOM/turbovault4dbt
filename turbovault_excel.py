@@ -1,6 +1,6 @@
 import os
 from configparser import ConfigParser
-from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, lef_satellite, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, lef_satellite_view, nh_link_view, meta
+from procs.sqlite3 import stage, satellite, hub, link, pit, nh_satellite, ma_satellite, rt_satellite, nh_link, sources, properties, generate_erd, ref, lef_satellite, stage_view, hub_view, link_view, satellite_view, rt_satellite_view, ma_satellite_view, rt_satellite_view, lef_satellite_view, nh_link_view, properties_view, meta
 from logging import Logger
 import pandas as pd
 import sqlite3
@@ -47,16 +47,18 @@ def main():
     parser.add_argument("--Tasks",help="Select the entities which You want to generate",action="append",widget='Listbox',
 
                         choices=['Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non Historized Link',
-                                 'Pit', 'Non Historized Satellite', 'Multi Active Satellite',
-                                 'Record Tracking Satellite', 'Link Effectivity Satellite', 'Reference Table', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View',
-                                 'Multi Active Satellite View', 'Record Tracking Satellite View', 'Link Effectivity Satellite View', 'Non Historized Link View'],
+                                 'Pit', 'Multi Active Satellite',
+                                 'Record Tracking Satellite', 'Link Effectivity Satellite', 'Stage View', 'Standard Hub View', 'Standard Satellite View', 'Standard Link View', 'Non Historized Link View',
+                                 'Multi Active Satellite View', 'Record Tracking Satellite View', 'Link Effectivity Satellite View'],
+                        #Removed: 'Reference Table','Non Historized Satellite',
                         default=['Stage','Standard Hub','Standard Satellite','Standard Link','Multi Active Satellite','Record Tracking Satellite'],nargs='*',gooey_options={'height': 300})
 
 
     parser.add_argument("--Sources",action="append",nargs="+", widget='Listbox', choices=available_sources, gooey_options={'height': 300},
                        help="Select the sources which You want to process", default=[])
-    parser.add_argument("--SourceYML",default=False,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
-    parser.add_argument("--Properties",default=False,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
+    parser.add_argument("--SourceYML",default=True,action="store_true",  help="Do You want to generate the sources.yml file?") #Create external Table (Y/N)
+    parser.add_argument("--Properties",default=True,action="store_true",  help="Do You want to generate the properties.yml files?") #Create external Table (Y/N)
+    parser.add_argument("--PropertiesView", default=False, action="store_true",  help="Do You want to generate the properties_view.yml files?")  # Create external Table (Y/N)
     parser.add_argument("--DBDocs",help="Please make sure to have DBDocs installed and that You are logged in.",default=False,action="store_true") #Create ER-Diagram (Y/N)
 
     args = parser.parse_args()
@@ -80,8 +82,10 @@ def main():
             source = source.replace('_','_.._')
             if args.Properties:
                 properties.gen_properties(cursor,source,generated_timestamp,model_path)
+            if args.PropertiesView:
+                properties_view.gen_properties(cursor, source, generated_timestamp, model_path)
             if 'Stage' in todo:
-                stage.generate_stage(cursor,source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming, stage_prefix)
+                stage.generate_stage(cursor,source, generated_timestamp, rdv_default_schema, stage_default_schema, model_path, hashdiff_naming, stage_prefix)
             
             if 'Standard Hub' in todo: 
                 hub.generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_path, stage_prefix)
@@ -115,7 +119,7 @@ def main():
                 ref.generate_ref(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming, stage_prefix)
 
             if 'Stage View' in todo:
-                stage_view.generate_stage(cursor, source, generated_timestamp, stage_default_schema, model_path, hashdiff_naming, stage_prefix)
+                stage_view.generate_stage(cursor, source, generated_timestamp, rdv_default_schema, stage_default_schema, model_path, hashdiff_naming, stage_prefix)
 
             if 'Standard Hub View' in todo:
                 hub_view.generate_hub(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix)

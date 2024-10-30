@@ -36,6 +36,7 @@ def generate_satellite_list(cursor, source):
         
 def generate_primarykey_constraint(cursor, object_id, version):
 
+    global primarykey_constraint
     query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name, Parent_Primary_Key_Physical_Name
                 FROM standard_satellite
                 WHERE satellite_identifier = '{object_id}'
@@ -45,6 +46,7 @@ def generate_primarykey_constraint(cursor, object_id, version):
     results = cursor.fetchall()
 
     for pk in results: #Usually a hub only has one hashkey column, so results should only return one row
+
 
         primarykey_constraint = pk[0]
         primarykey_column = pk [1]

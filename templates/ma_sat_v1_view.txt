@@ -9,7 +9,6 @@ hashkey: '@@Hashkey'
 hashdiff: '@@Hashdiff' 
 ma_attribute: 
 @@MaAttribute
-ledts_alias: 'valid_to'
 add_is_current_flag: true
 {%- endset -%}    
 

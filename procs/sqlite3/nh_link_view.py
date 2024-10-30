@@ -11,9 +11,9 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_.._")
 
-    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name))
+    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name))
                 FROM
-                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Hub_primary_key_physical_name,Source_column_physical_name,Hub_primary_key_physical_name
+                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name
                 from non_historized_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
@@ -173,7 +173,7 @@ def generate_foreignkey_constraints(cursor, link_id):
             if i != 0:
                 foreignkey_constraints += ","
 
-            foreignkey_constraints += f"\n\t\t  \""+"{{ datavault4dbt.foreign_key(name=\'"+Target_Foreign_Key_Constraint_Name+"', pk_table_relation='"+Target_Hub_table_physical_name+"', pk_column_names=['"+Hub_primary_key_physical_name+"'], fk_table_relation='"+Target_link_table_physical_name+"', fk_column_names=['"+Target_column_physical_name+"']) }} \""
+            foreignkey_constraints += f"\""+"{{ datavault4dbt.foreign_key(name=\'"+Target_Foreign_Key_Constraint_Name+"', pk_table_relation='"+Target_Hub_table_physical_name+"', pk_column_names=['"+Hub_primary_key_physical_name+"'], fk_table_relation='"+Target_link_table_physical_name+"', fk_column_names=['"+Target_column_physical_name+"']) }} \""
             #foreignkey_constraints = ""#no bug execution
             #fk_string += f"\n\t- '{fk}'"
         i = i+1

@@ -1,12 +1,12 @@
 
-{{
-    config(materialized="view")
-    config(schema='@@SCHEMA')
-}}
+{{ config(materialized="view") }}
+{{ config(schema='@@SCHEMA') }}
+{{ config(post_hook='GRANT SELECT ON {{ this }} TO @@rdv_schema WITH GRANT OPTION') }}
 
 {%- set yaml_metadata -%}
 source_model: 
   '@@SourceName': '@@SourceTable'
+@@derived_columns
 hashed_columns:
 @@HashedColumns
 @@PrejoinedColumns

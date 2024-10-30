@@ -32,9 +32,9 @@ def generate_source_models(cursor, hub_id, stage_prefix):
 
     command = ""
 
-    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),Hashkey,Static_Part_of_Record_Source_Column
+    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(DISTINCT Business_Key_Physical_Name),Hashkey,Static_Part_of_Record_Source_Column
                 FROM 
-                (SELECT src.Source_Table_Physical_Name,h.Source_Column_Physical_Name,COALESCE(h.Target_Primary_Key_Physical_Name,Target_Primary_Key_Physical_Name) as Hashkey,
+                (SELECT src.Source_Table_Physical_Name,h.Business_Key_Physical_Name,COALESCE(h.Target_Primary_Key_Physical_Name,Target_Primary_Key_Physical_Name) as Hashkey,
                 src.Static_Part_of_Record_Source_Column 
                 FROM standard_hub h
                 inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
@@ -62,7 +62,7 @@ def generate_source_models(cursor, hub_id, stage_prefix):
 
         command += f"\n\t\thk_column: {hk_column}"
 
-        rsrc_static = source_table_row[2]
+        rsrc_static = source_table_row[3]
 
         if rsrc_static != '':
             command += f"\n\t\trsrc_static: '{rsrc_static}'"

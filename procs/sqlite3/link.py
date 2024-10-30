@@ -48,6 +48,7 @@ def generate_source_models(cursor, link_id, stage_prefix):
     for source_table_row in results:
         source_table_name = '- name: '+ stage_prefix + source_table_row[0].lower()
         fk_columns = source_table_row[1].split(',')
+        fk_columns = list(set(fk_columns))
 
         if len(fk_columns) > 1: 
             fk_col_output = ""
@@ -148,6 +149,8 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     link_name = link[1]
     link_id = link[0]
     fk_list = link[2].split(',')
+    fk_list = list(set(fk_list))
+
     group_name = get_groupname(cursor,link_id)
     fk_string = ""
     for fk in fk_list:

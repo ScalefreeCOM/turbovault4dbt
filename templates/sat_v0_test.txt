@@ -20,7 +20,3 @@
         description: "Load Date Timestamp. Part of primary key."
       - name: CDWH_RECORD_SOURCE
         description: "Record Source"
-      - name: VALID_TO_TS
-        description: "End of validity timestamp"
-      - name: CURRENT_FLAG
-        description: "Current record flag"

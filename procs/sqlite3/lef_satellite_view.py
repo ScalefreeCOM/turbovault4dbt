@@ -70,7 +70,7 @@ def generate_link_hashkey(cursor, link_id):
     return link_hashkey_name
 
 
-def generate_primarykey_constraint(cursor, lef_sat_name):
+def generate_primarykey_constraint(cursor, lef_sat_name, version):
     query = f"""SELECT DISTINCT f.Target_Primary_Key_Constraint_Name, l.Target_Primary_Key_Physical_Name 
                 FROM link_eff_satellite f INNER JOIN standard_link l ON f.link_identifier = l.link_identifier
                 WHERE f.Link_Effectivity_Satellite = '{lef_sat_name}'
@@ -79,7 +79,7 @@ def generate_primarykey_constraint(cursor, lef_sat_name):
     cursor.execute(query)
     results = cursor.fetchall()
 
-    for pk in results:  # Usually a link only has one hashkey column, so results should only return one row
+    for pk in results: #Usually a hub only has one hashkey column, so results should only return one row
 
         primarykey_constraint = pk[0]
         primarykey_column = pk[1]
@@ -87,12 +87,14 @@ def generate_primarykey_constraint(cursor, lef_sat_name):
         if primarykey_constraint == None:
             primarykey_constraint = ""
         else:
-            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='" + primarykey_constraint + "', columns=['" + primarykey_column + "'], tabletype='satellite') }}\""
+            if version == 1:
+                primarykey_constraint += "1"
+
+            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='"+primarykey_constraint+"', columns=['"+primarykey_column+"'], tabletype='satellite') }}\""
 
     return primarykey_constraint
 
-
-def generate_foreignkey_constraints(cursor, lef_sat_name):
+def generate_foreignkey_constraints(cursor, lef_sat_name, version):
     query = f"""SELECT DISTINCT f.Target_Foreign_Key_Constraint_Name,
                     l.Target_link_table_physical_name,
                     l.Target_Primary_Key_Physical_Name,
@@ -120,7 +122,15 @@ def generate_foreignkey_constraints(cursor, lef_sat_name):
             if i != 0:
                 foreignkey_constraints += ","
 
-            foreignkey_constraints += f"\n\t\t  \"" + "{{ datavault4dbt.foreign_key(name=\'" + Target_Foreign_Key_Constraint_Name + "', pk_table_relation='" + pk_table_relation + "', pk_column_names=['" + pk_column_names + "'], fk_table_relation='" + fk_table_relation + "', fk_column_names=['" + fk_column_names + "']) }} \""
+            if version == 1:
+                Target_Foreign_Key_Constraint_Name += '1'
+
+            if version == 0:
+                fk_table_relation_splitted_list = fk_table_relation.split('_')
+                fk_table_relation_splitted_list[-2] += '0'
+                fk_table_relation = '_'.join(fk_table_relation_splitted_list)
+
+            foreignkey_constraints += f"\"" + "{{ datavault4dbt.foreign_key(name=\'" + Target_Foreign_Key_Constraint_Name + "', pk_table_relation='" + pk_table_relation + "', pk_column_names=['" + pk_column_names + "'], fk_table_relation='" + fk_table_relation + "', fk_column_names=['" + fk_column_names + "']) }} \""
             # foreignkey_constraints = ""#no bug execution
             # fk_string += f"\n\t- '{fk}'"
         i = i + 1
@@ -147,11 +157,13 @@ def generate_lef_satellite(cursor, source, generated_timestamp, rdv_default_sche
 
         #source_models = generate_source_models(cursor, link_id, stage_prefix)
         link_hashkey = generate_link_hashkey(cursor, link_id)
-        primarykey_constraint = generate_primarykey_constraint(cursor, lef_sat_name)
-        foreignkey_constraints = generate_foreignkey_constraints(cursor, lef_sat_name)
+
+        # Satellite_v0
+        primarykey_constraint = generate_primarykey_constraint(cursor, lef_sat_name,0)
+        foreignkey_constraints = generate_foreignkey_constraints(cursor, lef_sat_name, 0)
 
         if primarykey_constraint != "" and foreignkey_constraints != "":
-            foreignkey_constraints = ", " + generate_foreignkey_constraints(cursor, lef_sat_name)
+            primarykey_constraint += ", "
 
         source_name, source_object = source.split("_.._")
         model_path = model_path.replace('@@GroupName', group_name).replace('@@SourceSystem', source_name).replace('@@SourceModel', source_model).replace(
@@ -181,12 +193,21 @@ def generate_lef_satellite(cursor, source, generated_timestamp, rdv_default_sche
 
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
-            print(f"Created Link Model {lef_sat_name}_VI")
+            print(f"Created Link Model {lef_sat_name_v0}")
+
+        #Satellite_v1
+        primarykey_constraint = generate_primarykey_constraint(cursor, lef_sat_name, 1)
+        foreignkey_constraints = generate_foreignkey_constraints(cursor, lef_sat_name, 1)
+
+        if primarykey_constraint != "" and foreignkey_constraints != "":
+            foreignkey_constraints = ", " + foreignkey_constraints
+
 
         with open(os.path.join(".", "templates", "eff_sat_v1_view.txt"), "r") as f:
             command_tmp = f.read()
         f.close()
-        command = command_tmp.replace('@@SatName', lef_sat_name).replace('@@LinkHashkey', link_hashkey)
+        command = command_tmp.replace('@@SatName', lef_sat_name_v0).replace('@@LinkHashkey', link_hashkey).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace(
+            '@@ForeignKeyConstraints', foreignkey_constraints)
 
         filename = os.path.join(model_path, f"{lef_sat_name}_VI.sql")
 

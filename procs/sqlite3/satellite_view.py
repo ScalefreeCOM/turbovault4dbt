@@ -36,6 +36,7 @@ def generate_satellite_list(cursor, source):
         
 def generate_primarykey_constraint(cursor, object_id, version):
 
+    global primarykey_constraint
     query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name, Parent_Primary_Key_Physical_Name
                 FROM standard_satellite
                 WHERE satellite_identifier = '{object_id}'
@@ -45,6 +46,7 @@ def generate_primarykey_constraint(cursor, object_id, version):
     results = cursor.fetchall()
 
     for pk in results: #Usually a hub only has one hashkey column, so results should only return one row
+
 
         primarykey_constraint = pk[0]
         primarykey_column = pk [1]
@@ -58,6 +60,62 @@ def generate_primarykey_constraint(cursor, object_id, version):
             primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='"+primarykey_constraint+"', columns=['"+primarykey_column+"'], tabletype='satellite') }}\""
 
     return primarykey_constraint
+
+def generate_foreignkey_constraints(cursor, object_id, version):
+
+    query = f"""SELECT DISTINCT s.Target_Foreign_Key_Constraint_Name,
+                    l.Target_link_table_physical_name,
+                    l.Target_Primary_Key_Physical_Name,
+                    s.Target_Satellite_Table_Physical_Name,
+                    s.Target_Column_Physical_Name
+                    FROM standard_satellite s INNER JOIN standard_link l ON s.Parent_Identifier = l.Link_Identifier  
+                    WHERE s.Satellite_Identifier = '{object_id}'
+                    AND s.Target_Foreign_Key_Constraint_Name IS NOT NULL
+                    AND s.Target_Column_Sort_Order = 1
+                UNION
+                SELECT DISTINCT s.Target_Foreign_Key_Constraint_Name,
+                    h.Target_Hub_table_physical_name,
+                    h.Target_Primary_Key_Physical_Name,
+                    s.Target_Satellite_Table_Physical_Name,
+                    s.Target_Column_Physical_Name
+                    FROM standard_satellite s INNER JOIN standard_hub h ON s.Parent_Identifier = h.Hub_Identifier  
+                    WHERE s.Satellite_Identifier = '{object_id}'
+                    AND s.Target_Foreign_Key_Constraint_Name IS NOT NULL
+                    AND s.Target_Column_Sort_Order = 1
+
+"""
+
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+    i = 0
+    foreignkey_constraints = ""
+
+
+
+    for fk in results:
+
+        if fk[0] == None:
+            foreignkey_constraints = ""
+        else:
+            Target_Foreign_Key_Constraint_Name = fk[0]
+            pk_table_relation = fk[1]
+            pk_column_names = fk[2]
+            fk_table_relation = fk[3]
+            fk_column_names = fk[2]
+
+            if version == 1:
+                Target_Foreign_Key_Constraint_Name += '1'
+
+            if version == 0:
+                fk_table_relation_splitted_list = fk_table_relation.split('_')
+                fk_table_relation_splitted_list[-2] += '0'
+                fk_table_relation = '_'.join(fk_table_relation_splitted_list)
+
+            foreignkey_constraints += f"\"" + "{{ datavault4dbt.foreign_key(name=\'" + Target_Foreign_Key_Constraint_Name + "', pk_table_relation='" + pk_table_relation + "', pk_column_names=['" + pk_column_names + "'], fk_table_relation='" + fk_table_relation + "', fk_column_names=['" + fk_column_names + "']) }} \""
+
+        i = i + 1
+    return foreignkey_constraints
 
 def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, model_path, hashdiff_naming, stage_prefix):
     
@@ -79,12 +137,16 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
 
         payload = gen_payload(payload_list)
         primarykey_constraint = generate_primarykey_constraint(cursor, satellite_id, 0)
+        foreignkey_constraints = generate_foreignkey_constraints(cursor, satellite_id, 0)
+
+        if primarykey_constraint != "" and foreignkey_constraints != "":
+            primarykey_constraint += ", "
 
         #Satellite_v0
         with open(os.path.join(".","templates","sat_v0_view.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@PrimaryKeyConstraint', primarykey_constraint)
+        command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)
   
         satellite_model_name_splitted_list = satellite_name.split('_')
         satellite_model_name_splitted_list[-2] += '0'
@@ -110,11 +172,16 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
             command_tmp = f.read()
         f.close()
         primarykey_constraint = generate_primarykey_constraint(cursor, satellite_id, 1)
-        command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@PrimaryKeyConstraint', primarykey_constraint)
+        foreignkey_constraints = generate_foreignkey_constraints(cursor, satellite_id, 1)
+
+        if primarykey_constraint != "" and foreignkey_constraints != "":
+            primarykey_constraint += ", "
+
+        command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)
             
   
 
-        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}_vi.sql")
+        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}_VI.sql")
                 
         path_v1 = os.path.join(model_path_v1)
 
@@ -127,4 +194,4 @@ def generate_satellite(cursor,source, generated_timestamp, rdv_default_schema, m
 
         with open(filename_v1, 'w') as f:
             f.write(command_v1.expandtabs(2))
-            print(f"Created Satellite Model {satellite_name}_vi")
+            print(f"Created Satellite Model {satellite_name}_VI")

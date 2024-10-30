@@ -1,6 +1,6 @@
   - name: @@SatName
-    @@Target_Table_Comment
-    tags: ['SATELLITE']
+    description: "Link effectivity Satellite"
+    tags: ['LINK EFFECTIVITY SATELLITE']
     tests:
     - dbt_utils.unique_combination_of_columns:
         combination_of_columns: 
@@ -14,13 +14,9 @@
           - relationships:
               to: ref('@@ParentTable')
               field: @@ParentHK
-      - name: CDWH_DIFF_HASH
-        description: "Difference Hash"
       - name: CDWH_LOAD_TS
         description: "Load Date Timestamp. Part of primary key."
       - name: CDWH_RECORD_SOURCE
         description: "Record Source"
-      - name: VALID_TO_TS
-        description: "End of validity timestamp"
-      - name: CURRENT_FLAG
-        description: "Current record flag"
+      - name: IS_ACTIVE
+        description: "Activity flag"

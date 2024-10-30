@@ -35,7 +35,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","hub_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace("@@HubName",hub_name).replace("@@HubHK",hub_hk).replace("@@Target_Table_Comment",table_comment).replace("@@hash_key_comment",table_comment)
+        command_tmp = command_tmp.replace("@@HubName",hub_name+"_VI").replace("@@HubHK",hub_hk).replace("@@Target_Table_Comment",table_comment)
         command = command + '\n'+command_tmp
 
         bk_col_query = f"""
@@ -101,7 +101,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
                 hub_tmp = f.read()
             f.close()
             ref_hub_tmp = ref_hub_tmp + '\n' + hub_tmp.replace('@@HubName',hub_name).replace("@@HubHK",hub_hk)
-        command_tmp = command_tmp.replace("@@LinkName",link_name).replace("@@LinkHK",link_hk).replace("@@HubRef",ref_hub_tmp)
+        command_tmp = command_tmp.replace("@@LinkName",link_name+"_VI").replace("@@LinkHK",link_hk).replace("@@HubRef",ref_hub_tmp)
         command = command + '\n' + command_tmp
 
         link_col_query = f"""
@@ -163,7 +163,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","sat_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name).replace('@@Target_Table_Comment',table_comment)
+        command_tmp = command_tmp.replace('@@SatName',sat_name+"_VI").replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name).replace('@@Target_Table_Comment',table_comment)
         command = command + '\n' + command_tmp
 
         sat_col_query = f"""
@@ -224,7 +224,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","pit_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
+        command_tmp = command_tmp.replace('@@PitName',pit_name+"_VI").replace('@@HK',entity_hk).replace('@@Entity',entity_name)
         command = command + '\n' + command_tmp
 
     #Generating Satellite Version:0 Tests
@@ -272,7 +272,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","sat_v0_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@SatName',satellite_model_name_v0).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name).replace('@@Target_Table_Comment',table_comment)
+        command_tmp = command_tmp.replace('@@SatName',satellite_model_name_v0+"_VI").replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name).replace('@@Target_Table_Comment',table_comment)
         command = command + '\n' + command_tmp
 
         sat_col_query = f"""
@@ -323,7 +323,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".", "templates", "eff_sat_v0_test.txt"), "r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@ParentHK',
+        command_tmp = command_tmp.replace('@@SatName', satellite_model_name_v0+"_VI").replace('@@ParentHK',
                                                                                         parent_hk).replace(
             '@@ParentTable', parent_name)
         command = command + '\n' + command_tmp
@@ -369,7 +369,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".", "templates", "eff_sat_v1_test.txt"), "r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@SatName', sat_name).replace('@@ParentHK',parent_hk)
+        command_tmp = command_tmp.replace('@@SatName', sat_name+"_VI").replace('@@ParentHK',parent_hk)
         command = command + '\n' + command_tmp
 
     #Generating Stage Tests
@@ -377,7 +377,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     SELECT DISTINCT src.Source_Table_Physical_Name, 'pp_'||src.Source_Table_Physical_Name
     FROM source_data src 
     WHERE 1=1
-    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'  
+    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
     """
     cursor.execute(stage_query)
     results = cursor.fetchall()
@@ -392,7 +392,7 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","stage_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace('@@StageTableName',stage_name).replace('@@SrcTable',src_table_name)
+        command_tmp = command_tmp.replace('@@StageTableName',stage_name+"_vi").replace('@@SrcTable',src_table_name)
         command = command + '\n' + command_tmp
 
         stag_col_query = f"""SELECT s.Source_Column_Physical_Name, MIN(s.Target_Column_Comment)
@@ -474,13 +474,13 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         with open(os.path.join(".","templates","rts_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
-        command_tmp = command_tmp.replace("@@RTSName",rts_name).replace("@@HashKey",rts_hk)
+        command_tmp = command_tmp.replace("@@RTSName",rts_name+"_VI").replace("@@HashKey",rts_hk)
         command = command + '\n'+command_tmp
 
 
 
     model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName",group_name).replace('@@timestamp',generated_timestamp)
-    filename = os.path.join(model_path , f"{source_object.lower()}.yml")
+    filename = os.path.join(model_path , f"{source_object.lower()}_view.yml")
 
     path = os.path.join(model_path)
 
@@ -494,4 +494,4 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     with open(filename, 'w',encoding='utf8') as f:
         f.write(command.expandtabs(2))
 
-    print(f"Created {source_object.lower()}.yml")
+    print(f"Created {source_object.lower()}_view.yml")

@@ -90,7 +90,7 @@ def generate_primarykey_constraint(cursor, lef_sat_name, version):
             if version == 1:
                 primarykey_constraint += "1"
 
-            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='"+primarykey_constraint+"', columns=['"+primarykey_column+"'], tabletype='satellite') }}\""
+            primarykey_constraint = "\"{{ datavault4dbt.primary_key(name='"+primarykey_constraint+"', columns=['"+primarykey_column+"'], tabletype='effectivity_satellite') }}\""
 
     return primarykey_constraint
 

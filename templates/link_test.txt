@@ -3,7 +3,12 @@
     tags: ['LINK']
     columns:
       - name: @@LinkHK
+        description: "Primary Key and Hash Key"
         tests:
           - unique
           - not_null     
       @@HubRef
+      - name: CDWH_LOAD_TS
+        description: "Load Date Timestamp"
+      - name: CDWH_RECORD_SOURCE
+        description: "Record Source"

@@ -21,7 +21,8 @@ def generate_ma_satellite_list(cursor, source):
                 Source_Table_Physical_Name,Load_Date_Column,Multi_Active_Attributes
                 from 
                 (SELECT DISTINCT hs.MA_Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
-                src.Source_Table_Physical_Name,src.Load_Date_Column,hs.Multi_Active_Attributes FROM multiactive_satellite hs
+                src.Source_Table_Physical_Name,src.Load_Date_Column,hs.Multi_Active_Attributes 
+                FROM multiactive_satellite hs
                 inner join source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
@@ -45,10 +46,10 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         satellite_name = satellite[1]
         hashkey_column = satellite[2]
         hashdiff_column = hashdiff_naming.replace('@@SatName',satellite_name)
-        payload_list = satellite[3].split(',')
+        payload_list = satellite[6].split(';')
         source_model = stage_prefix + satellite[4].lower()
         loaddate = satellite[5]
-        ma_attribute_list = satellite[6].split(';')
+        ma_attribute_list = satellite[3].split(',')
         group_name = get_groupname(cursor,satellite[0])
         model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
