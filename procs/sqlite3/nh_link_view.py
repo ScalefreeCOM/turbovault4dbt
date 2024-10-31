@@ -3,7 +3,7 @@ import os
 from procs.sqlite3.hub import generate_source_models
 
 def get_groupname(cursor,object_id):
-    query = f"""SELECT DISTINCT GROUP_NAME from standard_link where Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    query = f"""SELECT DISTINCT GROUP_NAME from non_historized_link where NH_Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
     cursor.execute(query)
     return cursor.fetchone()[0]
 
@@ -11,15 +11,17 @@ def generate_link_list(cursor, source):
 
     source_name, source_object = source.split("_.._")
 
-    query = f"""SELECT Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name)) FROM
-                (SELECT l.Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name
-                from standard_link l
+    query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name))
+                FROM
+                (SELECT l.NH_Link_Identifier,Target_link_table_physical_name,Target_column_physical_name,Source_column_physical_name
+                from non_historized_link l
                 inner join source_data src on src.Source_table_identifier = l.Source_Table_Identifier
                 where 1=1
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}'
+                and l.Target_Primary_Key_Physical_Name <> ''
                 order by l.Target_Column_Sort_Order)
-                group by Link_Identifier,Target_link_table_physical_name
+                group by NH_Link_Identifier,Target_link_table_physical_name
                 """
 
     cursor.execute(query)
@@ -27,17 +29,47 @@ def generate_link_list(cursor, source):
 
     return results
 
+def gen_payload(cursor,source_table_identifier):
+    src_payload= ""
+    target_payload=""
+    query = f"""SELECT Source_table_identifier,GROUP_CONCAT(Source_column_physical_name),GROUP_CONCAT(Target_column_physical_name)
+    FROM non_historized_link l 
+    WHERE 1=1
+    AND l.Source_Table_Identifier = '{source_table_identifier}'
+    AND l.Target_Primary_Key_Physical_Name IS NULL
+    GROUP BY Source_table_identifier"""
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+
+    for row in results:
+       for column in row[1].split(','):
+        if src_payload == "":
+            src_payload = "\n\t\tpayload:\n"
+        src_payload = src_payload + f'\t\t\t- {column}\n'
+
+    for row in results:
+       for column in row[2].split(','):
+            if target_payload == "":
+                target_payload = "\npayload:\n"
+            target_payload = target_payload + f'\t\t- {column}\n'
+    
+
+    return src_payload,target_payload
 
 def generate_source_models(cursor, link_id, stage_prefix):
 
     command = ""
 
-    query = f"""SELECT Source_Table_Physical_Name,GROUP_CONCAT(COALESCE(Target_column_physical_name,Source_column_physical_name)),Static_Part_of_Record_Source_Column FROM
-                (SELECT src.Source_Table_Physical_Name,l.Target_column_physical_name,Source_column_physical_name,src.Static_Part_of_Record_Source_Column 
-                FROM standard_link l
+    query = f"""SELECT Source_Table_Physical_Name, Source_table_identifier,
+                GROUP_CONCAT(Target_column_physical_name)
+                ,Static_Part_of_Record_Source_Column FROM
+                (SELECT src.Source_Table_Physical_Name,src.Source_table_identifier,l.Target_column_physical_name,src.Static_Part_of_Record_Source_Column 
+                FROM non_historized_link l
                 inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
                 where 1=1
-                and Link_Identifier = '{link_id}'
+                and NH_Link_Identifier = '{link_id}'
+                and Target_Primary_Key_Physical_Name <> ""
                 ORDER BY Target_Column_Sort_Order)
                 group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
                 """
@@ -45,10 +77,12 @@ def generate_source_models(cursor, link_id, stage_prefix):
     cursor.execute(query)
     results = cursor.fetchall()
 
+
     for source_table_row in results:
-        source_table_name = '- name: '+ stage_prefix + source_table_row[0].lower()
-        fk_columns = source_table_row[1].split(',')
-        fk_columns = list(set(fk_columns))
+        source_table_identifier = source_table_row[1]
+        source_table_name = source_table_row[0].lower()
+        fk_columns = source_table_row[2].split(',')
+        src_payload,target_payload = gen_payload(cursor,source_table_identifier)
 
         if len(fk_columns) > 1: 
             fk_col_output = ""
@@ -57,24 +91,30 @@ def generate_source_models(cursor, link_id, stage_prefix):
         else:
             fk_col_output = "'" + fk_columns[0] + "'"
         
-        command += f"\n\t{source_table_name}\n\t\tfk_columns: {fk_col_output}"
-        rsrc_static = source_table_row[2]
+        command += f"\n\t{stage_prefix}{source_table_name}:\n\t\tfk_columns: {fk_col_output}"
+        rsrc_static = source_table_row[3]
+        if src_payload != "":
+           command = command + src_payload
+
 
         if rsrc_static != '':
             command += f"\n\t\trsrc_static: '{rsrc_static}'"
+        command = stage_prefix + source_table_name
 
-    return command
+
+    return command,target_payload
 
 
 def generate_link_hashkey(cursor, link_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Physical_Name 
-                FROM standard_link
-                WHERE link_identifier = '{link_id}'"""
+                FROM non_historized_link
+                WHERE NH_link_identifier = '{link_id}'
+                AND Target_Primary_Key_Physical_Name <> ''"""
 
     cursor.execute(query)
     results = cursor.fetchall()
-
+    link_hashkey_name=""
     for link_hashkey_row in results: #Usually a link only has one hashkey column, so results should only return one row
         link_hashkey_name = link_hashkey_row[0] 
 
@@ -83,8 +123,8 @@ def generate_link_hashkey(cursor, link_id):
 def generate_primarykey_constraint(cursor, link_id):
 
     query = f"""SELECT DISTINCT Target_Primary_Key_Constraint_Name, Target_Primary_Key_Physical_Name 
-                FROM standard_link
-                WHERE link_identifier = '{link_id}'
+                FROM non_historized_link
+                WHERE NH_Link_Identifier = '{link_id}'
                       AND Target_Column_Sort_Order = 1 """
 
     cursor.execute(query)
@@ -103,7 +143,6 @@ def generate_primarykey_constraint(cursor, link_id):
 
     return primarykey_constraint
 
-
 def generate_foreignkey_constraints(cursor, link_id):
 
     query = f"""SELECT DISTINCT l.Target_Foreign_Key_Constraint_Name, 
@@ -111,8 +150,8 @@ def generate_foreignkey_constraints(cursor, link_id):
                     l.Hub_primary_key_physical_name,
                     l.Target_link_table_physical_name,
                     l.Target_column_physical_name
-                    FROM standard_link l INNER JOIN standard_hub h ON l.Hub_identifier = h.Hub_identifier 
-                    WHERE l.link_identifier = '{link_id}'
+                    FROM non_historized_link l INNER JOIN standard_hub h ON l.Hub_identifier = h.Hub_identifier 
+                    WHERE l.NH_Link_Identifier = '{link_id}'
                     AND l.Target_Foreign_Key_Constraint_Name IS NOT NULL"""
 
     cursor.execute(query)
@@ -140,23 +179,21 @@ def generate_foreignkey_constraints(cursor, link_id):
         i = i+1
     return foreignkey_constraints
 
-def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix):
+def generate_nh_link(cursor, source, generated_timestamp, rdv_default_schema, model_path, stage_prefix):
 
   link_list = generate_link_list(cursor=cursor, source=source)
 
   for link in link_list:
     
-    link_name = link[1]
+    link_name = link[1] + "_VI"
     link_id = link[0]
     fk_list = link[2].split(',')
-    fk_list = list(set(fk_list))
 
-    group_name = get_groupname(cursor,link_id)
     fk_string = ""
     for fk in fk_list:
       fk_string += f"\n\t- '{fk}'"
 
-    source_models = generate_source_models(cursor, link_id, stage_prefix)
+    source_models,target_payload = generate_source_models(cursor, link_id, stage_prefix)
     link_hashkey = generate_link_hashkey(cursor, link_id)
     primarykey_constraint = generate_primarykey_constraint(cursor, link_id)
     foreignkey_constraints = generate_foreignkey_constraints(cursor, link_id)
@@ -165,18 +202,18 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
     if primarykey_constraint != "" and foreignkey_constraints != "":
         primarykey_constraint += ", "
 
-
     source_name, source_object = source.split("_.._")
+    group_name = get_groupname(cursor,link_id)
     model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 
 
 
 
-    with open(os.path.join(".","templates","link.txt"),"r") as f:
+    with open(os.path.join(".","templates","nh_link_view.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
-    command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)
-    
+    command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@Payload',target_payload).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)
+
 
     filename = os.path.join(model_path , f"{link_name}.sql")
             

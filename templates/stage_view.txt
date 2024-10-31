@@ -1,4 +1,5 @@
 
+{{ config(materialized="view") }}
 {{ config(schema='@@SCHEMA') }}
 {{ config(post_hook='GRANT SELECT ON {{ this }} TO @@rdv_schema WITH GRANT OPTION') }}
 
@@ -10,7 +11,7 @@ hashed_columns:
 @@HashedColumns
 @@PrejoinedColumns
 @@MultiActive
-rsrc: '@@RecordSource'
+rsrc: '@@RecordSource' 
 ldts: '@@LoadDate'
 include_source_columns: true
 

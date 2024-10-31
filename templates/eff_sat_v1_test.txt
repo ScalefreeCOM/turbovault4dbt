@@ -1,0 +1,19 @@
+  - name: @@SatName
+    description: "Link effectivity Satellite"
+    tags: ['LINK EFFECTIVITY SATELLITE']
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        combination_of_columns: 
+          - @@ParentHK
+          - ldts    
+    columns:
+      - name: @@ParentHK
+        description: "Hash Key. Part of primary key"
+      - name: CDWH_RECORD_SOURCE
+        description: "Record Source"
+      - name: EFFECTIVE_FROM
+        description: "Record Validity Timestamp From"
+      - name: EFFECTIVE_TO
+        description: "Record Validity Timestamp To"
+      - name: CURRENT_FLAG
+        description: "Current Record Flag"

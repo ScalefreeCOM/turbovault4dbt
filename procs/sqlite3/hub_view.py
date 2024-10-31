@@ -114,7 +114,7 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
 
     for hub in hub_list:
 
-        hub_name = hub[1]
+        hub_name = hub[1] + "_VI"
         hub_id = hub[0]
         bk_list = hub[2].split(',')
         group_name = get_groupname(cursor,hub_id)
@@ -127,7 +127,7 @@ def generate_hub(cursor,source, generated_timestamp,rdv_default_schema,model_pat
         hashkey = generate_hashkey(cursor, hub_id)
         primarykey_constraint = generate_primarykey_constraint(cursor, hub_id)
     
-        with open(os.path.join(".","templates","hub.txt"),"r") as f:
+        with open(os.path.join(".","templates","hub_view.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@Hashkey', hashkey).replace('@@BusinessKeys', bk_string).replace('@@PrimaryKeyConstraint', primarykey_constraint)

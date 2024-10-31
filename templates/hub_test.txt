@@ -3,6 +3,11 @@
     tags: ['HUB']
     columns:
       - name: @@HubHK
+        description: "Primary Key and Hash Key"
         tests:
           - unique
-          - not_null   
+          - not_null
+      - name: CDWH_LOAD_TS
+        description: "Load Date Timestamp"
+      - name: CDWH_RECORD_SOURCE
+        description: "Record Source"

@@ -1,5 +1,7 @@
 
-{{ config(post_hook="ALTER TABLE {{ this }} MODIFY PARTITION  BY RANGE (cdwh_load_ts) INTERVAL (NUMTOYMINTERVAL(1,'MONTH')) (PARTITION VALUES LESS THAN (TO_DATE('2023-01-01', 'YYYY-MM-DD', 'NLS_CALENDAR=GREGORIAN'))) ONLINE UPDATE INDEXES") }}
+{{
+    config(materialized="view")
+}}
 
 {%- set yaml_metadata -%}
 tracked_hashkey: @@Tracked_HK

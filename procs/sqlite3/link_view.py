@@ -146,7 +146,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
 
   for link in link_list:
     
-    link_name = link[1]
+    link_name = link[1] + "_VI"
     link_id = link[0]
     fk_list = link[2].split(',')
     fk_list = list(set(fk_list))
@@ -172,7 +172,7 @@ def generate_link(cursor, source, generated_timestamp, rdv_default_schema, model
 
 
 
-    with open(os.path.join(".","templates","link.txt"),"r") as f:
+    with open(os.path.join(".","templates","link_view.txt"),"r") as f:
         command_tmp = f.read()
     f.close()
     command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@SourceModels', source_models).replace('@@LinkHashkey', link_hashkey).replace('@@ForeignHashkeys', fk_string).replace('@@PrimaryKeyConstraint', primarykey_constraint).replace('@@ForeignKeyConstraints', foreignkey_constraints)

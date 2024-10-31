@@ -1,0 +1,18 @@
+
+{{
+    config(materialized="view")
+}}
+
+{%- set yaml_metadata -%}
+eff_sat_link_v0: @@SatName
+link_hashkey: @@LinkHashkey
+add_is_current_flag: true
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ datavault4dbt.eff_sat_link_v1(eff_sat_link_v0=metadata_dict.get("eff_sat_link_v0"),
+                                 link_hashkey=metadata_dict.get("link_hashkey"),
+                                 eff_from_alias=metadata_dict.get("eff_from_alias"),
+                                 eff_to_alias=metadata_dict.get("eff_to_alias"),
+                                 add_is_current_flag=metadata_dict.get("add_is_current_flag")) }}

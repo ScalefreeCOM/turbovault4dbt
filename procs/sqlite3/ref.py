@@ -1,9 +1,9 @@
 import os
 
-def generate_ref_sat(cursor,source):
+def generate_ref_sat(cursor,source, stage_prefix):
         source_name, source_object = source.split("_.._")
         query = f"""
-        SELECT DISTINCT 'stg_' || LOWER(src.Source_Object),rh.Source_Column_Physical_Name,rs.Target_Reference_table_physical_name,GROUP_CONCAT(rs.Source_Column_Physical_Name)
+        SELECT DISTINCT '{stage_prefix}' || LOWER(src.Source_Object),rh.Source_Column_Physical_Name,rs.Target_Reference_table_physical_name,GROUP_CONCAT(rs.Source_Column_Physical_Name)
         FROM ref_sat rs
         inner join ref_hub rh on rs.Parent_Table_Identifier = rh.Reference_Hub_Identifier and rs.Source_Table_Identifier = rh.Source_Table_Identifier
         inner join source_data src on rs.Source_Table_Identifier = src.Source_table_identifier
@@ -78,7 +78,7 @@ def generate_ref_list(cursor, source):
 
     return results
 
-def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming):
+def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming, stage_prefix):
     source_name, source_object = source.split("_.._")
     for ref in ref_list:
 
@@ -209,7 +209,7 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
 
         #Ref Satellites
 
-        ref_sat_list = generate_ref_sat(cursor,source)
+        ref_sat_list = generate_ref_sat(cursor,source, stage_prefix)
         command_tmp = ''
         #Satellite v0
         with open(os.path.join(".","templates","ref_sat_v0.txt"),"r") as f:
@@ -272,12 +272,12 @@ def generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,mod
                 print(f"Created Ref Sat Model {sat_name}")
 
 
-def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_path, hashdiff_naming):
+def generate_ref(cursor,source, generated_timestamp,rdv_default_schema,model_path, hashdiff_naming, stage_prefix):
     
     ref_list = generate_ref_list(cursor=cursor,source=source)
 
 
-    generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming)
+    generate_ref_table(cursor,source, generated_timestamp,rdv_default_schema,model_path,ref_list, hashdiff_naming, stage_prefix)
 
 
 

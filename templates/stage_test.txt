@@ -1,0 +1,8 @@
+  - name: @@StageTableName
+    description: "Stage table based on @@SrcTable"
+    tags: ['STAGE']
+    columns:
+      - name: CDWH_LOAD_TS
+        description: "Load Date Timestamp"
+      - name: CDWH_RECORD_SOURCE
+        description: "Record Source"

@@ -1,0 +1,12 @@
+  - name: @@RTSName
+    description: "Record tracking satellite"
+    tags: ['RECORD TRACKING SATELLITE']
+    columns:
+      - name: @@HashKey
+        description: "Tracked Hash Key"
+      - name: CDWH_LOAD_TS
+        description: "Load Date Timestamp"
+      - name: CDWH_RECORD_SOURCE
+        description: "Record Source"
+      - name: STAGE
+        description: "Stage table"

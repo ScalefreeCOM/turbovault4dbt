@@ -59,7 +59,7 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         
         
         #Satellite_v0
-        with open(os.path.join(".","templates","ma_sat_v0.txt"),"r") as f:
+        with open(os.path.join(".","templates","ma_sat_v0_view.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_v0 = command_tmp.replace('@@SourceModel', source_model).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@MaAttribute', ma_attribute).replace('@@Payload', payload).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
@@ -69,7 +69,7 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
         satellite_model_name_splitted_list[-2] += '0'
         satellite_model_name_v0 = '_'.join(satellite_model_name_splitted_list)
 
-        filename = os.path.join(model_path_v0 , f"{satellite_model_name_v0}.sql")
+        filename = os.path.join(model_path_v0 , f"{satellite_model_name_v0}_VI.sql")
                 
         path = os.path.join(model_path_v0)
 
@@ -82,17 +82,17 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
 
         with open(filename, 'w') as f:
             f.write(command_v0.expandtabs(2))
-            print(f"Created Multi Active Satellite Model {satellite_model_name_v0}")
+            print(f"Created Multi Active Satellite Model {satellite_model_name_v0}_VI")
 
         #Satellite_v1
-        with open(os.path.join(".","templates","ma_sat_v1.txt"),"r") as f:
+        with open(os.path.join(".","templates","ma_sat_v1_view.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_v1 = command_tmp.replace('@@SatName', satellite_model_name_v0).replace('@@Hashkey', hashkey_column).replace('@@Hashdiff', hashdiff_column).replace('@@MaAttribute', ma_attribute).replace('@@LoadDate', loaddate).replace('@@Schema', rdv_default_schema)
             
   
 
-        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}.sql")
+        filename_v1 = os.path.join(model_path_v1 , f"{satellite_name}_VI.sql")
                 
         path_v1 = os.path.join(model_path_v1)
 
@@ -105,4 +105,4 @@ def generate_ma_satellite(cursor,source, generated_timestamp, rdv_default_schema
 
         with open(filename_v1, 'w') as f:
             f.write(command_v1.expandtabs(2))
-            print(f"Created Multi Active Satellite Model {satellite_name}")
+            print(f"Created Multi Active Satellite Model {satellite_name}_VI")

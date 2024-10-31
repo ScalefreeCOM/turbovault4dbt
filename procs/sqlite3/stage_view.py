@@ -16,7 +16,7 @@ def gen_derived_columns(cursor, source):
               FROM standard_hub h inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               AND Source_Column_Physical_Name <> Business_Key_Physical_Name
-
+              
               UNION
               
               SELECT Source_Column_Physical_Name, Target_Column_Physical_Name AS Business_Key_Physical_Name 
@@ -307,18 +307,18 @@ def generate_stage(cursor, source,generated_timestamp, rdv_default_schema, stage
 
   for row in sources: #sources usually only has one row
     source_schema_name = row[0]
-    source_table_name = row[1]  
+    source_table_name = row[1]
     rs = row[2]
     ldts = row[3]
     source_system_name = row[4]
   timestamp = generated_timestamp
   
-  with open(os.path.join(".","templates","stage.txt"),"r") as f:
+  with open(os.path.join(".","templates","stage_view.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',source_schema_name).replace('@@MultiActive',multiactive).replace('@@rdv_schema', rdv_default_schema).replace('@@derived_columns', derived_columns)
 
-  filename = os.path.join(model_path , f"{stage_prefix}{source_table_name.lower()}.sql")
+  filename = os.path.join(model_path , f"{stage_prefix}{source_table_name.lower()}_vi.sql")
           
   path = os.path.join(model_path)
 
@@ -332,4 +332,4 @@ def generate_stage(cursor, source,generated_timestamp, rdv_default_schema, stage
   with open(filename, 'w') as f:
     f.write(command.expandtabs(2))
 
-  print(f"Created stage model \'{stage_prefix}{source_table_name.lower()}.sql\'")
+  print(f"Created stage model \'{stage_prefix}{source_table_name.lower()}_vi.sql\'")

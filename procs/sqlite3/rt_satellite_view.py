@@ -91,12 +91,12 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
                 cursor.execute(query2)
                 result = cursor.fetchone()
                 sources = sources + f"\n\t{stage_prefix}{result[0].lower()}:\n\t\trsrc_static: '{result[1]}'"
-            with open(os.path.join(".","templates","record_tracking_sat.txt"),"r") as f:
+            with open(os.path.join(".","templates","record_tracking_sat_view.txt"),"r") as f:
                 command_tmp = f.read()
             f.close()
             command = command_tmp.replace('@@Schema', rdv_default_schema).replace('@@Tracked_HK', tracked_hk).replace('@@Source_Models', sources)
 
-            filename = os.path.join(model_path , f"{record_tracking_satellite}.sql")
+            filename = os.path.join(model_path , f"{record_tracking_satellite}_VI.sql")
                     
             path = os.path.join(model_path)
 
@@ -109,5 +109,5 @@ def generate_rt_satellite(cursor,source, generated_timestamp,rdv_default_schema,
 
             with open(filename, 'w') as f:
                 f.write(command.expandtabs(2))
-                print(f"Created Record Tracking Satellite {record_tracking_satellite}")
+                print(f"Created Record Tracking Satellite {record_tracking_satellite}_VI")
            
