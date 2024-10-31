@@ -6,8 +6,29 @@
 ## What is TurboVault4dbt?
 TurboVault4dbt is an open-source tool that automatically generates dbt models according to our [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt)-templates. It uses a metadata input of Your Data Vault 2.0 from one of the supported databases and creates ready-to-process dbt-models.
 
+## What is special about this Fork?
+This fork was created for an Oracle specific environment, where Turbovault4dbt and Datavault4dbt were used as code generators for tables and views. Load operations were carried out in a third party ETL tool, where simple 1:1 mappings between Views and tables were created. Please see this [blog post](https://danielfritzler.de/data-vault-mit-odi.html) for details.
+Besides the Oracle compatibility it offers advanced features for Oracle such as
+  * Link Effectivity Sattellites
+  * Load Views for 1:1-Mappings in ETL-Tools such as Oracle Data Integrator
+  * Read Views for Version 1 Satellites
+  * Primary Keys
+  * Foreign Keys
+  * Table Comments
+  * Column Comments
+  * Index Tablespace Modification
+  * Partitioning
+  * Helpful SQL generators to create, select, drop, delete, grant models
+
+This fork is meant to be used together with this [datavault4dbt fork](https://github.com/universe-designer/datavault4dbt)
+If you use Windows, use [dv-starter](https://github.com/universe-designer/dv-starter/tree/main) to install and preconfigure Turbovault4dbt and Datavault4dbt easily.
+
+
+
+
+
 ## What are the prerequisites to use TurboVault4dbt?
-TurboVault4dbt requires a metadata analysis done by hand and stored in supported metadata storage. Furthermore, Python must be installed as TurboVault4dbt is a software written in Python.
+TurboVault4dbt requires a metadata analysis done by hand and stored in supported metadata storage. Furthermore, Python must be installed as TurboVault4dbt is a software written in Python. 
 
 <img src="https://www.getdbt.com/ui/img/logos/dbt-logo.svg" width=33% align=right>
 
@@ -15,7 +36,6 @@ TurboVault4dbt requires a metadata analysis done by hand and stored in supported
 
 
 To use the generated models, a [dbt project](https://docs.getdbt.com/docs/get-started/getting-started-dbt-core) is required. Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used, because the dbt models are calling macros of this package. 
-
 
 ## How does my metadata needs to look like?
 
@@ -70,6 +90,8 @@ On the left side, you can select which object types you want to generate. These 
 - [Dependent_Child_Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Link)
 - [Point_In_Time](https://github.com/ScalefreeCOM/datavault4dbt/wiki/PIT)
 - [Reference Data](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/Reference-Data)
+- Link Effectivity Satellites
+- Loading Views
 
 The right side lists all available source objects inside the connected metadata storage. You can select as many of them as you like.
 
