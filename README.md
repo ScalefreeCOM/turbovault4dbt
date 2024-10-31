@@ -3,8 +3,6 @@
 
 ***
 
-## What is TurboVault4dbt?
-TurboVault4dbt is an open-source tool that automatically generates dbt models according to our [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt)-templates. It uses a metadata input of Your Data Vault 2.0 from one of the supported databases and creates ready-to-process dbt-models.
 
 ## What is special about this Fork?
 This fork was created for an Oracle specific environment, where Turbovault4dbt and Datavault4dbt were used as code generators for tables and views. Load operations were carried out in a third party ETL tool, where simple 1:1 mappings between Views and tables were created. Please see this [blog post](https://danielfritzler.de/data-vault-mit-odi.html) for details.
@@ -20,11 +18,13 @@ Besides the Oracle compatibility it offers advanced features for Oracle such as
   * Partitioning
   * Helpful SQL generators to create, select, drop, delete, grant models
 
-This fork is meant to be used together with this [datavault4dbt fork](https://github.com/universe-designer/datavault4dbt)
+This fork is meant to be used together with this [datavault4dbt fork](https://github.com/universe-designer/datavault4dbt).
 If you use Windows, use [dv-starter](https://github.com/universe-designer/dv-starter/tree/main) to install and preconfigure Turbovault4dbt and Datavault4dbt easily.
 
 
 
+## What is TurboVault4dbt?
+TurboVault4dbt is an open-source tool that automatically generates dbt models according to our [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt)-templates. It uses a metadata input of Your Data Vault 2.0 from one of the supported databases and creates ready-to-process dbt-models.
 
 
 ## What are the prerequisites to use TurboVault4dbt?
