@@ -25,11 +25,12 @@ task_proc_mapping = {
 }
 
 def handle_task(task, data_structure, task_proc_mapping):
-    try:
+    task_proc_mapping[task](data_structure)
+    """try:
         task_proc_mapping[task](data_structure)
         print(f'Successfully generated the {task} {data_structure["source"]}')
     except Exception as e:
-        print(f'Failed to generate the {task} {data_structure["source"]}: {str(e)}')
+        print(f'Failed to generate the {task} {data_structure["source"]}: {str(e)}')"""
 
 def generate_selected_entities(todo, data_structure):
     for task in todo:

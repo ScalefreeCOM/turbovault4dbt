@@ -1,0 +1,22 @@
+{{ config(schema='@@Schema',
+          materialized='incremental') }}
+
+{%- set yaml_metadata -%}
+source_models: @@SourceModels
+link_hashkey: @@LinkHashkey 
+foreign_hashkeys: @@ForeignHashkeys
+@@Payload
+{%- endset -%}
+
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{%- set link_hashkey = metadata_dict['link_hashkey'] -%}
+{%- set foreign_hashkeys = metadata_dict['foreign_hashkeys'] -%}
+{%- set payload = metadata_dict['payload'] -%}
+{%- set source_models = metadata_dict['source_models'] -%}
+
+{{ datavault4dbt.nh_link(link_hashkey=metadata_dict.get("link_hashkey"),
+                        foreign_hashkeys=metadata_dict.get("foreign_hashkeys"),
+                        payload=metadata_dict.get("payload"),
+                        source_models=metadata_dict.get("source_models")) }}
