@@ -9,15 +9,14 @@ def get_groupname(cursor,source_name,source_object):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def gen_hashed_columns(cursor,source, hashdiff_naming):
+def gen_hashed_columns(cursor,source, hashdiff_naming, source_name,source_object):
   
   command = ""
-  print(source)
-  source_name, source_object = source.split("_.._")
+  #print(source)
 
   query = f"""
-              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM 
-              (SELECT h.Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name, FALSE as IS_SATELLITE
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM 
+              (SELECT COALESCE(h.Target_Role_Primary_Key_Physical_Name,h.Target_Primary_Key_Physical_Name) as Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name
               FROM standard_hub h
               inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -26,12 +25,8 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
 
               UNION ALL
 
-              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
-              (SELECT 
-              l.Target_Primary_Key_Physical_Name,             
-              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
-              FALSE as IS_SATELLITE
-              --(SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM
+              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name
               FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -54,8 +49,8 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               group by Target_Primary_Key_Physical_Name
               
               UNION ALL
-              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
-              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),TRUE FROM 
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name
               FROM standard_satellite s
               inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -63,8 +58,8 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               group by Target_Satellite_Table_Physical_Name
               
               UNION ALL
-              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
-              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),TRUE FROM 
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name
               FROM multiactive_satellite s
               inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -72,8 +67,8 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
               group by Target_Satellite_Table_Physical_Name
 
               UNION ALL
-              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),IS_SATELLITE FROM 
-              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name,TRUE as IS_SATELLITE
+              SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),TRUE FROM 
+              (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name
               FROM non_historized_satellite s
               inner join source_data src on s.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -82,8 +77,8 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
 
               UNION ALL
 
-              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
-              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name,FALSE as IS_SATELLITE
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM
+              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name
               FROM non_historized_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -129,33 +124,18 @@ def gen_hashed_columns(cursor,source, hashdiff_naming):
   return command
 
 
-def gen_prejoin_columns(cursor, source):
+def gen_prejoin_columns(cursor, source, source_name, source_object):
   
   command = ""  
-
-  source_name, source_object = source.split("_.._")
   
-  query = f"""SELECT 
-              COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
-              pj_src.Source_Schema_Physical_Name,
-              pj_src.Source_Table_Physical_Name,
-              l.Prejoin_Extraction_Column_Name,
-              l.Source_column_physical_name,
-              l.Prejoin_Table_Column_Name
-              FROM standard_link l
-              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
-              inner join source_data pj_src on l.Prejoin_Table_Identifier = pj_src.Source_table_identifier
-              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
-              and l.Prejoin_Table_Identifier is not NULL
-              UNION ALL 
-              SELECT 
+  query = f"""SELECT DISTINCT
               COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
               pj_src.Source_Schema_Physical_Name, 
               pj_src.Source_Table_Physical_Name,
               l.Prejoin_Extraction_Column_Name, 
               l.Source_column_physical_name,
               l.Prejoin_Table_Column_Name
-              FROM non_historized_link l
+              FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               inner join source_data pj_src on l.Prejoin_Table_Identifier = pj_src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
@@ -176,15 +156,15 @@ def gen_prejoin_columns(cursor, source):
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_name: '{source_name}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
 
 
-def gen_multiactive_columns(cursor,source):
+def gen_multiactive_columns(cursor,source, source_name, source_object):
   command = ""
-  source_name, source_object = source.split("_.._")
-  query = f"""SELECT DISTINCT Multi_Active_Attributes,Parent_primary_key_physical_name from multiactive_satellite mas
+  query = f"""SELECT DISTINCT Multi_Active_Attributes,Parent_primary_key_physical_name 
+                from multiactive_satellite mas
                 inner join source_data src on mas.Source_Table_Identifier = src.Source_table_identifier
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
   cursor.execute(query)
@@ -201,12 +181,26 @@ def gen_multiactive_columns(cursor,source):
     command = command + f"\tmain_hashkey_column:\n\t- {parent_hk}"
   return command
 
-def generate_stage(cursor, source,generated_timestamp,stage_default_schema, model_path,hashdiff_naming):
-
-  hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming)
-  prejoins = gen_prejoin_columns(cursor, source)
-  multiactive = gen_multiactive_columns(cursor,source)
-  source_name, source_object = source.split("_.._")
+def generate_stage(data_structure):
+  cursor = data_structure['cursor']
+  source = data_structure['source']
+  source_name = data_structure['source_name']
+  source_object = data_structure['source_object']
+  generated_timestamp = data_structure['generated_timestamp']
+  stage_default_schema = data_structure['stage_default_schema']
+  model_path = data_structure['model_path']
+  hashdiff_naming = data_structure['hashdiff_naming']
+  try:
+    flowBiConfigs = data_structure['flowBiConfigs']
+  except:
+    pass
+  
+  hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming, source_name, source_object)
+  prejoins = gen_prejoin_columns(cursor, source, source_name, source_object)
+  try:
+    multiactive = gen_multiactive_columns(cursor,source, source_name, source_object) ## TODO: here the code fails and generates None
+  except:
+    multiactive = ""
   group_name = get_groupname(cursor,source_name,source_object)
   model_path = model_path.replace("@@GroupName", 'Stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
@@ -224,24 +218,24 @@ def generate_stage(cursor, source,generated_timestamp,stage_default_schema, mode
     ldts = row[3]
     source_system_name = row[4]
   timestamp = generated_timestamp
-  
-  with open(os.path.join(".","templates","stage.txt"),"r") as f:
+
+  root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+  with open(os.path.join(root,"templates","stage.txt"),"r") as f:
       command_tmp = f.read()
   f.close()
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
   filename = os.path.join(model_path , f"stg_{source_table_name.lower()}.sql")
           
-  path = os.path.join(model_path)
-
+  #path = os.path.join(model_path)
 
   # Check whether the specified path exists or not
-  isExist = os.path.exists(path)
+  isExist = os.path.exists(model_path)
   if not isExist:   
   # Create a new directory because it does not exist 
-      os.makedirs(path)
+      os.makedirs(model_path)
 
   with open(filename, 'w') as f:
     f.write(command.expandtabs(2))
-
-  print(f"Created stage model \'stg_{source_table_name.lower()}.sql\'")
+  if data_structure['console_outputs']:
+    print(f"Created stage model \'stg_{source_table_name.lower()}.sql\'")

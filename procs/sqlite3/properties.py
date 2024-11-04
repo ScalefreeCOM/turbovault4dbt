@@ -6,12 +6,14 @@ def get_groupname(cursor,source_name,source_object):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def gen_properties(cursor,source,generated_timestamp,model_path):
+def gen_properties(data_structure):
+    cursor= data_structure['cursor']
+    generated_timestamp= data_structure['generated_timestamp']
+    model_path= data_structure['model_path']
+    source_name= data_structure['source_name']
+    source_object= data_structure['source_object']
     command = "version: 2\nmodels:"
-    source_name, source_object = source.split("_.._")
     group_name = get_groupname(cursor,source_name,source_object)
-
-
 
     #Generating Hub Tests
     hub_query = f"""SELECT DISTINCT Target_Hub_table_physical_name,Target_Primary_Key_Physical_Name 
@@ -26,7 +28,8 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     for hub in results:
         hub_name = hub[0]
         hub_hk = hub[1]
-        with open(os.path.join(".","templates","hub_test.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","hub_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_tmp = command_tmp.replace("@@HubName",hub_name).replace("@@HubHK",hub_hk)
@@ -46,7 +49,6 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     INNER JOIN standard_hub h on l.Hub_identifier = h.Hub_Identifier
     INNER JOIN source_data src on l.Source_Table_Identifier = src.Source_table_identifier
     WHERE 1=1
-    AND h.Is_Primary_Source = '1'
     AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
     )
     GROUP BY Target_link_table_physical_name,Target_Primary_Key_Physical_Name"""
@@ -58,13 +60,15 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         link_name = link[0]
         link_hk = link[1]
         ref_hub = link[2].split(',')
-        with open(os.path.join(".","templates","link_test.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","link_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         ref_hub_tmp = ""
         for hub in ref_hub:
             hub_name,hub_hk = hub.split(';')
-            with open(os.path.join(".","templates","link_hub_test.txt"),"r") as f:
+            root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+            with open(os.path.join(root,"templates","link_hub_test.txt"),"r") as f:
                 hub_tmp = f.read()
             f.close()
             ref_hub_tmp = ref_hub_tmp + '\n' + hub_tmp.replace('@@HubName',hub_name).replace("@@HubHK",hub_hk)
@@ -100,7 +104,8 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         sat_name = sat[0]
         parent_name = sat[1]
         parent_hk = sat[2]
-        with open(os.path.join(".","templates","sat_test.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","sat_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_tmp = command_tmp.replace('@@SatName',sat_name).replace('@@ParentHK',parent_hk).replace('@@ParentTable',parent_name)
@@ -115,10 +120,9 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
     inner join standard_hub h on p.Tracked_Entity = h.Hub_Identifier
     inner join source_data src on h.Source_table_identifier = src.Source_table_identifier
     WHERE 1=1
-    AND h.Is_Primary_Source = '1'
     and src.Source_System = '{source_name}'
     and src.Source_Object = '{source_object}'
-
+    
     UNION ALL
 
     SELECT DISTINCT
@@ -139,7 +143,8 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
         pit_name = pit[0]
         entity_name = pit[1]
         entity_hk = pit[2]
-        with open(os.path.join(".","templates","pit_test.txt"),"r") as f:
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        with open(os.path.join(root,"templates","pit_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
@@ -147,17 +152,15 @@ def gen_properties(cursor,source,generated_timestamp,model_path):
 
     model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName",group_name).replace('@@timestamp',generated_timestamp)
     filename = os.path.join(model_path , f"{source_object.lower()}.yml")
-
-    path = os.path.join(model_path)
-
+          
 
     # Check whether the specified path exists or not
-    isExist = os.path.exists(path)
-    if not isExist:
-    # Create a new directory because it does not exist
-        os.makedirs(path)
+    isExist = os.path.exists(model_path)
+    if not isExist:   
+    # Create a new directory because it does not exist 
+        os.makedirs(model_path)
 
     with open(filename, 'w') as f:
         f.write(command.expandtabs(2))
-
-    print(f"Created {source_object.lower()}.yml")
+    if data_structure['console_outputs']:
+        print(f"Created {source_object.lower()}.yml")
