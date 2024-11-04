@@ -119,7 +119,8 @@ def main():
         'rdv_default_schema': config.get('Google Sheets',"rdv_schema"),
         'model_path': config.get('Google Sheets','model_path'),
         'hashdiff_naming': config.get('Google Sheets','hashdiff_naming'),
-        'stage_default_schema': config.get('Google Sheets',"stage_schema"),  
+        'stage_default_schema': config.get('Google Sheets',"stage_schema"), 
+        'source_database': config.get('Google Sheets', "source_database"),
         'source_list': args.Sources[0]  ,
         'generateSources': False,
         'source_name' : None, # "Source" field splits into this field

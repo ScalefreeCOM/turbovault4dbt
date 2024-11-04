@@ -78,7 +78,7 @@ def generate_pit(data_structure):
         dimension_key_name = pit[7]
         sat_ids = satellites.split(';')
         sat_names = get_sat_names(cursor = cursor,sat_ids = sat_ids)
-        group_name = get_groupname(cursor,pit[0])
+        group_name = 'BDV/' + get_groupname(cursor,pit[0])
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_control = model_path.replace('@@GroupName','control').replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
     all_satellite_names = ''
