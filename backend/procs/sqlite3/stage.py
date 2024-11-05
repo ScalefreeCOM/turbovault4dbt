@@ -12,8 +12,6 @@ def get_groupname(cursor,source_name,source_object):
 def gen_hashed_columns(cursor,source, hashdiff_naming, source_name,source_object):
   
   command = ""
-  #print(source)
-
   query = f"""
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM 
               (SELECT COALESCE(h.Target_Role_Primary_Key_Physical_Name,h.Target_Primary_Key_Physical_Name) as Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name
@@ -197,9 +195,7 @@ def generate_stage(data_structure):
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
 
   filename = os.path.join(model_path , f"stg_{source_table_name.lower()}.sql")
-          
-  #path = os.path.join(model_path)
-
+    
   # Check whether the specified path exists or not
   isExist = os.path.exists(model_path)
   if not isExist:   

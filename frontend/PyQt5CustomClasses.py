@@ -1,10 +1,8 @@
-import sys
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QComboBox, QListWidget, QListWidgetItem, QTextEdit, QCheckBox, QStackedLayout, QPushButton
+    QWidget, QVBoxLayout, QLabel,QPushButton
 )
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QVariantAnimation, QPoint, QSize, QUrl, QTimer, QEasingCurve,pyqtProperty
-from PyQt5.QtGui import QColor, QPainter, QPen, QBrush, QPainterPath, QMovie, QFont, QPixmap, QDesktopServices, QPalette, QLinearGradient, QRadialGradient
+from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEasingCurve,pyqtProperty
+from PyQt5.QtGui import QColor, QPainter, QPen, QMovie, QFont, QLinearGradient, QRadialGradient
 
 class LoadingScreen(QWidget):
     def __init__(self, parent=None):

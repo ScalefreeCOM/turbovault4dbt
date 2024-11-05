@@ -1,23 +1,18 @@
 import os
-import sys
 import subprocess
-import time
 import ctypes
 from datetime import datetime
 from threading import Thread, Lock
-from PyQt5.QtCore import (
-    QEvent, QPoint, QSize, QPropertyAnimation, QRect, QEasingCurve, QVariantAnimation, Qt,
-)
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
-    QBrush, QColor, QDesktopServices, QFont, QIcon, QMovie,
-    QPainter, QPalette, QPen, QPixmap, QStandardItem, QStandardItemModel
+    QColor, QIcon, QMovie, QPixmap, QStandardItem, QStandardItemModel
 )
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import (
-    QApplication, QCheckBox, QComboBox, QLabel, QListWidget, QListWidgetItem,
+    QCheckBox, QComboBox, QLabel, QListWidget, QListWidgetItem,
     QStackedLayout, QVBoxLayout, QHBoxLayout, QGridLayout, QScrollBar, QTextEdit, QWidget
 )
-from frontend.PyQt5CustomClasses import ToggleBox, QPushButton
+from frontend.PyQt5CustomClasses import QPushButton
 from frontend.events import Events
 
 class MainApp(QWidget):

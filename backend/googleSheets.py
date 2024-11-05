@@ -1,15 +1,15 @@
 import os
+import pandas as pd
+import gspread as gs
+import sqlite3
+import numpy as np
+from datetime              import datetime
 from backend.procs.sqlite3 import sources
 from backend.procs.sqlite3 import generate_selected_entities
 from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import properties
-import pandas as pd
-import gspread as gs
-from google.oauth2.service_account import Credentials
-import sqlite3
-from datetime import datetime
-import numpy as np
-from threading import Thread
+
+
 class GoogleSheets:
     def __init__(self, **kwargs):
         self.todo = []
@@ -47,9 +47,6 @@ class GoogleSheets:
     def __initializeInMemoryDatabase(self):
         gc = gs.oauth(credentials_filename=self.credential_path)
         sh = gc.open_by_url(self.sheet_url)
-        
-        #pd.set_option('future.no_silent_downcasting', True)
-
         hub_entities_df             = pd.DataFrame(sh.worksheet('standard_hub')            .get_all_records())
         link_entities_df            = pd.DataFrame(sh.worksheet('standard_link')           .get_all_records())
         standard_satellite_df       = pd.DataFrame(sh.worksheet('standard_satellite')      .get_all_records())

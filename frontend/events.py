@@ -1,6 +1,4 @@
 from backend.turbovault import TurboVault
-from threading import Thread, Lock
-
 class Events:
     def __init__(self, **kwargs) -> None:
 
@@ -80,13 +78,3 @@ class Events:
                 Properties= selections['Properties'],
                 ) 
             self.TurboVault.doRunForDb()
-      
-            
-    def onAppStart(self) -> bool:
-
-        return True
-
-
-    def onPressCancel(self) -> bool:
-        return True
-    

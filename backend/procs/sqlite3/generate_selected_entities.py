@@ -25,7 +25,6 @@ task_proc_mapping = {
 }
 
 def handle_task(task, data_structure, task_proc_mapping):
-    #task_proc_mapping[task](data_structure)
     try:
         task_proc_mapping[task](data_structure)
     except Exception as e:

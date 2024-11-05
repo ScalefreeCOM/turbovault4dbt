@@ -1,10 +1,10 @@
 import os
+import sqlite3
+import pandas as pd
+from datetime              import datetime
 from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd
 from backend.procs.sqlite3 import properties
-import pandas as pd
-import sqlite3
-from datetime import datetime
-import time
+
 class Excel:
     def __init__(self, **kwargs):
         self.todo = []

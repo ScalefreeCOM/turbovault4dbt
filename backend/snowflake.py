@@ -1,15 +1,13 @@
 import os
+import sqlite3
+import snowflake.connector
+from datetime              import datetime
+from configparser          import RawConfigParser
 from backend.procs.sqlite3 import sources
 from backend.procs.sqlite3 import generate_selected_entities
 from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import properties
-from logging import Logger
-import pandas as pd
-import sqlite3
-from datetime import datetime
-from configparser import RawConfigParser
-import snowflake.connector
-import time
+
 
 class Snowflake:
     def __init__(self, **kwargs):

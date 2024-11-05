@@ -3,7 +3,6 @@ from backend.googleSheets import GoogleSheets
 from backend.snowflake import Snowflake
 from backend.bigquery import BigQuery
 from backend.db import DB
-from threading import Thread
 class TurboVault():
     def __init__(self, **kwargs):
         self.turboVaultconfigs = kwargs.get('turboVaultconfigs')

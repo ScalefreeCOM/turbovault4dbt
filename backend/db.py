@@ -1,13 +1,9 @@
 import os
-from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd
-from logging import Logger
 import sqlite3
-import pandas as pd
-from datetime import datetime
-import time
+from datetime              import datetime
+from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd
 from backend.procs.sqlite3 import properties
 image_path = os.path.join(os.path.dirname(__file__),"images")
-log = Logger('log')
 
 class DB:
     def __init__(self, **kwargs):

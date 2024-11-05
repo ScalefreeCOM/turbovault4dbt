@@ -1,12 +1,12 @@
 import os
+import sqlite3
+from datetime              import datetime
+from google.oauth2         import service_account
+from google.cloud          import bigquery
 from backend.procs.sqlite3 import sources
 from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import generate_selected_entities
 from backend.procs.sqlite3 import properties
-from google.cloud import bigquery
-from google.oauth2 import service_account
-import sqlite3
-from datetime import datetime
 
 class BigQuery:
     def __init__(self, **kwargs):
