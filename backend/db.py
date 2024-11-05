@@ -1,9 +1,13 @@
 import os
-import sqlite3
-from datetime              import datetime
 from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd
+from logging import Logger
+import sqlite3
+import pandas as pd
+from datetime import datetime
+import time
 from backend.procs.sqlite3 import properties
 image_path = os.path.join(os.path.dirname(__file__),"images")
+log = Logger('log')
 
 class DB:
     def __init__(self, **kwargs):
@@ -58,8 +62,7 @@ class DB:
             sources.gen_sources(self.data_structure)
         try:
             for self.data_structure['source'] in self.selectedSources:
-                self.data_structure['source'] = self.data_structure['source'].replace('_','_.._')
-                seperatedNameAsList = self.data_structure['source'].split('_.._')
+                seperatedNameAsList = self.data_structure['source'].split('_*-*_')
                 self.data_structure['source_name']   = seperatedNameAsList[0]
                 self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
                 generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)

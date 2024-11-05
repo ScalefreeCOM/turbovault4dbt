@@ -1,5 +1,3 @@
-import codecs
-from datetime import datetime
 import os
 
 def get_groupname(cursor,source_name,source_object):
@@ -9,7 +7,7 @@ def get_groupname(cursor,source_name,source_object):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def gen_hashed_columns(cursor,source, hashdiff_naming, source_name,source_object):
+def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
   
   command = ""
   query = f"""
@@ -93,7 +91,7 @@ def gen_hashed_columns(cursor,source, hashdiff_naming, source_name,source_object
   return command
 
 
-def gen_prejoin_columns(cursor, source, source_name, source_object):
+def gen_prejoin_columns(cursor, source_name, source_object):
   
   command = ""  
   
@@ -130,7 +128,7 @@ def gen_prejoin_columns(cursor, source, source_name, source_object):
   return command
 
 
-def gen_multiactive_columns(cursor,source, source_name, source_object):
+def gen_multiactive_columns(cursor, source_name, source_object):
   command = ""
   query = f"""SELECT DISTINCT Multi_Active_Attributes,Parent_primary_key_physical_name 
                 from multiactive_satellite mas
@@ -164,10 +162,10 @@ def generate_stage(data_structure):
   except:
     pass
   
-  hashed_columns = gen_hashed_columns(cursor, source, hashdiff_naming, source_name, source_object)
-  prejoins = gen_prejoin_columns(cursor, source, source_name, source_object)
+  hashed_columns = gen_hashed_columns(cursor, hashdiff_naming, source_name, source_object)
+  prejoins = gen_prejoin_columns(cursor, source_name, source_object)
   try:
-    multiactive = gen_multiactive_columns(cursor,source, source_name, source_object) ## TODO: here the code fails and generates None
+    multiactive = gen_multiactive_columns(cursor, source_name, source_object) ## TODO: here the code fails and generates None
   except:
     multiactive = ""
   group_name = get_groupname(cursor,source_name,source_object)
@@ -186,7 +184,6 @@ def generate_stage(data_structure):
     rs = row[2]
     ldts = row[3]
     source_system_name = row[4]
-  timestamp = generated_timestamp
 
   root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
   with open(os.path.join(root,"templates","stage.txt"),"r") as f:
