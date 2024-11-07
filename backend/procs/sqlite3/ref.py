@@ -91,7 +91,7 @@ def generate_ref(data_structure):
         ref_name = ref[1]
         historized = ref[2]
 
-        group_name = get_groupname(cursor,ref_id)
+        group_name = 'RDV/' + get_groupname(cursor,ref_id)
         
         ref_hub_list = get_ref_hub(cursor,ref_id)
         ref_hubs = []

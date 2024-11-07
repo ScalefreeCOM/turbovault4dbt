@@ -52,7 +52,8 @@ def generate_nh_satellite(data_structure):
         loaddate = nh_satellite[5]
 
         payload = gen_payload(payload_list)
-        group_name = get_groupname(cursor,nh_satellite[0])
+        group_name = 'RDV/' + get_groupname(cursor,nh_satellite[0])
+        
         model_path = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
         with open(os.path.join(root,"templates","nh_sat.txt"),"r") as f:

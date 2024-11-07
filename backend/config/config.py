@@ -25,6 +25,7 @@ class MetadataInputConfig:
             'model_path',
             'sheet_url',
             'gcp_oauth_credentials',
+            'source_database',
         ],
         'BigQuery':[
             'stage_schema',

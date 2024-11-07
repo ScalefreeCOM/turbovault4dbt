@@ -31,6 +31,20 @@ def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
               group by Target_Primary_Key_Physical_Name
               
               UNION ALL
+              
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT 
+              l.Hub_primary_key_physical_name as Target_Primary_Key_Physical_Name,             
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
+              FALSE as IS_SATELLITE
+              FROM standard_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              ORDER BY l.Target_Column_Sort_Order)
+              group by Target_Primary_Key_Physical_Name
+              
+              UNION ALL
               SELECT Target_Satellite_Table_Physical_Name,GROUP_CONCAT(Source_Column_Physical_Name),TRUE FROM 
               (SELECT '{hashdiff_naming.replace("@@SatName", "")}' || s.Target_Satellite_Table_Physical_Name as Target_Satellite_Table_Physical_Name,s.Source_Column_Physical_Name
               FROM standard_satellite s
@@ -65,6 +79,21 @@ def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
               AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              ORDER BY l.Target_Column_Sort_Order)
+              group by Target_Primary_Key_Physical_Name
+
+              UNION ALL
+
+              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), IS_SATELLITE FROM
+              (SELECT 
+              l.Hub_primary_key_physical_name as Target_Primary_Key_Physical_Name,             
+              COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name,
+              FALSE as IS_SATELLITE
+              FROM non_historized_link l
+              inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+              WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+              AND l.Target_Primary_Key_Physical_Name IS NOT NULL
+              and l.Hub_Identifier is not NULL
               ORDER BY l.Target_Column_Sort_Order)
               group by Target_Primary_Key_Physical_Name
               """
@@ -169,7 +198,7 @@ def generate_stage(data_structure):
   except:
     multiactive = ""
   group_name = get_groupname(cursor,source_name,source_object)
-  model_path = model_path.replace("@@GroupName", 'stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
+  model_path = model_path.replace("@@GroupName", 'Stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
   query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column, Source_System  FROM source_data src
                 WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'

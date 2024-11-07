@@ -51,7 +51,7 @@ def generate_satellite(data_structure):
         payload_list = satellite[3].split(',')
         source_model = 'stg_'+satellite[4].lower()
         loaddate = satellite[5]
-        group_name = get_groupname(cursor,satellite[0])
+        group_name = 'RDV/' + get_groupname(cursor,satellite[0])
         model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 

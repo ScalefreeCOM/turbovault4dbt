@@ -52,7 +52,7 @@ def generate_ma_satellite(data_structure):
         source_model = satellite[4].lower()
         loaddate = satellite[5]
         ma_attribute_list = satellite[6].split(';')
-        group_name = get_groupname(cursor,satellite[0])
+        group_name = 'RDV/' + get_groupname(cursor,satellite[0])
         model_path_v0 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
         model_path_v1 = model_path.replace('@@GroupName',group_name).replace('@@SourceSystem',source_name).replace('@@timestamp',generated_timestamp)
 

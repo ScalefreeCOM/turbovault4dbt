@@ -92,7 +92,7 @@ def generate_link(data_structure):
     link_name = link[1]
     link_id = link[0]
     fk_list = link[2].split(',')
-    group_name = get_groupname(cursor,link_id)
+    group_name = 'RDV/' + get_groupname(cursor,link_id)
     fk_string = ""
     for fk in fk_list:
       fk_string += f"\n\t- '{fk}'"

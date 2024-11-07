@@ -13,7 +13,7 @@ def gen_properties(data_structure):
     source_name= data_structure['source_name']
     source_object= data_structure['source_object']
     command = "version: 2\nmodels:"
-    group_name = get_groupname(cursor,source_name,source_object)
+    group_name = 'RDV/' + get_groupname(cursor,source_name,source_object)
 
     #Generating Hub Tests
     hub_query = f"""SELECT DISTINCT Target_Hub_table_physical_name,Target_Primary_Key_Physical_Name 

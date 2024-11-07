@@ -247,6 +247,7 @@ class MainApp(QWidget):
             }
         """
 
+        self.lock = Lock()  
         self.setWindowTitle("TurboVault4dbt")
         self.setWindowIcon(QIcon(r".\frontend\images\app_icon.png")) # Icon image should be replaced with SVG (or .ico)
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")

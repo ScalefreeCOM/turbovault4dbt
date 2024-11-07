@@ -34,6 +34,7 @@ class GoogleSheets:
             'generateSources': False,
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
+            'source_database': self.config.get("source_database"),
             }  
 
     
