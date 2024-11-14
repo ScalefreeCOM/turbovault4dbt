@@ -1,0 +1,25 @@
+{{ config(materialized='view') }}
+{{ config(schema='@@SCHEMA') }}
+
+{%- set yaml_metadata -%}
+source_model: 
+  '@@SourceName': '@@SourceTable'
+hashed_columns:
+@@HashedColumns
+@@PrejoinedColumns
+@@MultiActive
+rsrc: '@@RecordSource' 
+ldts: '@@LoadDate'
+include_source_columns: true
+
+{%- endset -%}
+
+{% set metadata_dict = fromyaml(yaml_metadata) %}
+
+{{ datavault4dbt.stage(source_model=metadata_dict.get('source_model'),
+                        ldts=metadata_dict.get('ldts'),
+                        rsrc=metadata_dict.get('rsrc'),
+                        hashed_columns=metadata_dict.get('hashed_columns'),
+                        derived_columns=metadata_dict.get('derived_columns'),
+                        prejoined_columns=metadata_dict.get('prejoined_columns'),
+                        missing_columns=metadata_dict.get('missing_columns')) }}
