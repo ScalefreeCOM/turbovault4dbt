@@ -1,38 +1,39 @@
-<h1 align=center>Welcome to turbovault4dbt</h1>
-<img src="https://user-images.githubusercontent.com/81677440/214857459-13fb4674-06e7-40d1-abb6-1b43133f2f8b.png" width=100% align=center>
+<h1 align=center>Welcome to TurboVault4dbt</h1>
+<img src="https://user-images.githubusercontent.com/81677440/214857459-13fb4674-06e7-40d1-abb6-1b43133f2f8b.png" width=100% align=center url="https://www.scalefree.com/consulting/turbovault4dbt">
 
 ***
 
 ## What is TurboVault4dbt?
-TurboVault4dbt is an open-source tool that automatically generates dbt models according to our [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt)-templates. It uses a metadata input of Your Data Vault 2.0 from one of the supported databases and creates ready-to-process dbt-models.
+TurboVault4dbt is an open-source tool that automatically generates dbt models according to our [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) templates. It uses a metadata input of your Data Vault 2.0 from one of the supported databases and creates ready-to-process dbt-models.
 
 ## What are the prerequisites to use TurboVault4dbt?
-TurboVault4dbt requires a metadata analysis done by hand and stored in supported metadata storage. Furthermore, Python must be installed as TurboVault4dbt is a software written in Python.
+- TurboVault4dbt requires a metadata analysis done by hand and stored in supported metadata storage.
+- Python must be installed as TurboVault4dbt is a software written in Python.
 
-<img src="https://www.getdbt.com/ui/img/logos/dbt-logo.svg" width=33% align=right>
+<img src="https://www.getdbt.com/ui/img/logos/dbt-logo.svg" width=22% align=right>
 
 
-
-To use the generated models, a [dbt project](https://docs.getdbt.com/docs/get-started/getting-started-dbt-core) is required. Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used, because the dbt models are calling macros of this package. 
+- A [dbt project](https://docs.getdbt.com/docs/get-started/getting-started-dbt-core) is required to use the generated models.
+- Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used since the dbt models are using datavault4dbt macros. 
 
 
 ## How does my metadata needs to look like?
 
 You can find DDL scripts and templates for the metadata tables and the Excel sheet [here]((https://github.com/ScalefreeCOM/turbovault4dbt/tree/main/metadata_ddl))]((https://github.com/ScalefreeCOM/turbovault4dbt/tree/main/metadata_ddl)). 
 
-Your metadata needs to be stored in the following eight tables/worksheets: 
+Your metadata needs to be stored in the following tables/worksheets: 
 - [Source Data](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/source-data)
-- [Hubs](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/hubs)
+- [Standard Hubs](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/hubs)
 - [Standard Links](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/links)
 - [Non-Historized Links](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/non-Historized-links)
 - [Standard Satellites](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/standard-satellites)
 - [Non-Historized Satellites](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/non-Historized-satellites)
 - [Multi-Active Satellites](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/multiactive-satellites)
 - [Point-In-Time Tables](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/Point-In-Time)
+- [Reference Tables](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/reference-tables)
 
 
-
-[<img src="https://user-images.githubusercontent.com/81677440/196627704-e230a88f-270a-44b2-a07d-dcd06694bd48.jpg" width = 45% align = right>](https://www.scalefree.com)
+[<img src="https://user-images.githubusercontent.com/81677440/196627704-e230a88f-270a-44b2-a07d-dcd06694bd48.jpg" width = 33% align = right>](https://www.scalefree.com)
 
 ## Where can I store my metadata?
 Currently, TurboVault4dbt supports metadata input from 
@@ -45,38 +46,46 @@ Currently, TurboVault4dbt supports metadata input from
 Our developers are constantly working on adding new connectors for more databases.
 
 ## How do I install TurboVault4dbt?
-To install Turbovault4dbt, follow the instructions on [this page](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/installation).
+To install TurboVault4dbt, follow the instructions on [this page](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/installation).
 ## How do I connect TurboVault4dbt with my metadata?
-You can configure the connection to Your metadata storage in the [config.ini](config.md). Further explanation for the configuration input can be found [here](connect-to-metadata.md).
+You can configure the connection to your metadata storage in the [config.ini](config.md). Further explanation for the configuration input can be found [here](connect-to-metadata.md).
 
-## How do I execute TurboVault4dbt?
-To execute TurboVault4dbt, You need Python installed. Execute the script according to Your database, where Your metadata is stored e.g. Snowflake --> turbovault_snowflake.py, BigQuery --> turbovault_bigquery.py, and so on.
-
-Then, a GUI will open that looks like this: 
+## How do I run TurboVault4dbt?
+To run TurboVault4dbt, you need to install Python, as well as the required packages. Then, simply execute main.py, which will open a GUI that looks like this: 
 
 <div align="center" >
 <img src="https://github.com/ScalefreeCOM/wiki-test/assets/78927659/16e841c1-0440-497f-a8c4-48c11e7c4c43" width=70% align=center>
 </div>
 
-On the left side, you can select which object types you want to generate. These are: 
-- [Stage](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Staging)
-- [Hub](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Hubs)
-- Satellite (both [version 0](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Satellite-v0) and [version 1](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Satellite-v1))
-- [Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Link)
-- Multiactive Satellite (both [version 0](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Multi-Active-Satellite-v0) and [version 1](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Multi-Active-Satellite-v1))
-- [Non_Historized_Satellite](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Non-Historized-Satellite)
-- [Non_Historized_Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Non-Historized-Link)
-- [Dependent_Child_Link](https://github.com/ScalefreeCOM/datavault4dbt/wiki/Standard-Link)
-- [Point_In_Time](https://github.com/ScalefreeCOM/datavault4dbt/wiki/PIT)
+First, choose your metadata input platform where you have your metadata stored from the dropdown menu.
 
-The right side lists all available source objects inside the connected metadata storage. You can select as many of them as you like.
+From the Sources section, choose the source objects that you would like to use. At least one source object should be selected.
 
-You can also generate the [sources.yml](https://github.com/ScalefreeCOM/turbovault4dbt/yml-generation), [properties.yml](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/yml-generation) or create a [Data Vault Model Visualization](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/Visualization-of-Your-Raw-Vault) by ticking each respective checkbox.
+From the Entities section, you can select which types of entities you want to generate. These are: 
+- [Stage](https://www.datavault4dbt.com/documentation/macro-instructions/staging/)
+- [Standard Hub](https://www.datavault4dbt.com/documentation/macro-instructions/hubs/standard-hub/)
+- [Standard Link](https://www.datavault4dbt.com/documentation/macro-instructions/links/standard-link/)
+- Satellite (both [version 0](https://www.datavault4dbt.com/documentation/macro-instructions/satellites/standard-satellite/standard-satellite-v0) and [version 1](https://www.datavault4dbt.com/documentation/macro-instructions/satellites/standard-satellite/standard-satellite-v1))
+- Multi-Active Satellite (both [version 0](https://www.datavault4dbt.com/documentation/macro-instructions/satellites/multi-active-satellite/multi-active-satellite-v0/) and [version 1](https://www.datavault4dbt.com/documentation/macro-instructions/satellites/multi-active-satellite/multi-active-satellite-v1/))
+- [Non-Historized Link](https://www.datavault4dbt.com/documentation/macro-instructions/links/non-historized-link/)
+- [Non-Historized Satellite](https://www.datavault4dbt.com/documentation/macro-instructions/satellites/non-historized-satellite/)
+- [Dependent Child Link](https://www.datavault4dbt.com/documentation/macro-instructions/links/dependent-child-keys/)
+- [Point-In-Time](https://www.datavault4dbt.com/documentation/macro-instructions/business-vault/pit/)
+- [Reference Table](https://www.datavault4dbt.com/documentation/macro-instructions/reference-data/reference-tables/)
 
-Now you can click on "start" and Turbovault4dbt will generate all necessary dbt models that work with datavault4dbt!
+By using the checkboxes:
+-  a [sources.yml](https://github.com/ScalefreeCOM/turbovault4dbt/yml-generation) can be generated,
+-  properties [.yml](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/yml-generation) files can be generated for each source object,
+-  and a [Data Vault Model Visualization](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/Visualization-of-Your-Raw-Vault) can be created using the external tool DBDocs.
+
+Now you can click on the START button and TurboVault4dbt will generate all necessary dbt models that work with [datavault4dbt](https://www.datavault4dbt.com)!
 
 ## Releases
-[v1.1.0 (22.05.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.1.0) - Current Version<br>
+[v2.0 (14.11.2024)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v2.0) - Current Version<br>
+[v1.2 (18.09.2024)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.2)<br>
+[v1.1.2 (23.01.2024)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.1.2)<br>
+[v1.1.1 (24.05.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.1.1)<br>
+[v1.1.0 (22.05.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.1.0)<br>
 [v1.0.3 (16.02.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.0.3)<br>
 [v1.0.2 (13.02.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.0.2)<br>
 [v1.0.1 (30.01.2023)](https://github.com/ScalefreeCOM/turbovault4dbt/releases/tag/v1.0.1)<br>
@@ -85,4 +94,4 @@ Now you can click on "start" and Turbovault4dbt will generate all necessary dbt 
 <h1 style="text-align: center;">Designed for</h1>
 
 
-[<img src="https://user-images.githubusercontent.com/81677440/195860893-435b5faa-71f1-4e01-969d-3593a808daa8.png" width=100% align=center>](https://www.scalefree.com/datavault4dbt/)
+[<img src="https://user-images.githubusercontent.com/81677440/195860893-435b5faa-71f1-4e01-969d-3593a808daa8.png" width=100% align=center>](https://www.datavault4dbt.com)
