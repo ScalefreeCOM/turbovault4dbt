@@ -54,7 +54,7 @@ You can configure the connection to your metadata storage in the [config.ini](co
 To run TurboVault4dbt, you need to install Python, as well as the required packages. Then, simply execute main.py, which will open a GUI that looks like this: 
 
 <div align="center" >
-<img src="https://github.com/ScalefreeCOM/wiki-test/assets/78927659/16e841c1-0440-497f-a8c4-48c11e7c4c43" width=70% align=center>
+<img src="https://github.com/user-attachments/assets/3dc3d4a0-5770-44ed-b7c6-dc77f052a0ad" width=70% align=center>
 </div>
 
 First, choose your metadata input platform where you have your metadata stored from the dropdown menu.
