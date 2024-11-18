@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel,QPushButton
+    QWidget, QVBoxLayout, QLabel,QPushButton, QLineEdit
 )
-from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEasingCurve,pyqtProperty
+from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEasingCurve, pyqtProperty, QPoint
 from PyQt5.QtGui import QColor, QPainter, QPen, QMovie, QFont, QLinearGradient, QRadialGradient
 
 class LoadingScreen(QWidget):
@@ -128,6 +128,7 @@ class QPushButton(QPushButton):
         hoverTextColor: str = "black", 
         hoverBorderColor: str = "black", 
         hoverBorderWidth: int = 1, 
+        style: bool = True, 
         *args, 
         **kwargs
         ) -> None:
@@ -145,8 +146,9 @@ class QPushButton(QPushButton):
         self.hoverBorderColor: str = hoverBorderColor
         self.hoverBorderWidth: int = hoverBorderWidth
         self.fontSize: int = fontSize
-        self.setStyleSheet(self._getStylesheet())
-        self.setFont(QFont(self.fontName))
+        if style:
+            self.setStyleSheet(self._getStylesheet())
+            self.setFont(QFont(self.fontName))
         # Initialize elevation animation
         self.elevationAnimation: QPropertyAnimation = QPropertyAnimation(self, b"geometry")
         self.elevationAnimation.setDuration(200)
@@ -190,3 +192,63 @@ class QPushButton(QPushButton):
             }}
         """
         
+
+class QLineEdit(QLineEdit):
+    def __init__(self, placeholderText=""):
+        super().__init__()
+        self.setPlaceholderText(placeholderText)
+        self.setFont(QFont("Rajdhani", 10))
+        self.setStyleSheet("""
+            QLineEdit {
+                background-color: white;
+                border: 1px solid #ccc;
+                padding: 8px;
+                border-radius: 5px;
+                color: black;
+            }
+            QLineEdit:hover {
+                border-color: lightblue;
+            }
+            QLineEdit:focus {
+                border-color: #00aabe;
+            }
+        """)
+
+        self._underlineAnimation = QPropertyAnimation(self, b"geometry")
+        self._underlineColor = QColor("#00aabe")
+        self._animatedLinePos = None
+        self.setFocusPolicy(Qt.ClickFocus)
+
+    def focusInEvent(self, event):
+        startX = self.width() // 2
+        startPoint = QPoint(startX, self.height() - 2)
+        self._animateUnderline(startPoint)
+
+    def _animateUnderline(self, startPoint: QPoint):
+        self._underlineAnimation.stop()
+        
+        # Calculate the start and end positions for the underline based on input
+        startLine = QRect(startPoint.x(), self.height() - 2, 0, 2)  # Start with zero-width line at startPoint
+        endLine = QRect(0, self.height() - 2, self.width(), 2)      # Expand to full width below text field
+
+        # Configure animation to expand underline from the given start point
+        self._underlineAnimation.setStartValue(startLine)
+        self._underlineAnimation.setEndValue(endLine)
+        self._underlineAnimation.setDuration(300)
+        self._underlineAnimation.start()
+
+    def paintEvent(self, event):
+        super().paintEvent(event)
+
+        # Draw the animated underline when the field is focused
+        if self.hasFocus():
+            painter = QPainter(self)
+            painter.setRenderHint(QPainter.Antialiasing)
+            pen = QPen(self._underlineColor)
+            pen.setWidth(2)
+            painter.setPen(pen)
+            # Draw the line from the start point, expanding left and right as defined by the animation
+            painter.drawLine(self._underlineAnimation.startValue().x(), 
+                             self._underlineAnimation.startValue().y(), 
+                             self._underlineAnimation.endValue().width(), 
+                             self._underlineAnimation.endValue().y())

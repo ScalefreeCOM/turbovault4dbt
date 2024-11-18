@@ -5,7 +5,7 @@ from datetime import datetime
 from threading import Thread, Lock
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
-    QColor, QIcon, QMovie, QPixmap, QStandardItem, QStandardItemModel
+    QColor, QMovie, QPixmap, QStandardItem, QStandardItemModel
 )
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import (
@@ -13,19 +13,20 @@ from PyQt5.QtWidgets import (
     QStackedLayout, QVBoxLayout, QHBoxLayout, QGridLayout, QScrollBar, QTextEdit, QWidget
 )
 from frontend.PyQt5CustomClasses import QPushButton
-from frontend.events import Events
+from frontend.eventsPrimaryLayout import EventsPrimaryLayout
 from frontend.styles import styles
-class MainApp(QWidget):
+class PrimaryLayout(QWidget):
     def __init__(self, **kwargs) -> None:
         super().__init__()
         ConfigData: dict = kwargs.pop('configData') # Config data gettin poped
         self.validSourcePlatforms  : list = ConfigData['validSourcePlatforms']
         self.invalidSourcePlatforms: list = ConfigData['invalidSourcePlatforms']
         self.config: object = ConfigData['config']
-        self.events: object = Events(
+        self.events: object = EventsPrimaryLayout(
             config = self.config, 
             print2FeedbackConsole= self.print2FeedbackConsole,
             validSourcePlatforms = self.validSourcePlatforms,
+            switchLayout= kwargs.get('switchLayout'),
         )
         self.leftLabelPath: str = r".\frontend\images\turbovault4dbt_logo_rgb.svg"
         self.rightLabelPath: str = r".\frontend\images\scalefree_logo_rgb.svg"
@@ -41,10 +42,10 @@ class MainApp(QWidget):
         self.buttonStyle, self.disabledButtonStyle, self.listStyle, self.scrollBarStyle, self.checkboxStyle = styles()
         
         self.lock = Lock()  
-        self.setWindowTitle("TurboVault4dbt")
-        self.setWindowIcon(QIcon(r".\frontend\images\app_icon.png")) # Icon image should be replaced with SVG (or .ico)
+        #self.setWindowTitle("TurboVault4dbt")
+        #self.setWindowIcon(QIcon(r".\frontend\images\app_icon.png")) # Icon image should be replaced with SVG (or .ico)
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")
-        self.setGeometry(100, 100, 800, 1280)
+        #self.setGeometry(100, 100, 800, 1280)
         self.setupUI()
         
     def setupUI(self) -> None:
@@ -306,7 +307,7 @@ class MainApp(QWidget):
 
         # Set the style for the Cancel button
         self.cancelButton.setStyleSheet(self.buttonStyle)
-        self.cancelButton.clicked.connect(self.onCancel)
+        self.cancelButton.clicked.connect(self.events.onPressConfig)
 
         # Trademark label 
         trademarkLabel: QLabel = QLabel("© " + str(datetime.now().year) + " Scalefree International GmbH")
@@ -402,8 +403,6 @@ class MainApp(QWidget):
             name= 'generating',
             ).start()
         
-    def onCancel(self):
-        self.feedbackConsole.append("Process canceled.")
     
     def print2FeedbackConsole(self, message=None) -> None:
         self.feedbackConsole.append(message)
