@@ -1,0 +1,13 @@
+{{ config(schema='@@Schema',
+materialized='incremental') }}
+
+{%- set yaml_metadata -%}
+tracked_hashkey: @@Tracked_HK
+source_models:@@Source_Models
+
+{%- endset -%}    
+
+{%- set metadata_dict = fromyaml(yaml_metadata) -%}
+
+{{ datavault4dbt.rec_track_sat(tracked_hashkey=metadata_dict.get('tracked_hashkey'),
+                                source_models=metadata_dict.get('source_models')) }}
