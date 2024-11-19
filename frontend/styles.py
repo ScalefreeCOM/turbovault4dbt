@@ -1,4 +1,6 @@
-def styles():
+class customStyle:
+    logoSize: list = [300, 100]
+    configIconSize: list = [50, logoSize[1]//2]
     primaryStyle: str = """background-color: white; border: 0px solid black; color: #2d2382; font-family: Rajdhani; font-size: 30px; padding: 0px;"""
     secondaryStyle: str = """background-color: white; border: 0px solid black; color: #2d2382; font-family: Rajdhani; font-size: 20px; padding: 0px;"""
     textStyle: str = """background-color: white; border: 0px solid black; color: #555555; font-family: "Droid Serif"; font-size: 20px; """
@@ -208,4 +210,3 @@ def styles():
             background-color: #66ccd7;
         }
     """
-    return primaryStyle, secondaryStyle, textStyle, dropdownStyle, buttonStyle, disabledButtonStyle, listStyle, scrollBarStyle, checkboxStyle

@@ -3,11 +3,10 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEasingCurve, pyqtProperty, QPoint
 from PyQt5.QtGui import QColor, QPainter, QPen, QMovie, QFont, QLinearGradient, QRadialGradient
-
+from frontend.styles import customStyle
 class LoadingScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-
         # Attach to the main window as a child widget and set a semi-transparent background
         self.setFixedSize(parent.size())
         self.move(0, 0)  # Position at top-left corner
@@ -129,11 +128,13 @@ class QPushButton(QPushButton):
         hoverBorderColor: str = "black", 
         hoverBorderWidth: int = 1, 
         style: bool = True, 
+        size: list = [200, 56],
         *args, 
         **kwargs
         ) -> None:
         super().__init__(*args, **kwargs)
         
+        self.customStyle : object = customStyle
         # Set initial styles
         self.borderColor: str = borderColor
         self.borderWidth: int = borderWidth
@@ -146,13 +147,16 @@ class QPushButton(QPushButton):
         self.hoverBorderColor: str = hoverBorderColor
         self.hoverBorderWidth: int = hoverBorderWidth
         self.fontSize: int = fontSize
+        self.setFixedSize(size[0], size[1])
         if style:
+            self.setStyleSheet(self.customStyle.buttonStyle)
+        else:
             self.setStyleSheet(self._getStylesheet())
             self.setFont(QFont(self.fontName))
         # Initialize elevation animation
         self.elevationAnimation: QPropertyAnimation = QPropertyAnimation(self, b"geometry")
         self.elevationAnimation.setDuration(200)
-        
+
         self.pressed.connect(self.animatePress)
         self.released.connect(self.animateRelease)
 

@@ -5,6 +5,7 @@ class FormLayout(QWidget):
     def __init__(self, **kwargs):
         super().__init__()
         self.switchLayout= kwargs.get('switchLayout')
+        self.customStyle: object = kwargs.get('customStyle')
         self._initUi()
 
     def _initUi(self):

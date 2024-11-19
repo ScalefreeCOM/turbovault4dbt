@@ -3,12 +3,12 @@ from PyQt5.QtGui import (QIcon)
 from frontend.primaryLayout import PrimaryLayout
 from frontend.configLayout import ConfigLayout
 from frontend.formLayout import FormLayout
-from frontend.styles import styles
+from frontend.styles import customStyle
 class MainApp(QMainWindow):
     def __init__(self, **kwargs):
         super().__init__()
         self.configData = kwargs.pop('configData')
-        self.primaryStyle, _, _, _, _, _, _, _, _ = styles()
+        self.customStyle = customStyle()
         self.initUI()
         
     def initUI(self):
@@ -22,10 +22,15 @@ class MainApp(QMainWindow):
         self.primaryLayout = PrimaryLayout(
             switchLayout= self.switchLayout,
             configData= self.configData,
+            customStyle = self.customStyle,
             )
-        self.configLayout = ConfigLayout(self.switchLayout)
+        self.configLayout = ConfigLayout(
+            switchLayout= self.switchLayout,
+            customStyle = self.customStyle,
+            )
         self.formLayout= FormLayout(
             switchLayout= self.switchLayout,
+            customStyle = self.customStyle,
             )
         
         # Add layouts to stacked widget
@@ -34,7 +39,7 @@ class MainApp(QMainWindow):
         self.stackedWidget.addWidget(self.configLayout)
         
         self.setCentralWidget(self.stackedWidget)
-        self.setStyleSheet(self.primaryStyle)
+        self.setStyleSheet(self.customStyle.primaryStyle)
         # Show primary layout at startup
         self.switchLayout("primary")
 

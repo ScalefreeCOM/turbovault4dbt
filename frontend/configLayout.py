@@ -6,9 +6,10 @@ from PyQt5.QtCore import QSize, Qt
 from frontend.PyQt5CustomClasses import QPushButton
 
 class ConfigLayout(QWidget):
-    def __init__(self, switchLayoutFunc):
+    def __init__(self, **kwargs):
         super().__init__()
-        self._switchLayoutFunc = switchLayoutFunc
+        self.customStyle: object = kwargs.get('customStyle')
+        self._switchLayout : function = kwargs.get('switchLayout')
         self._initUi()
 
     def _initUi(self):
@@ -18,7 +19,7 @@ class ConfigLayout(QWidget):
         # Back button
         backButton = QPushButton(text="←")
         backButton.setFixedSize(100, 30)
-        backButton.clicked.connect(lambda: self._switchLayoutFunc("primary"))
+        backButton.clicked.connect(lambda: self._switchLayout("primary"))
         mainLayout.addWidget(backButton, alignment=Qt.AlignLeft)
 
         # Scrollable icon view
@@ -89,7 +90,7 @@ class ConfigLayout(QWidget):
         self.setLayout(mainLayout)
 
     def _onIconSelected(self, label):
-        self._switchLayoutFunc('form')
+        self._switchLayout('form')
 
     def _onOkClicked(self):
         print("OK clicked")

@@ -6,3 +6,4 @@ dump.db
 /tvdb-venv/
 /VenTurboVault/
 /models/
+frontend/test.py

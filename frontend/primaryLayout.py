@@ -3,22 +3,23 @@ import subprocess
 import ctypes
 from datetime import datetime
 from threading import Thread, Lock
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import (
-    QColor, QMovie, QPixmap, QStandardItem, QStandardItemModel
+    QColor, QMovie, QPixmap, QStandardItem, QStandardItemModel, QIcon 
 )
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import (
     QCheckBox, QComboBox, QLabel, QListWidget, QListWidgetItem,
-    QStackedLayout, QVBoxLayout, QHBoxLayout, QGridLayout, QScrollBar, QTextEdit, QWidget
+    QStackedLayout, QVBoxLayout, QHBoxLayout, QGridLayout, QScrollBar, QTextEdit, QWidget, QSpacerItem, QSizePolicy
 )
-from frontend.PyQt5CustomClasses import QPushButton
+from frontend.PyQt5CustomClasses  import QPushButton
 from frontend.eventsPrimaryLayout import EventsPrimaryLayout
-from frontend.styles import styles
+
 class PrimaryLayout(QWidget):
     def __init__(self, **kwargs) -> None:
         super().__init__()
         ConfigData: dict = kwargs.pop('configData') # Config data gettin poped
+        self.customStyle: object = kwargs.get('customStyle')
         self.validSourcePlatforms  : list = ConfigData['validSourcePlatforms']
         self.invalidSourcePlatforms: list = ConfigData['invalidSourcePlatforms']
         self.config: object = ConfigData['config']
@@ -30,6 +31,8 @@ class PrimaryLayout(QWidget):
         )
         self.leftLabelPath: str = r".\frontend\images\turbovault4dbt_logo_rgb.svg"
         self.rightLabelPath: str = r".\frontend\images\scalefree_logo_rgb.svg"
+        self.configIconPath: str = r".\frontend\images\config.svg"
+        self.helpIconPath: str = r".\frontend\images\help.svg"
         self.selections: dict = {
             'Tasks': [], 
             'Sources': [], 
@@ -38,41 +41,16 @@ class PrimaryLayout(QWidget):
             'Properties': False,
             'SourcePlatform': None,           
         }
-        self.primaryStyle, self.secondaryStyle, self.textStyle, self.dropdownStyle,\
-        self.buttonStyle, self.disabledButtonStyle, self.listStyle, self.scrollBarStyle, self.checkboxStyle = styles()
-        
+
         self.lock = Lock()  
-        #self.setWindowTitle("TurboVault4dbt")
-        #self.setWindowIcon(QIcon(r".\frontend\images\app_icon.png")) # Icon image should be replaced with SVG (or .ico)
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")
-        #self.setGeometry(100, 100, 800, 1280)
         self.setupUI()
         
     def setupUI(self) -> None:
         mainLayout: QVBoxLayout = QVBoxLayout()
         mainLayout.setContentsMargins(0, 0, 0, 0)
 
-        # Create a horizontal layout for images
-        imageLayout = QHBoxLayout()
-        imageLayout.setContentsMargins(12, 12, 12, 12)
-
-        # Left image
-        self.leftImageLabel = QLabel(self)
-        svgWidget = QSvgWidget(self.leftLabelPath)
-        svgWidget.setFixedSize(300, 86)
-        svgWidget.mousePressEvent = self.redirectToGoogle
-        imageLayout.addWidget(svgWidget, alignment=Qt.AlignLeft | Qt.AlignTop)
-
-        # Right image
-        self.rightImageLabel = QLabel(self)
-        pixmap = QPixmap(self.rightLabelPath)
-        self.rightImageLabel.setPixmap(pixmap.scaled(250, 100, Qt.KeepAspectRatio))
-        self.rightImageLabel.mousePressEvent = self.redirectToGoogle
-        imageLayout.addWidget(self.rightImageLabel, alignment=Qt.AlignRight | Qt.AlignTop)
-
-        # Add the image layout to the main layout
-        mainLayout.addLayout(imageLayout)
-        
+        mainLayout.addLayout(self.__createConfigHelpLogo())
         mainLayout.addLayout(self.__createDropdownLayout())
         mainLayout.addLayout(self.__createListsWithButtonsLayout())
         mainLayout.addLayout(self.__createCheckboxLayout())
@@ -89,20 +67,64 @@ class PrimaryLayout(QWidget):
         self.setLayout(mainLayout)
 
         # Apply the background color and border styles to the main widget
-        self.setStyleSheet(self.primaryStyle)
+        self.setStyleSheet(self.customStyle.primaryStyle)
 
     def redirectToGoogle(self, event):
         pass
-        
+    
+    def __createConfigHelpLogo(self)-> QVBoxLayout:
+            container : QVBoxLayout = QVBoxLayout() 
+            configButton = QPushButton(
+                backgroundColor = None,
+                style= False, 
+                )
+            configButton.setIcon(QIcon(self.configIconPath))
+            configButton.setIconSize(QSize(self.customStyle.configIconSize[0], self.customStyle.configIconSize[1]))
+            configButton.setFixedSize(self.customStyle.configIconSize[0], self.customStyle.configIconSize[1])
+            configButton.setFlat(True)
+            configButton.clicked.connect(self.events.onPressConfig)
+            container.addWidget(configButton, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            helpButton = QPushButton(
+                backgroundColor = None,
+                style= False, 
+                )
+            helpButton.setIcon(QIcon(self.helpIconPath))
+            helpButton.setIconSize(QSize(self.customStyle.configIconSize[0], self.customStyle.configIconSize[1]))
+            helpButton.setFixedSize(self.customStyle.configIconSize[0], self.customStyle.configIconSize[1])
+            helpButton.setFlat(True)
+            helpButton.clicked.connect(self.events.onPressHelp)            
+            container.addWidget(helpButton, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            # Create a horizontal layout for
+            imageLayout = QHBoxLayout()
+            imageLayout.setContentsMargins(12, 12, 12, 12)
+
+            self.leftImageLabel = QLabel(self)
+            Logo = QSvgWidget(self.leftLabelPath)
+            #Logo.setFixedSize(self.customStyle.logoSize[0], self.customStyle.logoSize[1])
+            Logo.mousePressEvent = self.redirectToGoogle
+            imageLayout.addLayout(container)
+            imageLayout.addWidget(Logo, alignment=Qt.AlignCenter | Qt.AlignTop)
+
+
+            emptyLabel = QLabel()
+            emptyLabel.setFixedWidth(self.customStyle.configIconSize[0])
+            spacerBox = QHBoxLayout()
+            spacerBox.addWidget(emptyLabel, alignment=Qt.AlignRight | Qt.AlignTop)
+            imageLayout.addLayout(spacerBox)
+
+
+            return imageLayout
+              
     def __createDropdownLayout(self) -> QVBoxLayout:
         dropdownLayout: QVBoxLayout = QVBoxLayout()  
         dropdownLabel: QLabel = QLabel("METADATA INPUT")
 
         # Set the style for the dropdown label
-        dropdownLabel.setStyleSheet(self.primaryStyle)
+        dropdownLabel.setStyleSheet(self.customStyle.primaryStyle)
 
         self.sourcePlatformCombo: QComboBox = QComboBox()
-        # dropdownItems: list = ["Select a platform"] + self.validSourcePlatforms
         
         # Set up the model to allow styling each item individually
         model = QStandardItemModel()
@@ -123,11 +145,10 @@ class PrimaryLayout(QWidget):
             item.setEnabled(False)
             model.appendRow(item)
             
-        # self.sourcePlatformCombo.addItems(dropdownItems)
         self.sourcePlatformCombo.currentIndexChanged.connect(self.updateSources)
         
         # Set the style for the combo box and adjust its height
-        self.sourcePlatformCombo.setStyleSheet(self.dropdownStyle)
+        self.sourcePlatformCombo.setStyleSheet(self.customStyle.dropdownStyle)
         self.sourcePlatformCombo.setFixedHeight(56) 
         self.sourcePlatformCombo.view().window().setWindowFlags(Qt.Popup | Qt.NoDropShadowWindowHint)
         self.sourcePlatformCombo.view().setSpacing(3)
@@ -151,11 +172,9 @@ class PrimaryLayout(QWidget):
         # Create a horizontal layout for the sources label and select button
         sourcesLabelLayout: QHBoxLayout = QHBoxLayout()
         sourcesLabel: QLabel = QLabel("SOURCES")
-        sourcesLabel.setStyleSheet(self.primaryStyle)
+        sourcesLabel.setStyleSheet(self.customStyle.primaryStyle)
 
         self.selectAllSourcesBtn: QPushButton = QPushButton(text="SELECT ALL")
-        self.selectAllSourcesBtn.setFixedSize(200, 56)
-        self.selectAllSourcesBtn.setStyleSheet(self.buttonStyle)
         self.selectAllSourcesBtn.clicked.connect(self.toggleSelectSources)
 
         # Add label and button to the horizontal layout
@@ -165,7 +184,7 @@ class PrimaryLayout(QWidget):
         self.sourcesList: QListWidget = QListWidget()
         self.sourcesList.setSelectionMode(QListWidget.MultiSelection)
         self.sourcesList.setMinimumHeight(56)
-        self.sourcesList.setStyleSheet(self.listStyle + self.scrollBarStyle)
+        self.sourcesList.setStyleSheet(self.customStyle.listStyle + self.customStyle.scrollBarStyle)
 
         # Add the label layout and list widget to the sources layout
         self.sourcesLayout.addLayout(sourcesLabelLayout)
@@ -178,11 +197,9 @@ class PrimaryLayout(QWidget):
         # Create a horizontal layout for the tasks label and deselect button
         tasksLabelLayout: QHBoxLayout = QHBoxLayout()
         tasksLabel = QLabel("ENTITIES")
-        tasksLabel.setStyleSheet(self.primaryStyle)
+        tasksLabel.setStyleSheet(self.customStyle.primaryStyle)
 
         self.deselectAllTasksBtn: QPushButton = QPushButton(text="DESELECT ALL")
-        self.deselectAllTasksBtn.setFixedSize(200, 56)
-        self.deselectAllTasksBtn.setStyleSheet(self.buttonStyle)
         self.deselectAllTasksBtn.clicked.connect(self.toggleDeselectTasks)
 
         # Add label and button to the horizontal layout
@@ -192,7 +209,7 @@ class PrimaryLayout(QWidget):
         self.tasksList: QListWidget = QListWidget()
         self.tasksList.setSelectionMode(QListWidget.MultiSelection)
         self.tasksList.setMinimumHeight(56)
-        self.tasksList.setStyleSheet(self.listStyle + self.scrollBarStyle)
+        self.tasksList.setStyleSheet(self.customStyle.listStyle + self.customStyle.scrollBarStyle)
 
         tasks = [
             'Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non-Historized Link',
@@ -230,10 +247,10 @@ class PrimaryLayout(QWidget):
         # Helper method to create checkbox layout
         def createCheckboxLayout(label_text: str, check_box: QCheckBox) -> QHBoxLayout:
             hbox: QHBoxLayout = QHBoxLayout()
-            check_box.setStyleSheet(self.checkboxStyle)
+            check_box.setStyleSheet(self.customStyle.checkboxStyle)
             hbox.addWidget(check_box)
             label: QLabel = QLabel(label_text)
-            label.setStyleSheet(self.textStyle)
+            label.setStyleSheet(self.customStyle.textStyle)
             hbox.addWidget(label, alignment=Qt.AlignLeft, stretch=1)
             hbox.setContentsMargins(6, 6, 6, 6)
             return hbox
@@ -262,11 +279,11 @@ class PrimaryLayout(QWidget):
         # Feedback console with GIF background
         self.feedbackConsole = QTextEdit(self)
         self.feedbackConsole.setReadOnly(True)
-        self.feedbackConsole.setStyleSheet(self.textStyle + "background: rgba(237, 237, 237, 255); border: 0px solid #2d2382; padding: 6px;")
+        self.feedbackConsole.setStyleSheet(self.customStyle.textStyle + "background: rgba(237, 237, 237, 255); border: 0px solid #2d2382; padding: 6px;")
         
         # Create a custom QScrollBar and assign it to the console
         customScrollBar = QScrollBar()
-        customScrollBar.setStyleSheet(self.scrollBarStyle)
+        customScrollBar.setStyleSheet(self.customStyle.scrollBarStyle)
         self.feedbackConsole.setVerticalScrollBar(customScrollBar)
 
         # Load and set a GIF animation as the background ## Change transparency vaule of the feedback console to reveal the background image
@@ -293,25 +310,23 @@ class PrimaryLayout(QWidget):
         buttonLayout.setContentsMargins(12, 6, 12, 6)
         
         self.startButton: QPushButton = QPushButton(text= "START")
-        self.startButton.setFixedSize(200, 56)
         
         # Set the style for the Start button
-        self.startButton.setStyleSheet(self.buttonStyle)
+        self.startButton.setStyleSheet(self.customStyle.buttonStyle)
         self.startButton.clicked.connect(self.onStart)
         
         self.startButton.setEnabled(False)
         self.startButton.setToolTip("PLEASE SELECT AT LEAST ONE SOURCE AND ONE TASK.")
         
         self.cancelButton: QPushButton = QPushButton(text= "CANCEL")
-        self.cancelButton.setFixedSize(200, 56)
 
         # Set the style for the Cancel button
-        self.cancelButton.setStyleSheet(self.buttonStyle)
-        self.cancelButton.clicked.connect(self.events.onPressConfig)
+        self.cancelButton.setStyleSheet(self.customStyle.buttonStyle)
+        self.cancelButton.clicked.connect(self.events.onPressConfig) # TODO: handle
 
         # Trademark label 
         trademarkLabel: QLabel = QLabel("© " + str(datetime.now().year) + " Scalefree International GmbH")
-        trademarkLabel.setStyleSheet(self.secondaryStyle + "padding: 6px;")
+        trademarkLabel.setStyleSheet(self.customStyle.secondaryStyle + "padding: 6px;")
         
         buttonLayout.addWidget(trademarkLabel)
         buttonLayout.addWidget(self.startButton, alignment=Qt.AlignRight)
@@ -357,10 +372,10 @@ class PrimaryLayout(QWidget):
 
         # Adjust the style and tooltip based on the state of the button
         if isEnabled:
-            self.startButton.setStyleSheet(self.buttonStyle)
+            self.startButton.setStyleSheet(self.customStyle.buttonStyle)
             self.startButton.setToolTip("CLICK TO START THE PROCESS.") 
         else:
-            self.startButton.setStyleSheet(self.disabledButtonStyle)
+            self.startButton.setStyleSheet(self.customStyle.disabledButtonStyle)
             self.startButton.setToolTip("PLEASE SELECT AT LEAST ONE SOURCE AND ONE TASK.") 
         
     def toggleSelectSources(self) -> None:
