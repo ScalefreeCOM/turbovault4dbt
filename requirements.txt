@@ -31,6 +31,7 @@ Pillow==9.4.0
 proto-plus==1.22.2
 protobuf==4.21.12
 psutil==5.9.4
+psycopg2==2.9.3
 pyarrow==8.0.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
