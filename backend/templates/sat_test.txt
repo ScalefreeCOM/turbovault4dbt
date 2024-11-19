@@ -1,0 +1,14 @@
+  - name: @@SatName
+    tags: ['SATELLITE']
+    tests:
+    - dbt_utils.unique_combination_of_columns:
+        combination_of_columns: 
+          - @@ParentHK
+          - ldts    
+    columns:
+      - name: @@ParentHK
+        tests:
+          - not_null
+          - relationships:
+              to: ref('@@ParentTable')
+              field: @@ParentHK

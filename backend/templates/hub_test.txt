@@ -1,0 +1,7 @@
+  - name: @@HubName
+    tags: ['HUB']
+    columns:
+      - name: @@HubHK
+        tests:
+          - unique
+          - not_null   
