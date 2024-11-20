@@ -8,7 +8,7 @@ from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import generate_selected_entities
 from backend.procs.sqlite3 import properties
 
-class BigQuery:
+class Bigquery:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
@@ -34,7 +34,8 @@ class BigQuery:
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
         } 
-
+        if not kwargs.get('print2FeedbackConsole'):
+            self.data_structure['console_outputs'] = False
 
     def setTODO(self, **kwargs):
         self.SourceYML = kwargs.pop('SourceYML')

@@ -9,7 +9,7 @@ from backend.procs.sqlite3 import properties
 image_path = os.path.join(os.path.dirname(__file__),"images")
 log = Logger('log')
 
-class DB:
+class Db:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
@@ -34,7 +34,8 @@ class DB:
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
         }  
-
+        if not kwargs.get('print2FeedbackConsole'):
+            self.data_structure['console_outputs'] = False
     
     def setTODO(self, **kwargs):
         self.SourceYML = kwargs.pop('SourceYML')
@@ -60,17 +61,19 @@ class DB:
         self.read()
         if self.SourceYML:
             sources.gen_sources(self.data_structure)
-        try:
-            for self.data_structure['source'] in self.selectedSources:
-                seperatedNameAsList = self.data_structure['source'].split('_*-*_')
-                self.data_structure['source_name']   = seperatedNameAsList[0]
-                self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
-                generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
-                if self.Properties:
+
+        for self.data_structure['source'] in self.selectedSources:
+            seperatedNameAsList = self.data_structure['source'].split('_*-*_')
+            self.data_structure['source_name']   = seperatedNameAsList[0]
+            self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
+            generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
+            if self.Properties:
+                try:
                     properties.gen_properties(self.data_structure)
-            self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
-        except Exception as e:
-            self.data_structure['print2FeedbackConsole'](message= 'No sources selected!')
+                except:
+                    self.data_structure['print2FeedbackConsole'](message= 'Failed to generate properties.yml file for the source: {0}.'.format(self.data_structure['source_name']))
+        self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
+
 
         if self.DBDocs:
             generate_erd.generate_erd(self.data_structure['cursor'], self.selectedSources, self.data_structure['generated_timestamp'],self.data_structure['model_path'],self.data_structure['hashdiff_naming'])

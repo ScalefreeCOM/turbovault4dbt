@@ -4,7 +4,7 @@ from configparser import ConfigParser
 
 class MetadataInputConfig:
     def __init__(self)->None:
-        self.supportedPlatforms: list = ['Excel','Google Sheets','Snowflake','BigQuery','db']        
+        self.supportedPlatforms: list = ['Excel','Googlesheets','Snowflake','Bigquery','db']        
         self.configExpectedFields: dict ={
         'Snowflake':[
             'stage_schema',
@@ -18,7 +18,7 @@ class MetadataInputConfig:
             'meta_schema',
             'credential_path',
         ],
-        'Google Sheets':[
+        'Googlesheets':[
             'stage_schema',
             'rdv_schema',
             'hashdiff_naming',
@@ -27,7 +27,7 @@ class MetadataInputConfig:
             'gcp_oauth_credentials',
             'source_database',
         ],
-        'BigQuery':[
+        'Bigquery':[
             'stage_schema',
             'rdv_schema',
             'metadata_dataset',
@@ -43,7 +43,7 @@ class MetadataInputConfig:
             'model_path',
             'excel_path',
         ],
-        'db': [
+        'Db': [
             'stage_schema',
             'rdv_schema',
             'hashdiff_naming',

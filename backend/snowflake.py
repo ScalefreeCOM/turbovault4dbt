@@ -29,7 +29,8 @@ class Snowflake:
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
         } 
-    
+        if not kwargs.get('print2FeedbackConsole'):
+            self.data_structure['console_outputs'] = False    
     def configParser(self)->bool:
         try:
             root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])

@@ -14,34 +14,27 @@ class EventsPrimaryLayout:
 
     def onDropdownSelection(self, selection: str) -> list:
         if selection == 'Excel':
-            self.TurboVault.excel.read()
-            newSources : list = self.TurboVault.excel.data_structure['source_list']
-        elif selection == 'Google Sheets':
-            self.TurboVault.googleSheets.read()
-            newSources : list = self.TurboVault.googleSheets.data_structure['source_list']
+            self.TurboVault.Excel.read()
+            newSources : list = self.TurboVault.Excel.data_structure['source_list']
+        elif selection == 'Googlesheets':
+            self.TurboVault.Googlesheets.read()
+            newSources : list = self.TurboVault.Googlesheets.data_structure['source_list']
         elif selection == 'Snowflake':
-            self.TurboVault.snowflake.read()
-            newSources : list = self.TurboVault.snowflake.data_structure['source_list']         
-        elif selection == 'BigQuery':
-            self.TurboVault.bigquery.read()
-            newSources : list = self.TurboVault.bigquery.data_structure['source_list']
-        elif selection == 'db':
-            self.TurboVault.db.read()
-            newSources : list = self.TurboVault.db.data_structure['source_list']
+            self.TurboVault.Snowflake.read()
+            newSources : list = self.TurboVault.Snowflake.data_structure['source_list']         
+        elif selection == 'Bigquery':
+            self.TurboVault.Bigquery.read()
+            newSources : list = self.TurboVault.Bigquery.data_structure['source_list']
+        elif selection == 'Db':
+            self.TurboVault.Db.read()
+            newSources : list = self.TurboVault.Db.data_structure['source_list']
         return newSources
     
     def onPressStart(self, selections) -> None:
-        platformMap = {
-            'Excel': (self.TurboVault.excel, self.TurboVault.doRunForExcel),
-            'Google Sheets': (self.TurboVault.googleSheets, self.TurboVault.doRunForGoogleSheets),
-            'Snowflake': (self.TurboVault.snowflake, self.TurboVault.doRunForSnowflake),
-            'BigQuery': (self.TurboVault.bigquery, self.TurboVault.doRunForBigQuery),
-            'db': (self.TurboVault.db, self.TurboVault.doRunForDb)
-        }
         
-        platform, runFunction = platformMap.get(selections['SourcePlatform'], (None, None))
-        
-        if platform and runFunction:
+        selectedSourcePlatform = selections['SourcePlatform']
+        platform = getattr(self.TurboVault, selectedSourcePlatform, None)
+        if platform:
             platform.setTODO(
                 SourceYML=selections['SourceYML'],
                 Tasks=selections['Tasks'],
@@ -49,8 +42,10 @@ class EventsPrimaryLayout:
                 DBDocs=selections['DBDocs'],
                 Properties=selections['Properties']
             )
-            runFunction()
-            
+        method = getattr(self.TurboVault, f"doRunFor{selectedSourcePlatform.capitalize()}", None)
+        if method:
+            method()            
+
     def onPressConfig(self)-> None:
         self.switchLayout('config')
     

@@ -10,7 +10,7 @@ from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import properties
 
 
-class GoogleSheets:
+class Googlesheets:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
@@ -36,7 +36,8 @@ class GoogleSheets:
             'source_object' : None, # "Source" field splits into this field
             'source_database': self.config.get("source_database"),
             }  
-
+        if not kwargs.get('print2FeedbackConsole'):
+            self.data_structure['console_outputs'] = False
     
     def setTODO(self, **kwargs):
         self.SourceYML = kwargs.pop('SourceYML')

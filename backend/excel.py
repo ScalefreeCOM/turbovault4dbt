@@ -29,7 +29,8 @@ class Excel:
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
             }  
-
+        if not kwargs.get('print2FeedbackConsole'):
+            self.data_structure['console_outputs'] = False
     
     def setTODO(self, **kwargs):
         self.SourceYML = kwargs.pop('SourceYML')
