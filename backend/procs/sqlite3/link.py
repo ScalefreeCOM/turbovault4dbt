@@ -121,4 +121,4 @@ def generate_link(data_structure):
     with open(filename, 'w') as f:
       f.write(command.expandtabs(2))
       if data_structure['console_outputs']:
-          data_structure['print2FeedbackConsole'](message= f"Created Link Model {link_name}")
+          data_structure['print2FeedbackConsole']( f"Created Link Model {link_name}")

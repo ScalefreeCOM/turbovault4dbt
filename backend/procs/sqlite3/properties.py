@@ -163,4 +163,4 @@ def gen_properties(data_structure):
     with open(filename, 'w') as f:
         f.write(command.expandtabs(2))
     if data_structure['console_outputs']:
-        data_structure['print2FeedbackConsole'](message= f"Created {source_object.lower()}.yml")
+        data_structure['print2FeedbackConsole']( f"Created {source_object.lower()}.yml")

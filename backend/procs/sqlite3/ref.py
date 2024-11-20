@@ -161,7 +161,7 @@ def generate_ref(data_structure):
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
             if console_outputs:
-                data_structure['print2FeedbackConsole'](message= f"Created Reference Table Model {ref_name}")
+                data_structure['print2FeedbackConsole']( f"Created Reference Table Model {ref_name}")
 
         #Reference Hub
         relevant_hubs = get_hub_source(cursor,source_name,source_object)
@@ -203,7 +203,7 @@ def generate_ref(data_structure):
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
             if console_outputs:
-                data_structure['print2FeedbackConsole'](message= f"Created Reference Hub Model {ref_hub_name}")
+                data_structure['print2FeedbackConsole']( f"Created Reference Hub Model {ref_hub_name}")
 
         #Ref Satellites
 
@@ -244,7 +244,7 @@ def generate_ref(data_structure):
             with open(filename, 'w') as f:
                 f.write(command.expandtabs(2))
                 if console_outputs:
-                    data_structure['print2FeedbackConsole'](message= f"Created Reference Sat Model {sat_name}")
+                    data_structure['print2FeedbackConsole']( f"Created Reference Sat Model {sat_name}")
 
             #Satellite_v1
             root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
@@ -269,5 +269,5 @@ def generate_ref(data_structure):
             with open(filename_v1, 'w') as f:
                 f.write(command_v1.expandtabs(2))
                 if console_outputs:
-                    data_structure['print2FeedbackConsole'](message= f"Created Ref Sat Model {sat_name}")
+                    data_structure['print2FeedbackConsole']( f"Created Ref Sat Model {sat_name}")
 

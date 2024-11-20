@@ -140,9 +140,9 @@ class Bigquery:
                 generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
                 if self.Properties:
                     properties.gen_properties(self.data_structure)
-            self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
+            self.data_structure['print2FeedbackConsole']( 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
         except Exception as e:
-            self.data_structure['print2FeedbackConsole'](message= 'No sources selected!')
+            self.data_structure['print2FeedbackConsole']( 'No sources selected!')
 
         if self.DBDocs:
             generate_erd.generate_erd(self.data_structure['cursor'], self.selectedSources, self.data_structure['generated_timestamp'],self.data_structure['model_path'],self.data_structure['hashdiff_naming'])

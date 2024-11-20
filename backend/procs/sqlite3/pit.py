@@ -108,7 +108,7 @@ def generate_pit(data_structure):
         with open(filename, 'w') as f:
             f.write(command.expandtabs(2))
         if data_structure['console_outputs']:
-            data_structure['print2FeedbackConsole'](message= f"Created Pit Model {pit_name}")
+            data_structure['print2FeedbackConsole']( f"Created Pit Model {pit_name}")
 
         #control_snap_v0
         with open('templates/control_snap_v0.txt') as f1:

@@ -6,8 +6,15 @@ from backend.db import Db
 class TurboVault():
     def __init__(self, **kwargs):
         self.turboVaultconfigs = kwargs.get('turboVaultconfigs')
-        validSourcePlatforms= kwargs.get('validSourcePlatforms')
+        validSourcePlatforms: list = kwargs.get('validSourcePlatforms')
+        if isinstance(validSourcePlatforms, list):
+            pass
+        else:
+            validSourcePlatforms = [validSourcePlatforms]
         self.print2FeedbackConsole : function = kwargs.get('print2FeedbackConsole')
+        if self.print2FeedbackConsole == None:
+           self.print2FeedbackConsole = print
+            
         self.supportedPlatforms= ['Excel', 'Googlesheets','Snowflake','Bigquery','Db']
         for validSource in validSourcePlatforms:
             if validSource in self.supportedPlatforms:

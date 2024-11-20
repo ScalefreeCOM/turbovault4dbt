@@ -86,7 +86,7 @@ def generate_ma_satellite(data_structure):
         with open(filename, 'w') as f:
             f.write(command_v0.expandtabs(2))
             if data_structure['console_outputs']:
-                data_structure['print2FeedbackConsole'](message= f"Created Multi Active Satellite Model {satellite_model_name_v0}")
+                data_structure['print2FeedbackConsole']( f"Created Multi Active Satellite Model {satellite_model_name_v0}")
 
         #Satellite_v1
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
@@ -111,4 +111,4 @@ def generate_ma_satellite(data_structure):
         with open(filename_v1, 'w') as f:
             f.write(command_v1.expandtabs(2))
             if data_structure['console_outputs']:
-                data_structure['print2FeedbackConsole'](message= f"Created Multi Active Satellite Model {satellite_name}")
+                data_structure['print2FeedbackConsole']( f"Created Multi Active Satellite Model {satellite_name}")

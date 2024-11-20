@@ -102,5 +102,5 @@ def generate_rt_satellite(data_structure):
             with open(filename, 'w') as f:
                 f.write(command.expandtabs(2))
                 if data_structure['console_outputs']:
-                    data_structure['print2FeedbackConsole'](message= f"Created Record Tracking Satellite {tracked_entity}_rts") 
+                    data_structure['print2FeedbackConsole']( f"Created Record Tracking Satellite {tracked_entity}_rts") 
            

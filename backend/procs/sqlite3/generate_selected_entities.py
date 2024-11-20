@@ -28,7 +28,7 @@ def handle_task(task, data_structure, task_proc_mapping):
     try:
         task_proc_mapping[task](data_structure)
     except Exception as e:
-        data_structure['print2FeedbackConsole'](message= f'Failed to generate the {task} {data_structure["source"]}: {str(e)}')
+        data_structure['print2FeedbackConsole']( f'Failed to generate the {task} {data_structure["source"]}: {str(e)}')
 
 def generate_selected_entities(todo, data_structure):
     for task in todo:

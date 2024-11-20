@@ -71,8 +71,8 @@ class Db:
                 try:
                     properties.gen_properties(self.data_structure)
                 except:
-                    self.data_structure['print2FeedbackConsole'](message= 'Failed to generate properties.yml file for the source: {0}.'.format(self.data_structure['source_name']))
-        self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
+                    self.data_structure['print2FeedbackConsole']( 'Failed to generate properties.yml file for the source: {0}.'.format(self.data_structure['source_name']))
+        self.data_structure['print2FeedbackConsole']( 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
 
 
         if self.DBDocs:
