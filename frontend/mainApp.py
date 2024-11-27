@@ -7,7 +7,8 @@ from frontend.styles import customStyle
 class MainApp(QMainWindow):
     def __init__(self, **kwargs):
         super().__init__()
-        self.configData = kwargs.pop('configData')
+        self.configData = kwargs.get('configData')
+        self.writeConfig = kwargs.get('writeConfig')
         self.customStyle = customStyle()
         self.initUI()
         
@@ -28,13 +29,19 @@ class MainApp(QMainWindow):
             switchLayout= self.switchLayout,
             customStyle = self.customStyle,
             )
-        self.formLayout= FormLayout(
-            switchLayout= self.switchLayout,
-            customStyle = self.customStyle,
-            )
-        
+        self.formLayouts :dict = {} 
+        for validSurcePlatform in self.configData['validSourcePlatforms']:
+            self.formLayouts[validSurcePlatform] = FormLayout(
+                switchLayout= self.switchLayout,
+                customStyle = self.customStyle,
+                sourcePlatform= validSurcePlatform,
+                config = self.configData['config'],
+                configPath = self.configData['path'],
+                writeConfig = self.writeConfig,
+                )
+            self.stackedWidget.addWidget(self.formLayouts[validSurcePlatform])
+            
         # Add layouts to stacked widget
-        self.stackedWidget.addWidget(self.formLayout)
         self.stackedWidget.addWidget(self.primaryLayout)
         self.stackedWidget.addWidget(self.configLayout)
         
@@ -48,5 +55,6 @@ class MainApp(QMainWindow):
             self.stackedWidget.setCurrentWidget(self.primaryLayout)
         elif layoutName == "config":
             self.stackedWidget.setCurrentWidget(self.configLayout)
-        elif layoutName == "form":
-            self.stackedWidget.setCurrentWidget(self.formLayout)
+        elif "form" in layoutName:
+            form = layoutName.split("form",1)[1].replace(" ","").replace("\n","")
+            self.stackedWidget.setCurrentWidget(self.formLayouts[form])

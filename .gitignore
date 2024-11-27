@@ -7,3 +7,4 @@ dump.db
 /VenTurboVault/
 /models/
 frontend/test.py
+launch.json

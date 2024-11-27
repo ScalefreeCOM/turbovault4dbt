@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QLabel,QPushButton, QLineEdit
+    QWidget, QVBoxLayout, QLabel,QPushButton, QLineEdit, QHBoxLayout
 )
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEasingCurve, pyqtProperty, QPoint
-from PyQt5.QtGui import QColor, QPainter, QPen, QMovie, QFont, QLinearGradient, QRadialGradient
+from PyQt5.QtGui import QColor, QPainter, QPen, QMovie, QFont, QLinearGradient, QRadialGradient, QPixmap
 from frontend.styles import customStyle
+
 class LoadingScreen(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -195,64 +196,110 @@ class QPushButton(QPushButton):
                 border: {self.hoverBorderWidth}px solid {self.hoverBorderColor};
             }}
         """
-        
-
+              
 class QLineEdit(QLineEdit):
-    def __init__(self, placeholderText=""):
+    def __init__(self, **kwargs):
         super().__init__()
-        self.setPlaceholderText(placeholderText)
-        self.setFont(QFont("Rajdhani", 10))
-        self.setStyleSheet("""
-            QLineEdit {
-                background-color: white;
-                border: 1px solid #ccc;
-                padding: 8px;
-                border-radius: 5px;
-                color: black;
-            }
-            QLineEdit:hover {
-                border-color: lightblue;
-            }
-            QLineEdit:focus {
-                border-color: #00aabe;
-            }
-        """)
+        self.redX: str = r".\images\redX.svg"
+        self.greenCheck: str = r".\images\greenCheck.svg"
+        #self.Height: int = int(kwargs.get('height'))
+        self.setPlaceholderText(kwargs.get('placeholderText'))
+        self.setText(kwargs.get('text'))
+        #self.setFixedHeight(self.Height)
+        self._defaultBorderColor: QColor = QColor('lightgrey')
+        self._focusBorderColor: QColor = QColor('#00aabe')
+        self._currentBorderColor: QColor = self._defaultBorderColor
+        self._borderWidth: int = 2
+        self._animationProgress: float = 0.0
+        self.textPadding: int = 80
+        self.statusIcon = None
+        self.animationType = 'expandCover'
 
-        self._underlineAnimation = QPropertyAnimation(self, b"geometry")
-        self._underlineColor = QColor("#00aabe")
-        self._animatedLinePos = None
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.setStyleSheet(kwargs.get('style'))
+        
+        self._animationTimer: QTimer = QTimer()
+        self._animationTimer.timeout.connect(self._updateAnimation)
+        
+        self.textToBorderDistance = 0
+        self.animationSpeed = 5
+
+
+    def resizeEvent(self, event):
+        self.widgetHeight, self.widgetWidth = self.size().height(), self.size().width()
+        super().resizeEvent(event)
+        if self.statusIcon:
+            self.statusIcon.move(5, (self.height() - 24) // 2)
 
     def focusInEvent(self, event):
-        startX = self.width() // 2
-        startPoint = QPoint(startX, self.height() - 2)
-        self._animateUnderline(startPoint)
+        super().focusInEvent(event)
+        self._animationProgress = 0.0
+        self._animationTimer.start(self.animationSpeed)
 
-    def _animateUnderline(self, startPoint: QPoint):
-        self._underlineAnimation.stop()
-        
-        # Calculate the start and end positions for the underline based on input
-        startLine = QRect(startPoint.x(), self.height() - 2, 0, 2)  # Start with zero-width line at startPoint
-        endLine = QRect(0, self.height() - 2, self.width(), 2)      # Expand to full width below text field
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        self._currentBorderColor = self._defaultBorderColor
+        self._animationProgress = 0.0
+        self._animationTimer.stop()
+        self.update()
 
-        # Configure animation to expand underline from the given start point
-        self._underlineAnimation.setStartValue(startLine)
-        self._underlineAnimation.setEndValue(endLine)
-        self._underlineAnimation.setDuration(300)
-        self._underlineAnimation.start()
+    def _updateAnimation(self):
+        self._animationProgress += 0.02
+        if self._animationProgress >= 1.0:
+            self._animationProgress = 1.0
+            self._animationTimer.stop()
+        self.update()
 
     def paintEvent(self, event):
         super().paintEvent(event)
+        painter = QPainter(self)
+        pen = QPen(self._defaultBorderColor, self._borderWidth)
+        painter.setPen(pen)
 
-        # Draw the animated underline when the field is focused
-        if self.hasFocus():
-            painter = QPainter(self)
-            painter.setRenderHint(QPainter.Antialiasing)
-            pen = QPen(self._underlineColor)
-            pen.setWidth(2)
+        # Default border line (static)
+        painter.drawLine(
+            self.textPadding,
+            self.height() + self.textToBorderDistance,
+            self.width() - self.textPadding,
+            self.height() + self.textToBorderDistance,
+        )
+
+        # Animation: Expand Cover effect
+        if self._animationProgress > 0.0:
+            pen.setColor(self._focusBorderColor)
             painter.setPen(pen)
-            # Draw the line from the start point, expanding left and right as defined by the animation
-            painter.drawLine(self._underlineAnimation.startValue().x(), 
-                             self._underlineAnimation.startValue().y(), 
-                             self._underlineAnimation.endValue().width(), 
-                             self._underlineAnimation.endValue().y())
+
+            # Step 1: Draw bottom border
+            animatedWidth = (self.width() - 2 * self.textPadding) * self._animationProgress
+            painter.drawLine(
+                self.textPadding,
+                self.height() + self.textToBorderDistance,
+                self.textPadding + animatedWidth,
+                self.height() + self.textToBorderDistance,
+            )
+
+            # Step 2: Draw vertical borders
+            if self._animationProgress > 0.5:
+                verticalProgress = (self._animationProgress - 0.5) * 2  # Normalize to [0, 1]
+                topY = self.height() + self.textToBorderDistance - (self.height() * verticalProgress)
+                painter.drawLine(
+                    self.textPadding,
+                    self.height() + self.textToBorderDistance,
+                    self.textPadding,
+                    topY,
+                )
+                painter.drawLine(
+                    self.width() - self.textPadding,
+                    self.height() + self.textToBorderDistance,
+                    self.width() - self.textPadding,
+                    topY,
+                )
+
+            # Step 3: Draw top border
+            if self._animationProgress == 1.0:
+                painter.drawLine(
+                    self.textPadding + animatedWidth,
+                    self.height()- self.widgetHeight,
+                    self.textPadding,
+                    self.height()- self.widgetHeight,
+                )
+        painter.end()

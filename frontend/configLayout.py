@@ -53,22 +53,17 @@ class ConfigLayout(QWidget):
             
             iconLabel = QLabel(label)
             iconLabel.setFixedWidth(120)
-            #iconLabel.setWordWrap(True)
+
             iconLabel.setAlignment(Qt.AlignCenter)
-            #iconLabel.setAlignment(Qt.AlignHCenter | Qt.AlignTop)  
-                      
+
             iconContainerWidget = QWidget()
             iconContainerLayout = QVBoxLayout(iconContainerWidget)
             iconContainerLayout.addWidget(iconButton)
             iconContainerLayout.setAlignment(Qt.AlignHCenter)
             iconContainerLayout.addWidget(iconLabel)
-            #labelContainerWidget = QWidget()
-            #labelContainerLayout = QVBoxLayout(labelContainerWidget)
-            #labelContainerLayout.addWidget(iconLabel)
-            #labelContainerLayout.setAlignment(Qt.AlignHCenter)
+
             
             iconGridLayout.addWidget(iconContainerWidget, index // itemPerRow, index % itemPerRow)
-            #iconGridLayout.addWidget(labelContainerWidget, int(index // itemPerRow) +1, index % itemPerRow)
             iconGridLayout.setRowStretch(-(-len(icons)//itemPerRow), itemPerRow)           
                                   
         iconScrollArea.setWidget(iconContainer)
@@ -90,7 +85,7 @@ class ConfigLayout(QWidget):
         self.setLayout(mainLayout)
 
     def _onIconSelected(self, label):
-        self._switchLayout('form')
+        self._switchLayout('form'+label)
 
     def _onOkClicked(self):
         print("OK clicked")

@@ -210,3 +210,11 @@ class customStyle:
             background-color: #66ccd7;
         }
     """
+    QLineEdit: str ="""
+            background-color: transparent; 
+            padding-left: 120px; 
+            padding-right: 120px;
+            font-family: Rajdhani; 
+            font-size: 20px; 
+            height: 40px;
+        """

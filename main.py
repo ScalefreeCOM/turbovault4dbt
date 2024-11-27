@@ -6,8 +6,10 @@ from backend.config.config import MetadataInputConfig
 from frontend.mainApp import MainApp
 def main():
     app = QApplication(sys.argv)
+    config = MetadataInputConfig()
     window = MainApp(
-        configData = MetadataInputConfig().data
+        configData = config.data,
+        writeConfig = config.write,
         )
     window.show()
     sys.exit(app.exec_())

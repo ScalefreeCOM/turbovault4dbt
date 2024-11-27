@@ -54,6 +54,7 @@ class MetadataInputConfig:
         'validSourcePlatforms': [], 
         'invalidSourcePlatforms': [], 
         'config':None, 
+        'path': None,
         }
         self.read()
         try:
@@ -63,7 +64,8 @@ class MetadataInputConfig:
                
     def read(self):
         config = ConfigParser()
-        config.read(os.path.join(os.path.dirname(__file__),"config.ini"))
+        self.data['path'] = os.path.join(os.path.dirname(__file__),"config.ini")
+        config.read(self.data['path'])
         self.data['config']= config
 
     def validate(self):
@@ -84,3 +86,7 @@ class MetadataInputConfig:
                 self.data['invalidSourcePlatforms'].append(key)
                 print('Invalid source platform: '+ key)
                 
+    def write(self):
+        with open(self.data['path'], 'w') as configfile:
+            self.data['config'].write(configfile)  
+            configfile.close()      
