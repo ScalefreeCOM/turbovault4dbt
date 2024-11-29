@@ -71,11 +71,11 @@ class ConfigLayout(QWidget):
 
         # Bottom buttons (OK and Cancel)
         bottomButtonLayout = QHBoxLayout()
-        bottomButtonLayout.addStretch()  
+        bottomButtonLayout.setContentsMargins(12, 6, 12, 6)
 
         okButton = QPushButton(text="OK")
         okButton.clicked.connect(self._onOkClicked)
-        bottomButtonLayout.addWidget(okButton)
+        bottomButtonLayout.addWidget(okButton, alignment=Qt.AlignRight)
 
         cancelButton = QPushButton(text="CANCEL")
         cancelButton.clicked.connect(self._onCancelClicked)
@@ -88,7 +88,7 @@ class ConfigLayout(QWidget):
         self._switchLayout('form'+label)
 
     def _onOkClicked(self):
-        print("OK clicked")
+        self._switchLayout("primary")
 
     def _onCancelClicked(self):
-        print("Cancel clicked")
+        self._switchLayout("primary")

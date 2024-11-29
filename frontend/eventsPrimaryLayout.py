@@ -25,9 +25,9 @@ class EventsPrimaryLayout:
         elif selection == 'Bigquery':
             self.TurboVault.Bigquery.read()
             newSources : list = self.TurboVault.Bigquery.data_structure['source_list']
-        elif selection == 'Db':
-            self.TurboVault.Db.read()
-            newSources : list = self.TurboVault.Db.data_structure['source_list']
+        elif selection == 'Database':
+            self.TurboVault.Database.read()
+            newSources : list = self.TurboVault.Database.data_structure['source_list']
         return newSources
     
     def onPressStart(self, selections) -> None:

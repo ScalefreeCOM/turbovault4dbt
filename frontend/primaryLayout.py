@@ -18,7 +18,7 @@ from frontend.eventsPrimaryLayout import EventsPrimaryLayout
 class PrimaryLayout(QWidget):
     def __init__(self, **kwargs) -> None:
         super().__init__()
-        ConfigData: dict = kwargs.pop('configData') # Config data gettin poped
+        ConfigData: dict = kwargs.pop('configData')
         self.customStyle: object = kwargs.get('customStyle')
         self.validSourcePlatforms  : list = ConfigData['validSourcePlatforms']
         self.invalidSourcePlatforms: list = ConfigData['invalidSourcePlatforms']

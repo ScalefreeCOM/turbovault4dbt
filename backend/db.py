@@ -9,7 +9,7 @@ from backend.procs.sqlite3 import properties
 image_path = os.path.join(os.path.dirname(__file__),"images")
 log = Logger('log')
 
-class Db:
+class Database:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')

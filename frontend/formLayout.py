@@ -82,16 +82,20 @@ class FormLayout(QWidget):
     def __genButtons(self):
         # Bottom buttons
         bottomButtonLayout = QHBoxLayout()
-        bottomButtonLayout.setContentsMargins(100, 0, 20, 50) #  (left, top, right, bottom)
-        saveButton = QPushButton(text="Save")
-        saveButton.clicked.connect(self.onSave)  # Connect save button to onSave
-        okButton = QPushButton(text="OK")
-        okButton.clicked.connect(self.changeLayout)
-        cancelButton = QPushButton(text="Cancel")
 
-        bottomButtonLayout.addWidget(saveButton, alignment=Qt.AlignRight)
-        bottomButtonLayout.addWidget(okButton, alignment=Qt.AlignRight)
-        bottomButtonLayout.addWidget(cancelButton, alignment=Qt.AlignRight)
+        bottomButtonLayout.setContentsMargins(12, 6, 12, 6)
+        okButton = QPushButton(text="OK")
+        okButton.clicked.connect(self.onOK)
+        cancelButton = QPushButton(text="Cancel")
+        cancelButton.clicked.connect(self.onCancel)
+
+
+        bottomButtonLayout.addWidget(okButton, 
+                                     alignment=Qt.AlignRight,
+                                     )
+        bottomButtonLayout.addWidget(cancelButton, 
+                                     #alignment=Qt.AlignRight,
+                                     )
         return bottomButtonLayout
 
     def changeLayout(self) -> None:
@@ -112,11 +116,16 @@ class FormLayout(QWidget):
             descriptions.append("Enter value for " + key)
         self.genForm(keys, values, descriptions)
 
-    def onSave(self):
+    def onOK(self):
         self.syncDataWithMemory()
         for key, value in self.content.items():
             self.config.set(self.sourcePlatform, key, value['value'])
 
         self.writeConfig()
+        self.changeLayout()
+
+    def onCancel(self):
+        self.changeLayout()
+
 
 

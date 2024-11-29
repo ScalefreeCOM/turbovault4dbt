@@ -2,7 +2,7 @@ from backend.excel import Excel
 from backend.googleSheets import Googlesheets
 from backend.snowflake import Snowflake
 from backend.bigquery import Bigquery
-from backend.db import Db
+from backend.db import Database
 class TurboVault():
     def __init__(self, **kwargs):
         self.turboVaultconfigs = kwargs.get('turboVaultconfigs')
@@ -15,7 +15,7 @@ class TurboVault():
         if self.print2FeedbackConsole == None:
            self.print2FeedbackConsole = print
             
-        self.supportedPlatforms= ['Excel', 'Googlesheets','Snowflake','Bigquery','Db']
+        self.supportedPlatforms= ['Excel', 'Googlesheets','Snowflake','Bigquery','Database']
         for validSource in validSourcePlatforms:
             if validSource in self.supportedPlatforms:
                 platformClass = globals().get(validSource.capitalize())
@@ -37,5 +37,5 @@ class TurboVault():
     def doRunForSnowflake(self):
         self.Snowflake.run()
 
-    def doRunForDb(self):
-        self.Db.run()
+    def doRunForDatabase(self):
+        self.Database.run()

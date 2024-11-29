@@ -43,7 +43,7 @@ class MetadataInputConfig:
             'model_path',
             'excel_path',
         ],
-        'Db': [
+        'Database': [
             'stage_schema',
             'rdv_schema',
             'hashdiff_naming',
