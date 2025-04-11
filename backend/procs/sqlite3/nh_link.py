@@ -7,7 +7,7 @@ def get_groupname(cursor,object_id):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def generate_link_list(cursor, source, source_name, source_object):
+def generate_link_list(cursor, source_name, source_object):
 
     query = f"""SELECT NH_Link_Identifier,Target_link_table_physical_name,GROUP_CONCAT(COALESCE(Hub_primary_key_physical_name,Source_column_physical_name))
                 FROM
@@ -30,12 +30,19 @@ def generate_link_list(cursor, source, source_name, source_object):
 def gen_payload(cursor,source_table_identifier):
     src_payload= ""
     target_payload=""
-    query = f"""SELECT Source_table_identifier,GROUP_CONCAT(Source_column_physical_name),GROUP_CONCAT(Target_column_physical_name)
-    FROM non_historized_link l 
+    query = f"""
+    SELECT 
+        Source_table_identifier,
+        GROUP_CONCAT(Source_column_physical_name),
+        GROUP_CONCAT(Target_column_physical_name)
+    FROM 
+        non_historized_link l 
     WHERE 1=1
-    AND l.Source_Table_Identifier = '{source_table_identifier}'
-    AND l.Target_Primary_Key_Physical_Name IS NULL
-    GROUP BY Source_table_identifier"""
+        AND l.Source_Table_Identifier = '{source_table_identifier}'
+        AND l.Target_Primary_Key_Physical_Name IS NULL
+    GROUP BY 
+        Source_table_identifier
+        """
 
     cursor.execute(query)
     results = cursor.fetchall()
@@ -59,18 +66,33 @@ def generate_source_models(cursor, link_id):
 
     command = ""
 
-    query = f"""SELECT Source_Table_Physical_Name, Source_table_identifier,
-                GROUP_CONCAT(Target_column_physical_name)
-                ,Static_Part_of_Record_Source_Column FROM
-                (SELECT DISTINCT src.Source_Table_Physical_Name,src.Source_table_identifier,l.Target_column_physical_name,src.Static_Part_of_Record_Source_Column 
-                FROM non_historized_link l
-                inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
-                where 1=1
+    query = f"""
+    SELECT 
+        Source_Table_Physical_Name, 
+        Source_table_identifier,
+        GROUP_CONCAT(Target_column_physical_name),
+        Static_Part_of_Record_Source_Column 
+    FROM
+        (
+            SELECT DISTINCT 
+                src.Source_Table_Physical_Name,
+                src.Source_table_identifier,
+                l.Target_column_physical_name,
+                src.Static_Part_of_Record_Source_Column 
+            FROM 
+                non_historized_link l
+            inner join 
+                source_data src on l.Source_Table_Identifier = src.Source_table_identifier
+            where 1=1
                 and NH_Link_Identifier = '{link_id}'
                 and Target_Primary_Key_Physical_Name <> ""
-                ORDER BY Target_Column_Sort_Order)
-                group by Source_Table_Physical_Name,Static_Part_of_Record_Source_Column
-                """
+            ORDER BY 
+                Target_Column_Sort_Order
+        )
+    group by 
+        Source_Table_Physical_Name,
+        Static_Part_of_Record_Source_Column
+            """
 
     cursor.execute(query)
     results = cursor.fetchall()
@@ -126,7 +148,7 @@ def generate_nh_link(data_structure):
   model_path = data_structure['model_path']  
   source_name = data_structure['source_name'] 
   source_object = data_structure['source_object']       
-  link_list = generate_link_list(cursor=cursor, source=source, source_name= source_name, source_object= source_object)
+  link_list = generate_link_list(cursor, source_name, source_object)
 
   for link in link_list:
     

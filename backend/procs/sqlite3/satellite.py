@@ -13,19 +13,34 @@ def gen_payload(payload_list):
     
     return payload_string
 
-def generate_satellite_list(cursor, source, source_name, source_object):
+def generate_satellite_list(cursor, source_name, source_object):
 
-    query = f"""SELECT DISTINCT Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,GROUP_CONCAT(Target_Column_Physical_Name),
-                Source_Table_Physical_Name,Load_Date_Column,Group_Name
-                from 
-                (SELECT DISTINCT hs.Satellite_Identifier,hs.Target_Satellite_Table_Physical_Name,hs.Parent_Primary_Key_Physical_Name,hs.Target_Column_Physical_Name,
-                src.Source_Table_Physical_Name,src.Load_Date_Column,hs.Group_Name FROM standard_satellite hs
-                inner join source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
-                where 1=1
-                and src.Source_System = '{source_name}'
-                and src.Source_Object = '{source_object}'
-                order by Target_Column_Sort_Order asc)
-                group by Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column, Group_Name"""
+    query = f"""
+    SELECT DISTINCT 
+        Satellite_Identifier,
+        Target_Satellite_Table_Physical_Name,
+        Parent_Primary_Key_Physical_Name,
+        GROUP_CONCAT(Target_Column_Physical_Name),
+        Source_Table_Physical_Name,Load_Date_Column,Group_Name
+    from 
+        (
+        SELECT DISTINCT 
+            hs.Satellite_Identifier,
+            hs.Target_Satellite_Table_Physical_Name,
+            hs.Parent_Primary_Key_Physical_Name,
+            hs.Target_Column_Physical_Name,
+            src.Source_Table_Physical_Name,
+            src.Load_Date_Column,
+            hs.Group_Name 
+        FROM standard_satellite hs
+        inner join 
+            source_data src on src.Source_table_identifier = hs.Source_Table_Identifier
+        where 1=1
+            and src.Source_System = '{source_name}'
+            and src.Source_Object = '{source_object}'
+        order by Target_Column_Sort_Order asc)
+    group by 
+    Satellite_Identifier,Target_Satellite_Table_Physical_Name,Parent_Primary_Key_Physical_Name,Source_Table_Physical_Name,Load_Date_Column, Group_Name"""
 
     cursor.execute(query)
     results = cursor.fetchall()
@@ -42,7 +57,7 @@ def generate_satellite(data_structure):
     hashdiff_naming = data_structure['hashdiff_naming']    
     source_name = data_structure['source_name'] 
     source_object = data_structure['source_object'] 
-    satellite_list = generate_satellite_list(cursor=cursor, source=source,source_name=source_name, source_object= source_object)
+    satellite_list = generate_satellite_list(cursor, source_name, source_object)
 
     for satellite in satellite_list:
         satellite_name = satellite[1]

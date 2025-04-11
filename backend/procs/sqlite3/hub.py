@@ -4,21 +4,35 @@ def get_groupname(cursor,object_id):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def generate_hub_list(cursor, source, source_name, source_object):
+def generate_hub_list(cursor, source_name, source_object):
     
-    query = f"""SELECT Hub_Identifier,Target_Hub_table_physical_name,GROUP_CONCAT(distinct Business_Key_Physical_Name)
-                from 
-                (SELECT h.Hub_Identifier,h.Target_Hub_table_physical_name,(Business_Key_Physical_Name),h.Group_Name    
-                FROM standard_hub h
-                inner join source_data src on src.Source_table_identifier = h.Source_Table_Identifier
-                where 1=1
-                and src.Source_System = '{source_name}'
-                and src.Source_Object = '{source_object}'
-                and h.Is_Primary_Source = '1'
-                ORDER BY h.Target_Column_Sort_Order
-                )
-                group by Hub_Identifier,Target_Hub_table_physical_name
-                """
+    query = f"""
+    SELECT 
+        Hub_Identifier,
+        Target_Hub_table_physical_name,
+        GROUP_CONCAT(distinct Business_Key_Physical_Name)
+    from 
+        (SELECT 
+            h.Hub_Identifier,
+            h.Target_Hub_table_physical_name,
+            (Business_Key_Physical_Name),
+            h.Group_Name    
+        FROM 
+            standard_hub h
+        inner join 
+            source_data 
+                src on src.Source_table_identifier = h.Source_Table_Identifier
+        where 
+            1=1
+            and src.Source_System = '{source_name}'
+            and src.Source_Object = '{source_object}'
+            and h.Is_Primary_Source = '1'
+        ORDER BY 
+            h.Target_Column_Sort_Order
+        )
+    group by 
+        Hub_Identifier,
+        Target_Hub_table_physical_name"""
 
     cursor.execute(query)
     results = cursor.fetchall()
@@ -91,7 +105,7 @@ def generate_hub(data_structure):
     model_path = data_structure['model_path']
     source_name = data_structure['source_name'] 
     source_object = data_structure['source_object'] 
-    hub_list = generate_hub_list(cursor=cursor, source=source, source_name= source_name, source_object= source_object)
+    hub_list = generate_hub_list(cursor, source_name, source_object)
 
     for hub in hub_list:
 

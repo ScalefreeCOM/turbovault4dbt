@@ -11,7 +11,8 @@ def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
   
   command = ""
   query = f"""
-              SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM 
+              SELECT 
+              Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM 
               (SELECT COALESCE(h.Target_Role_Primary_Key_Physical_Name,h.Target_Primary_Key_Physical_Name) as Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name
               FROM standard_hub h
               inner join source_data src on h.Source_Table_Identifier = src.Source_table_identifier
@@ -186,11 +187,7 @@ def generate_stage(data_structure):
   stage_default_schema = data_structure['stage_default_schema']
   model_path = data_structure['model_path']
   hashdiff_naming = data_structure['hashdiff_naming']
-  try:
-    flowBiConfigs = data_structure['flowBiConfigs']
-  except:
-    pass
-  
+
   hashed_columns = gen_hashed_columns(cursor, hashdiff_naming, source_name, source_object)
   prejoins = gen_prejoin_columns(cursor, source_name, source_object)
   try:
@@ -200,8 +197,17 @@ def generate_stage(data_structure):
   group_name = get_groupname(cursor,source_name,source_object)
   model_path = model_path.replace("@@GroupName", 'Stage').replace("@@SourceSystem", source_name).replace('@@timestamp',generated_timestamp)
 
-  query = f"""SELECT Source_Schema_Physical_Name,Source_Table_Physical_Name, Record_Source_Column, Load_Date_Column, Source_System  FROM source_data src
-                WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+  query = f"""SELECT 
+                Source_Schema_Physical_Name,
+                Source_Table_Physical_Name, 
+                Record_Source_Column, 
+                Load_Date_Column, 
+                Source_System  
+              FROM 
+                source_data src
+              WHERE 
+                src.Source_System = '{source_name}' 
+                and src.Source_Object = '{source_object}'
                 """
 
   cursor.execute(query)
@@ -219,7 +225,7 @@ def generate_stage(data_structure):
       command_tmp = f.read()
   f.close()
   command = command_tmp.replace("@@RecordSource",rs).replace("@@LoadDate",ldts).replace("@@HashedColumns", hashed_columns).replace("@@PrejoinedColumns",prejoins).replace('@@SourceName',source_system_name).replace('@@SourceTable',source_table_name).replace('@@SCHEMA',stage_default_schema).replace('@@MultiActive',multiactive)
-
+  # source_table_name
   filename = os.path.join(model_path , f"stg_{source_table_name.lower()}.sql")
     
   # Check whether the specified path exists or not

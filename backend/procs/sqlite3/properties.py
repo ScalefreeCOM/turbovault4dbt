@@ -16,12 +16,17 @@ def gen_properties(data_structure):
     group_name = 'RDV/' + get_groupname(cursor,source_name,source_object)
 
     #Generating Hub Tests
-    hub_query = f"""SELECT DISTINCT Target_Hub_table_physical_name,Target_Primary_Key_Physical_Name 
-    from standard_hub h
-    INNER JOIN source_data src on src.Source_table_identifier = h.Source_Table_Identifier
-    WHERE 1=1
-    AND h.Is_Primary_Source = '1'
-    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
+    hub_query = f"""
+        SELECT DISTINCT 
+            Target_Hub_table_physical_name,
+            Target_Primary_Key_Physical_Name 
+        from 
+            standard_hub h
+        INNER JOIN 
+            source_data src on src.Source_table_identifier = h.Source_Table_Identifier
+        WHERE 1=1
+            AND h.Is_Primary_Source = '1'
+            AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'"""
     cursor.execute(hub_query)
     results = cursor.fetchall()
 
@@ -57,8 +62,8 @@ def gen_properties(data_structure):
     results = cursor.fetchall()
 
     for link in results:
-        link_name = link[0]
-        link_hk = link[1]
+        link_name = str(link[0])
+        link_hk = str(link[1])
         ref_hub = link[2].split(',')
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
         with open(os.path.join(root,"templates","link_test.txt"),"r") as f:
@@ -101,9 +106,9 @@ def gen_properties(data_structure):
     results = cursor.fetchall()
 
     for sat in results:
-        sat_name = sat[0]
-        parent_name = sat[1]
-        parent_hk = sat[2]
+        sat_name = str(sat[0])
+        parent_name = str(sat[1])
+        parent_hk = str(sat[2])
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
         with open(os.path.join(root,"templates","sat_test.txt"),"r") as f:
             command_tmp = f.read()

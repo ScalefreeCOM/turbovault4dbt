@@ -11,7 +11,7 @@ def get_groupname(cursor,object_id):
     cursor.execute(query)
     return cursor.fetchone()[0]
 
-def get_object_list(cursor,source, source_name, source_object):
+def get_object_list(cursor, source_name, source_object):
     
     query = f"""SELECT DISTINCT h.Hub_Identifier 
                 from standard_hub h 
@@ -42,7 +42,7 @@ def generate_rt_satellite(data_structure):
     rdv_default_schema = data_structure['rdv_default_schema']
     model_path = data_structure['model_path']         
 
-    object_list = get_object_list(cursor,source, source_name, source_object)
+    object_list = get_object_list(cursor, source_name, source_object)
 
     for object in object_list:
         query = f"""SELECT DISTINCT h.Target_Primary_Key_Physical_Name, h.Target_Hub_table_physical_name, GROUP_CONCAT(src.Source_Table_Identifier)
