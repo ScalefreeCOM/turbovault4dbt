@@ -48,7 +48,10 @@ Our developers are constantly working on adding new connectors for more database
 ## How do I install TurboVault4dbt?
 To install TurboVault4dbt, follow the instructions on [this page](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/installation).
 ## How do I connect TurboVault4dbt with my metadata?
-You can configure the connection to your metadata storage in the [config.ini](config.md). Further explanation for the configuration input can be found [here](connect-to-metadata.md).
+You can configure the connection to your metadata storage in the config.ini located in turbovault4dbt/backend
+/config/
+Whichever section is found to be relevant to your project needs to be configured, and the rest could be deleted.
+In the next run, the section configured in the config.ini will appear in Turbo Vault's UI.
 
 ## How do I run TurboVault4dbt?
 To run TurboVault4dbt, you need to install Python, as well as the required packages. Then, simply execute main.py, which will open a GUI that looks like this: 
@@ -57,7 +60,7 @@ To run TurboVault4dbt, you need to install Python, as well as the required packa
 <img src="https://github.com/user-attachments/assets/3dc3d4a0-5770-44ed-b7c6-dc77f052a0ad" width=70% align=center>
 </div>
 
-First, choose your metadata input platform where you have your metadata stored from the dropdown menu.
+First, choose your metadata input platform, where you have your metadata stored, from the dropdown menu.
 
 From the Sources section, choose the source objects that you would like to use. At least one source object should be selected.
 
