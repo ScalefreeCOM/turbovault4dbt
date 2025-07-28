@@ -9,7 +9,7 @@ from backend.procs.sqlite3 import properties
 image_path = os.path.join(os.path.dirname(__file__),"images")
 log = Logger('log')
 
-class DB:
+class Database:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
@@ -24,7 +24,7 @@ class DB:
             'console_outputs': True,
             'cursor': None,
             'source': None,
-            'generated_timestamp': datetime.now().strftime("%Y%m%d%H%M%S"),
+            'generated_timestamp': None,
             'rdv_default_schema': self.config.get("rdv_schema"),
             'model_path': self.model_path,
             'hashdiff_naming': self.config.get('hashdiff_naming'),
@@ -48,6 +48,7 @@ class DB:
         return db.cursor()
                     
     def read(self):
+        self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
         self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
         self.data_structure['cursor'].execute("SELECT DISTINCT SOURCE_SYSTEM || '_*-*_' || SOURCE_OBJECT FROM source_data")
         results = self.data_structure['cursor'].fetchall()
@@ -60,17 +61,19 @@ class DB:
         self.read()
         if self.SourceYML:
             sources.gen_sources(self.data_structure)
-        try:
-            for self.data_structure['source'] in self.selectedSources:
-                seperatedNameAsList = self.data_structure['source'].split('_*-*_')
-                self.data_structure['source_name']   = seperatedNameAsList[0]
-                self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
-                generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
-                if self.Properties:
+
+        for self.data_structure['source'] in self.selectedSources:
+            seperatedNameAsList = self.data_structure['source'].split('_*-*_')
+            self.data_structure['source_name']   = seperatedNameAsList[0]
+            self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
+            generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
+            if self.Properties:
+                try:
                     properties.gen_properties(self.data_structure)
-            self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
-        except Exception as e:
-            self.data_structure['print2FeedbackConsole'](message= 'No sources selected!')
+                except:
+                    self.data_structure['print2FeedbackConsole'](message= 'Failed to generate properties for {0} : {1}.'.format(self.data_structure['source_name'], self.data_structure['source_object']))
+        self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
+
 
         if self.DBDocs:
             generate_erd.generate_erd(self.data_structure['cursor'], self.selectedSources, self.data_structure['generated_timestamp'],self.data_structure['model_path'],self.data_structure['hashdiff_naming'])

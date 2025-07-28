@@ -19,7 +19,7 @@ class Excel:
             'console_outputs': True,
             'cursor': None,
             'source': None,
-            'generated_timestamp': datetime.now().strftime("%Y%m%d%H%M%S"),
+            'generated_timestamp': None,
             'rdv_default_schema': self.config.get("rdv_schema"),
             'model_path': self.model_path,
             'hashdiff_naming': self.config.get('hashdiff_naming'),
@@ -47,6 +47,7 @@ class Excel:
         return db.cursor()  
                      
     def read(self):
+        self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
         self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
         self.data_structure['cursor'].execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
         results = self.data_structure['cursor'].fetchall()
@@ -55,7 +56,7 @@ class Excel:
             source_list.append(row[0])
         self.data_structure['source_list'] = source_list
         self.catchDatabase()
-        
+
     def catchDatabase(self):
         if os.path.exists('dump.db'):
             os.remove('dump.db')
@@ -89,4 +90,4 @@ class Excel:
 
         if self.DBDocs:
             generate_erd.generate_erd(self.data_structure['cursor'], self.selectedSources,self.data_structure['generated_timestamp'],self.data_structure['model_path'],self.data_structure['hashdiff_naming'])
-        self.data_structure['cursor'].close()  
+        self.data_structure['cursor'].close()

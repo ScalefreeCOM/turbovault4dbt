@@ -23,9 +23,9 @@ class Events:
         elif selection == 'BigQuery':
             self.TurboVault.bigquery.read()
             newSources : list = self.TurboVault.bigquery.data_structure['source_list']
-        elif selection == 'db':
-            self.TurboVault.db.read()
-            newSources : list = self.TurboVault.db.data_structure['source_list']
+        elif selection == 'Database':
+            self.TurboVault.Database.read()
+            newSources : list = self.TurboVault.Database.data_structure['source_list']
         return newSources
     
     def onPressStart(self, selections) -> None:    
@@ -38,7 +38,7 @@ class Events:
                 Properties= selections['Properties'],
                 ) 
             self.TurboVault.doRunForExcel()
-
+            self.TurboVault.excel.read()
         elif selections['SourcePlatform'] == 'Google Sheets':
             self.TurboVault.googleSheets.setTODO(
                 SourceYML = selections['SourceYML'], 
@@ -69,12 +69,12 @@ class Events:
                 ) 
             self.TurboVault.doRunForBigQuery()
             
-        elif selections['SourcePlatform'] == 'db':
-            self.TurboVault.db.setTODO(
+        elif selections['SourcePlatform'] == 'Database':
+            self.TurboVault.Database.setTODO(
                 SourceYML = selections['SourceYML'], 
                 Tasks = selections['Tasks'] , 
                 Sources= selections['Sources'], 
                 DBDocs= selections['DBDocs'], 
                 Properties= selections['Properties'],
                 ) 
-            self.TurboVault.doRunForDb()
+            self.TurboVault.doRunForDatabase()
