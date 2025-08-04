@@ -1,10 +1,9 @@
-## TODO
 import os
 from configparser import ConfigParser
 
 class MetadataInputConfig:
     def __init__(self)->None:
-        self.supportedPlatforms: list = ['Excel','Google Sheets','Snowflake','BigQuery','db']        
+        self.supportedPlatforms: list = ['Excel','Google Sheets','Snowflake','BigQuery','Database']        
         self.configExpectedFields: dict ={
         'Snowflake':[
             'stage_schema',
@@ -43,7 +42,7 @@ class MetadataInputConfig:
             'model_path',
             'excel_path',
         ],
-        'db': [
+        'Database': [
             'stage_schema',
             'rdv_schema',
             'hashdiff_naming',

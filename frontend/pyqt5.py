@@ -3,7 +3,8 @@ import subprocess
 import ctypes
 from datetime import datetime
 from threading import Thread, Lock
-from PyQt5.QtCore import Qt
+from queue import Queue
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import (
     QColor, QIcon, QMovie, QPixmap, QStandardItem, QStandardItemModel
 )
@@ -15,6 +16,7 @@ from PyQt5.QtWidgets import (
 from frontend.PyQt5CustomClasses import QPushButton
 from frontend.events import Events
 from frontend.styles import styles
+
 class MainApp(QWidget):
     def __init__(self, **kwargs) -> None:
         super().__init__()
@@ -22,6 +24,11 @@ class MainApp(QWidget):
         self.validSourcePlatforms  : list = ConfigData['validSourcePlatforms']
         self.invalidSourcePlatforms: list = ConfigData['invalidSourcePlatforms']
         self.config: object = ConfigData['config']
+        
+        # --- Start of Changes ---
+        self.message_queue = Queue()
+        # --- End of Changes ---
+
         self.events: object = Events(
             config = self.config, 
             print2FeedbackConsole= self.print2FeedbackConsole,
@@ -46,6 +53,12 @@ class MainApp(QWidget):
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")
         self.setGeometry(100, 100, 800, 1280)
         self.setupUI()
+
+        # --- Start of Changes ---
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.process_queue)
+        self.timer.start(100) # Check the queue every 100ms
+        # --- End of Changes ---
         
     def setupUI(self) -> None:
         mainLayout: QVBoxLayout = QVBoxLayout()
@@ -118,7 +131,7 @@ class MainApp(QWidget):
         # Add invalid platforms as unselectable with custom color
         for platform in self.invalidSourcePlatforms:
             item = QStandardItem(platform)
-            item.setForeground(QColor("#eb5a50"))  # Custom red color
+            item.setForeground(QColor("#eb5a50"))
             item.setEnabled(False)
             model.appendRow(item)
             
@@ -403,10 +416,18 @@ class MainApp(QWidget):
             ).start()
         
     def onCancel(self):
-        self.feedbackConsole.append("Process canceled.")
+        self.print2FeedbackConsole("Process canceled.")
     
+    # --- Start of Changes ---
     def print2FeedbackConsole(self, message=None) -> None:
-        self.feedbackConsole.append(message)
+        if message:
+            self.message_queue.put(message)
+
+    def process_queue(self):
+        while not self.message_queue.empty():
+            message = self.message_queue.get_nowait()
+            self.feedbackConsole.append(message)
+    # --- End of Changes ---
 
     def enableWidgets(self, state) -> None:
         self.sourcePlatformCombo.setEnabled(state)
@@ -415,4 +436,3 @@ class MainApp(QWidget):
         self.deselectAllTasksBtn.setEnabled(state)
         self.tasksList.setEnabled(state)
         self.startButton.setEnabled(state)
-        

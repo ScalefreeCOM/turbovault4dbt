@@ -161,6 +161,7 @@ class Snowflake:
         return db.cursor()
 
     def read(self):
+        self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
         self.configParser()
         self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
         self.data_structure['cursor'].execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")

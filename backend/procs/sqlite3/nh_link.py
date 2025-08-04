@@ -3,7 +3,7 @@ import os
 from backend.procs.sqlite3.hub import generate_source_models
 
 def get_groupname(cursor,object_id):
-    query = f"""SELECT DISTINCT GROUP_NAME from non_historized_link where NH_Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
+    query = f"""SELECT DISTINCT Group_Name from non_historized_link where NH_Link_Identifier = '{object_id}' ORDER BY Target_Column_Sort_Order LIMIT 1"""
     cursor.execute(query)
     return cursor.fetchone()[0]
 
