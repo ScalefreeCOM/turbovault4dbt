@@ -44,7 +44,14 @@ Currently, TurboVault4dbt supports metadata input from
 - **SQLite DB Files**
 
 Our developers are constantly working on adding new connectors for more databases.
+--- 
 
+## Looking for dedicated Support?
+While our development team is eager to answer all questions and fix bugs directly here on Github, this sometimes isn't enough for organizations looking for a guaranteed level of support. 
+To meet this requirement, Scalefree has created the [DataVault4dbt Premium Package](https://kb.scalefr.ee/anexd2)! Follow the link to learn about all benefits included. 
+
+
+---
 ## How do I install TurboVault4dbt?
 To install TurboVault4dbt, follow the instructions on [this page](https://github.com/ScalefreeCOM/turbovault4dbt/wiki/installation).
 ## How do I connect TurboVault4dbt with my metadata?
