@@ -5,7 +5,4 @@
 source_models: @@SourceModel
 {%- endset -%}      
 
-{% set metadata_dict = fromyaml(yaml_metadata) %}
-
-{{ datavault4dbt.ref_hub(source_models=metadata_dict['source_models'],
-                     ref_keys=metadata_dict['ref_keys']) }}
+{{ datavault4dbt.ref_hub(yaml_metadata=yaml_metadata) }}

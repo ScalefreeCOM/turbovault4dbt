@@ -7,8 +7,4 @@ link_hashkey: @@LinkHashkey
 foreign_hashkeys: @@ForeignHashkeys
 {%- endset -%}
 
-{% set metadata_dict = fromyaml(yaml_metadata) %}
-
-{{ datavault4dbt.link(link_hashkey=metadata_dict.get("link_hashkey"),
-        foreign_hashkeys=metadata_dict.get("foreign_hashkeys"),
-        source_models=metadata_dict.get("source_models")) }}
+{{ datavault4dbt.link(yaml_metadata=yaml_metadata) }}
