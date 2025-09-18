@@ -4,7 +4,6 @@ materialized='incremental') }}
 {%- set yaml_metadata -%}
 tracked_hashkey: @@Tracked_HK
 source_models:@@Source_Models
-
 {%- endset -%}    
 
-{{ datavault4dbt.eff_sat(yaml_metadata=yaml_metadata) }}
+{{ datavault4dbt.rec_track_sat(yaml_metadata=yaml_metadata) }}
