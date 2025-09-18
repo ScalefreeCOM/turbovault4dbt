@@ -14,7 +14,7 @@ TurboVault4dbt is an open-source tool that automatically generates dbt models ac
 
 
 - A [dbt project](https://docs.getdbt.com/docs/get-started/getting-started-dbt-core) is required to use the generated models.
-- Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used since the dbt models are using datavault4dbt macros. 
+- Additionally, our dbt package [datavault4dbt](https://github.com/ScalefreeCOM/datavault4dbt) must be used **with version 1.9.0 or newer** since the dbt models are using datavault4dbt macros. 
 
 
 ## How does my metadata needs to look like?
