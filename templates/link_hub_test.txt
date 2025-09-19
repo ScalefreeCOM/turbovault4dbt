@@ -1,5 +1,0 @@
-      - name: @@HubHK
-        tests:
-          - relationships:
-              to: ref('@@HubName')
-              field: @@HubHK

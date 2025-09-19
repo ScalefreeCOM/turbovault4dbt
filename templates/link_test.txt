@@ -1,8 +1,0 @@
-  - name: @@LinkName
-    tags: ['LINK']
-    columns:
-      - name: @@LinkHK
-        tests:
-          - unique
-          - not_null     
-      @@HubRef
