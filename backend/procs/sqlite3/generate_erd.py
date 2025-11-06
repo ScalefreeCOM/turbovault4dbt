@@ -105,8 +105,10 @@ def generate_erd(cursor,source_list, generated_timestamp,model_path,hashdiff_nam
     source_name_list = []
     source_object_list = []
     for source in source_list:
-        #print(source)
-        source_name,source_object = source.split('_')
+        if '_*-*_' in source:
+            source_name,source_object = source.split('_*-*_')
+        else:
+            source_name,source_object = source.split('_')
         source_name_list.append(source_name)
         source_object_list.append(source_object)
     
@@ -319,7 +321,10 @@ def generate_erd(cursor,source_list, generated_timestamp,model_path,hashdiff_nam
     ##TableGroups
 
     for source in source_list:
-        source_system,source_object = source.split('_')
+        if '_*-*_' in source:
+            source_system,source_object = source.split('_*-*_')
+        else:
+            source_system,source_object = source.split('_')
         group_name = get_source_group(cursor,source_system,source_object)
         query = f"""
                  SELECT DISTINCT Target_Hub_table_physical_name

@@ -14,9 +14,8 @@ class Database:
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
         self.db_path = self.config.get('db_path')
-        self.db_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), self.db_path)) # If a file path is relative, then resolve to an absolute path 
         root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
-        root = '\\'.join(root.split('\\')[0:-1])  ## get one step back from the root folder
+        root = '\\'.join(root.split('\\')[0:-1])
         self.model_path = self.config.get('model_path')
         self.model_path = os.path.join(root , self.model_path.replace('../', '').replace('/', '\\'))
         self.data_structure = {

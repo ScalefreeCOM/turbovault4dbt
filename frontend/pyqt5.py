@@ -207,8 +207,17 @@ class MainApp(QWidget):
         self.tasksList.setStyleSheet(self.listStyle + self.scrollBarStyle)
 
         tasks = [
-            'Stage', 'Standard Hub', 'Standard Satellite', 'Standard Link', 'Non-Historized Link',
-            'Point-in-Time', 'Non-Historized Satellite', 'Multi-Active Satellite', 'Record Tracking Satellite'
+            'Stage', 
+            'Standard Hub', 
+            'Standard Satellite', 
+            'Standard Link', 
+            'Non-Historized Link',
+            'Point-in-Time', 
+            'Non-Historized Satellite', 
+            'Multi-Active Satellite', 
+            'Record Tracking Satellite', 
+            #'Effectivity Satellite',
+            'Reference Table'
         ]
 
         for task in tasks:

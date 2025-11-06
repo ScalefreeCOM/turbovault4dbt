@@ -10,7 +10,7 @@ def generate_ref_sat(cursor,source_name, source_object):
         AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
         GROUP BY src.Source_Object,rs.Target_Reference_table_physical_name
         ORDER BY rs.Target_Column_Sort_Order asc
-"""
+        """
 
         cursor.execute(query)
         return cursor.fetchall()

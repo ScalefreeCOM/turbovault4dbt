@@ -83,7 +83,10 @@ class Excel:
                 self.data_structure['source_object'] = ''.join(seperatedNameAsList[1:])
                 generate_selected_entities.generate_selected_entities(self.todo, self.data_structure)
                 if self.Properties:
-                    properties.gen_properties(self.data_structure)
+                    try:
+                        properties.gen_properties(self.data_structure)
+                    except Exception as e:
+                        self.data_structure['print2FeedbackConsole'](message= f'Failed to generate the properties for {self.data_structure["source"]}: {str(e)}')
             self.data_structure['print2FeedbackConsole'](message= 'Process successfully executed and models are ready to be used in Datavault 4dbt.')
         except Exception as e:
             self.data_structure['print2FeedbackConsole'](message= 'No sources selected!')

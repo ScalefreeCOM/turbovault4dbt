@@ -77,16 +77,24 @@ def gen_properties(data_structure):
 
 
     #Generating Satellite Tests
-    sat_query = f"""SELECT DISTINCT Target_Satellite_Table_Physical_Name
-    ,COALESCE(sh.Target_Hub_table_physical_name,sl.Target_link_table_physical_name,nhl.Target_link_table_physical_name) as Parent_Table_Name
-    ,Parent_Primary_Key_Physical_Name
+    sat_query = f"""
+    SELECT DISTINCT 
+        Target_Satellite_Table_Physical_Name,
+        COALESCE(sh.Target_Hub_table_physical_name, sl.Target_link_table_physical_name, nhl.Target_link_table_physical_name) as Parent_Table_Name,
+        Parent_Primary_Key_Physical_Name
     FROM 
     (
-    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_Identifier,Parent_Primary_Key_Physical_Name FROM standard_satellite
+    SELECT DISTINCT 
+        Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_Identifier,Parent_Primary_Key_Physical_Name FROM standard_satellite
     UNION ALL
-    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_primary_key_physical_name FROM multiactive_satellite
+    SELECT DISTINCT 
+        Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_primary_key_physical_name FROM multiactive_satellite
     UNION ALL
-    SELECT DISTINCT Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_Primary_Key_Physical_Name FROM non_historized_satellite
+    SELECT DISTINCT 
+        Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_Primary_Key_Physical_Name FROM non_historized_satellite
+    UNION ALL
+    SELECT DISTINCT
+        Target_Satellite_Table_Physical_Name,Source_Table_Identifier,Parent_identifier,Parent_Primary_Key_Physical_Name FROM effectivity_satellite
     ) s
     INNER JOIN source_data src on src.Source_Table_Identifier = s.Source_Table_Identifier
     LEFT JOIN standard_link sl on sl.Link_Identifier = s.Parent_Identifier
