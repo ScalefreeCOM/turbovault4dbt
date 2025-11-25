@@ -22,7 +22,7 @@ def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
               UNION ALL
 
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM
-              (SELECT l.Target_Primary_Key_Physical_Name, l.Source_Column_Physical_Name
+              (SELECT l.Target_Primary_Key_Physical_Name, COALESCE(l.Prejoin_Target_Column_Alias, l.Prejoin_Extraction_Column_Name, l.Source_Column_Physical_Name) as Source_Column_Physical_Name
               FROM standard_link l
               inner join source_data src on l.Source_Table_Identifier = src.Source_table_identifier
               WHERE src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
