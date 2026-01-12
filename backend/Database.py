@@ -34,6 +34,7 @@ class Database:
             'source_name' : None, # "Source" field splits into this field
             'source_object' : None, # "Source" field splits into this field
         }  
+        print(f"Attempting to connect to: {self.db_path}")
 
     
     def setTODO(self, **kwargs):
