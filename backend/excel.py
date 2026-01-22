@@ -22,6 +22,8 @@ class Excel:
         self.model_path = str(root / clean_model_path)
         
         self.data_structure ={
+            'print2FeedbackConsole': kwargs.get('print2FeedbackConsole'),
+            'console_outputs': True,
             'cursor': None,
             'source': None,
             'generated_timestamp': None,
