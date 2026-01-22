@@ -3,7 +3,7 @@ import sqlite3
 import pandas as pd
 from datetime              import datetime
 from pathlib               import Path
-from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd
+from backend.procs.sqlite3 import generate_selected_entities, sources, generate_erd, properties
 
 class Excel:
     def __init__(self, **kwargs):
