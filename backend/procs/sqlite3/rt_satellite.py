@@ -83,7 +83,7 @@ def generate_rt_satellite(data_structure):
                 cursor.execute(query2)
                 result = cursor.fetchone()
                 sources = sources + f"\n\tstg_{result[0].lower()}:\n\t\trsrc_static: '{result[1]}'"
-            root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+            root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
             with open(os.path.join(root,"templates","record_tracking_sat.txt"),"r") as f:
             #with open(os.path.join(".","templates","record_tracking_sat.txt"),"r") as f:
                 command_tmp = f.read()

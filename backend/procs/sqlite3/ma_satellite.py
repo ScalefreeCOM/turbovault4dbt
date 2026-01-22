@@ -61,7 +61,7 @@ def generate_ma_satellite(data_structure):
         
         
         #Satellite_v0
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","ma_sat_v0.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -89,7 +89,7 @@ def generate_ma_satellite(data_structure):
                 data_structure['print2FeedbackConsole'](message= f"Created Multi Active Satellite Model {satellite_model_name_v0}")
 
         #Satellite_v1
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","ma_sat_v1.txt"),"r") as f:
             command_tmp = f.read()
         f.close()

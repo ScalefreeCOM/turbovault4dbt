@@ -214,7 +214,7 @@ def generate_stage(data_structure):
     ldts = row[3]
     source_system_name = row[4]
 
-  root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+  root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
   with open(os.path.join(root,"templates","stage.txt"),"r") as f:
       command_tmp = f.read()
   f.close()

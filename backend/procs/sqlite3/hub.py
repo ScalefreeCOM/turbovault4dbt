@@ -108,7 +108,7 @@ def generate_hub(data_structure):
         hashkey = generate_hashkey(cursor, hub_id)
     
         #with open(os.path.join(".","templates","hub.txt"),"r") as f:
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","hub.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
