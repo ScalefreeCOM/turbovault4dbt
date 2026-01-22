@@ -1,8 +1,2 @@
-/procs/sqlite3/__pycache__/
-config.ini
-dump.db
-*.pyc
-*.sty
-/tvdb-venv/
-/VenTurboVault/
-/models/
+# Created by venv; see https://docs.python.org/3/library/venv.html
+*

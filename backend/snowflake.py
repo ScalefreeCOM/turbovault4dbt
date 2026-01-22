@@ -2,6 +2,7 @@ import os
 import sqlite3
 import snowflake.connector
 from datetime              import datetime
+from pathlib               import Path
 from configparser          import RawConfigParser
 from backend.procs.sqlite3 import sources
 from backend.procs.sqlite3 import generate_selected_entities
@@ -30,12 +31,18 @@ class Snowflake:
             'source_object' : None, # "Source" field splits into this field
         } 
     
-    def configParser(self)->bool:
+    def configParser(self) -> bool:
         try:
-            root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
-            root = '\\'.join(root.split('\\')[0:-1])  ## get one step back from the root folder
+            # Use pathlib for robust cross-platform path resolution
+            current_file = Path(__file__).resolve()
+            # Navigate to the project root (up from backend/snowflake.py)
+            root = current_file.parents[1]
+            
             self.model_path = self.config.get('model_path')
-            self.model_path = os.path.join(root , self.model_path.replace('../', '').replace('/', '\\'))
+            # Clean up the config path and join it with the root
+            clean_model_path = self.model_path.replace('../', '').replace('\\', '/').strip('/')
+            self.model_path = str(root / clean_model_path)
+
             self.snowflake_credentials = RawConfigParser()
             self.snowflake_credentials.read(self.config.get('credential_path'))
             self.user = self.snowflake_credentials.get('main', 'SNOWFLAKE_USER_NAME')
@@ -162,7 +169,6 @@ class Snowflake:
 
     def read(self):
         self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
-        self.configParser()
         self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
         self.data_structure['cursor'].execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
         results = self.data_structure['cursor'].fetchall()
@@ -170,21 +176,22 @@ class Snowflake:
         for row in results:
             source_list.append(row[0])
         self.data_structure['source_list'] = source_list
-
         self.catchDatabase()
-        
+
     def catchDatabase(self):
-        if os.path.exists('dump.db'):
-            os.remove('dump.db')
-        self.data_structure['cursor'].execute("vacuum main into 'dump.db'")
-        self.data_structure['cursor'].close()  
-                   
+        dump_path = Path("dump.db")
+        if dump_path.exists():
+            dump_path.unlink()
+        self.data_structure['cursor'].execute(f"vacuum main into '{dump_path}'")
+        self.data_structure['cursor'].close()
+
     def reloadDatabase(self):
-        db = sqlite3.connect('dump.db')
+        dump_path = Path("dump.db")
+        db = sqlite3.connect(str(dump_path))
         dest = sqlite3.connect(':memory:')
         db.backup(dest)
         db.close()
-        os.remove('dump.db')
+        dump_path.unlink()
         return dest.cursor()
                                      
     def run(self):

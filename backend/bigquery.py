@@ -1,6 +1,7 @@
 import os
 import sqlite3
-from datetime              import datetime
+from pathlib import Path
+from datetime import datetime
 from google.oauth2         import service_account
 from google.cloud          import bigquery
 from backend.procs.sqlite3 import sources
@@ -12,10 +13,19 @@ class BigQuery:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
-        root = '\\'.join(root.split('\\')[0:-1])  ## get one step back from the root folder
+        
+        # Cross-platform path handling using pathlib
+        current_file = Path(__file__).resolve()
+        # Find the root by looking for the 'backend' directory or stepping up
+        # This replaces the brittle .split('\\procs\\sqlite3') logic
+        root = current_file.parents[1] # This gets you to the 'backend' folder level
+        
         self.model_path = self.config.get('model_path')
-        self.model_path = os.path.join(root , self.model_path.replace('../', '').replace('/', '\\'))
+        # Use Path.joinpath and normalize slashes
+        # Path() automatically handles converting '/' or '\\' to the OS default
+        normalized_model_path = Path(self.model_path.replace('../', ''))
+        self.model_path = str(root.parent / normalized_model_path)
+        
         self.project_id = self.config.get('project_id')
         self.credential_path = self.config.get( 'credential_path')
         self.metadata_dataset = self.config.get('metadata_dataset')
@@ -104,7 +114,7 @@ class BigQuery:
 
     def read(self):
         self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
-        self.data_structure['cursor']= self.__initializeInMemoryDatabase()
+        self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
         self.data_structure['cursor'].execute("SELECT DISTINCT SOURCE_SYSTEM || '_' || SOURCE_OBJECT FROM source_data")
         results = self.data_structure['cursor'].fetchall()
         source_list = []
@@ -112,19 +122,21 @@ class BigQuery:
             source_list.append(row[0])
         self.data_structure['source_list'] = source_list
         self.catchDatabase()
-        
+
     def catchDatabase(self):
-        if os.path.exists('dump.db'):
-            os.remove('dump.db')
-        self.data_structure['cursor'].execute("vacuum main into 'dump.db'")
-        self.data_structure['cursor'].close()  
-                   
+        dump_path = Path("dump.db")
+        if dump_path.exists():
+            dump_path.unlink()
+        self.data_structure['cursor'].execute(f"vacuum main into '{dump_path}'")
+        self.data_structure['cursor'].close()
+
     def reloadDatabase(self):
-        db = sqlite3.connect('dump.db')
+        dump_path = Path("dump.db")
+        db = sqlite3.connect(str(dump_path))
         dest = sqlite3.connect(':memory:')
         db.backup(dest)
         db.close()
-        os.remove('dump.db')
+        dump_path.unlink()
         return dest.cursor()
                                      
     def run(self):
