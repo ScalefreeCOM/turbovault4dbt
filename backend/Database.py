@@ -23,7 +23,7 @@ class Database:
         self.db_path = str((current_file.parent / db_path_raw).resolve())
 
         # Handle model_path by removing relative markers and joining with root
-        semodel_path_ra = self.config.get('model_path').replace('../', '').replace('\\', '/').strip('/')
+        self.model_path = self.config.get('model_path').replace('../', '').replace('\\', '/').strip('/')
 
         self.data_structure = {
             'print2FeedbackConsole': kwargs.get('print2FeedbackConsole'),
