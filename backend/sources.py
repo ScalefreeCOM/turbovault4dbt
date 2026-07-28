@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 def gen_sources(data_structure):
     cursor = data_structure['cursor']
@@ -41,19 +42,15 @@ def gen_sources(data_structure):
         command = command + f'\t- name: {source_system}\n\t  schema: {source_schema}\n\t  database: {source_database}\n\t  tables:\n'
         for table in source_tables:
             command = command + f'\t\t-  name: {table}\n'
-    model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName","Sources").replace('@@timestamp',generated_timestamp)
-    filename = os.path.join(model_path , "sources.yml")
-          
-    path = os.path.join(model_path)
+        
+        # Cross-platform path handling using pathlib
+        model_path_obj = Path(model_path.replace("@@SourceSystem", "").replace("@@GroupName", "Sources").replace('@@timestamp', generated_timestamp))
+        filename = model_path_obj / "sources.yml"
 
+        # Create directory if it doesn't exist
+        model_path_obj.mkdir(parents=True, exist_ok=True)
 
-    # Check whether the specified path exists or not
-    isExist = os.path.exists(path)
-    if not isExist:   
-    # Create a new directory because it does not exist 
-        os.makedirs(path)
-
-    with open(filename, 'w') as f:
-        f.write(command.expandtabs(2))
+        with open(filename, 'w') as f:
+            f.write(command.expandtabs(2))
     if data_structure['console_outputs']:    
         print(f"Created sources.yml")

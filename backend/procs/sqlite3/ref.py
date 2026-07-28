@@ -141,7 +141,7 @@ def generate_ref(data_structure):
         ##@@Historized
         if(historized != 'full' and historized != 'latest'):
             historized = f"snapshot'\nsnapshot_relation:'{historized}"
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs')[0])
         with open(os.path.join(root,"templates","ref_table.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -184,7 +184,7 @@ def generate_ref(data_structure):
                 rsrc_static = src[1]
                 source_models += f"\n\t\t- name: {Source_name.lower()}\n\t\t\tref_keys: '{ref_keys}'\n\t\t\trsrc_static: '{rsrc_static}'"
                 
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","ref_hub.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -210,7 +210,7 @@ def generate_ref(data_structure):
         ref_sat_list = generate_ref_sat(cursor,source_name, source_object)
         command_tmp = ''
         #Satellite v0
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","ref_sat_v0.txt") ,"r") as f:
             command_tmp = f.read()
         f.close()
@@ -247,7 +247,7 @@ def generate_ref(data_structure):
                     data_structure['print2FeedbackConsole'](message= f"Created Reference Sat Model {sat_name}")
 
             #Satellite_v1
-            root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+            root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
             with open(os.path.join(root,"templates","ref_sat_v1.txt"),"r") as f:
                 command_tmp = f.read()
             f.close()

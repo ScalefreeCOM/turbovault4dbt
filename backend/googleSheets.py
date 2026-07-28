@@ -8,16 +8,24 @@ from backend.procs.sqlite3 import sources
 from backend.procs.sqlite3 import generate_selected_entities
 from backend.procs.sqlite3 import generate_erd
 from backend.procs.sqlite3 import properties
+from pathlib               import Path
 
 
 class GoogleSheets:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
-        root = '\\'.join(root.split('\\')[0:-1])  ## get one step back from the root folder
+
+        # Use pathlib for robust cross-platform path handling
+        current_file = Path(__file__).resolve()
+        # Navigate to the project root (up from backend/googleSheets.py)
+        root = current_file.parents[1]
+
         self.model_path = self.config.get('model_path')
-        self.model_path = os.path.join(root , self.model_path.replace('../', '').replace('/', '\\'))
+        # Clean up the config path and join it with the root
+        clean_model_path = self.model_path.replace('../', '').replace('\\', '/').strip('/')
+        self.model_path = str(root / clean_model_path)
+
         self.credential_path = self.config.get('gcp_oauth_credentials')
         self.sheet_url = self.config.get('sheet_url')
         self.data_structure ={
@@ -86,7 +94,7 @@ class GoogleSheets:
         ref_sat_df.to_sql('ref_sat',db)
         source_data_df.to_sql('source_data',db)
         return db.cursor()
-    
+
     def read(self):
         self.data_structure['generated_timestamp'] = datetime.now().strftime("%Y%m%d%H%M%S")
         self.data_structure['cursor'] = self.__initializeInMemoryDatabase()
@@ -96,21 +104,22 @@ class GoogleSheets:
         for row in results:
             source_list.append(row[0])
         self.data_structure['source_list'] = source_list
-        
         self.catchDatabase()
-        
+
     def catchDatabase(self):
-        if os.path.exists('dump.db'):
-            os.remove('dump.db')
-        self.data_structure['cursor'].execute("vacuum main into 'dump.db'")
-        self.data_structure['cursor'].close()  
-                   
+        dump_path = Path("dump.db")
+        if dump_path.exists():
+            dump_path.unlink()
+        self.data_structure['cursor'].execute(f"vacuum main into '{dump_path}'")
+        self.data_structure['cursor'].close()
+
     def reloadDatabase(self):
-        db = sqlite3.connect('dump.db')
+        dump_path = Path("dump.db")
+        db = sqlite3.connect(str(dump_path))
         dest = sqlite3.connect(':memory:')
         db.backup(dest)
         db.close()
-        os.remove('dump.db')
+        dump_path.unlink()
         return dest.cursor()
                                      
     def run(self):

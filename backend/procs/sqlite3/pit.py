@@ -86,7 +86,7 @@ def generate_pit(data_structure):
         all_satellite_names += f"\n\t- {sat}"
 
 
-    root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
     with open(os.path.join(root,"templates","pit_v1.txt"),"r") as f:
 
         command_tmp = f.read()

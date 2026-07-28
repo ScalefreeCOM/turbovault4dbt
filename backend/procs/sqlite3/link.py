@@ -103,7 +103,7 @@ def generate_link(data_structure):
 
 
 
-    root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
     with open(os.path.join(root,"templates","link.txt"),"r") as f:
     #with open(os.path.join(".","templates","link.txt"),"r") as f:
         command_tmp = f.read()

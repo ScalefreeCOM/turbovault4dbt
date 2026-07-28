@@ -58,7 +58,7 @@ def generate_satellite(data_structure):
         payload = gen_payload(payload_list)
         
         #Satellite_v0
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","sat_v0.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -86,7 +86,7 @@ def generate_satellite(data_structure):
                 data_structure['print2FeedbackConsole'](message= f"Created Satellite Model {satellite_model_name_v0}")
 
         #Satellite_v1
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","sat_v1.txt"),"r") as f:
             command_tmp = f.read()
         f.close()

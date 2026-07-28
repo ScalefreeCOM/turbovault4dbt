@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime
 import time
 from backend.procs.sqlite3 import properties
+from pathlib import Path
 image_path = os.path.join(os.path.dirname(__file__),"images")
 log = Logger('log')
 
@@ -13,12 +14,17 @@ class Database:
     def __init__(self, **kwargs):
         self.todo = []
         self.config = kwargs.get('turboVaultconfigs')
-        self.db_path = self.config.get('db_path')
-        self.db_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), self.db_path)) # If a file path is relative, then resolve to an absolute path 
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
-        root = '\\'.join(root.split('\\')[0:-1])  ## get one step back from the root folder
-        self.model_path = self.config.get('model_path')
-        self.model_path = os.path.join(root , self.model_path.replace('../', '').replace('/', '\\'))
+
+        # Use pathlib for cross-platform path resolution
+        current_file = Path(__file__).resolve()
+        
+        # Robustly resolve db_path
+        db_path_raw = self.config.get('db_path')
+        self.db_path = str((current_file.parent / db_path_raw).resolve())
+
+        # Handle model_path by removing relative markers and joining with root
+        self.model_path = self.config.get('model_path').replace('../', '').replace('\\', '/').strip('/')
+
         self.data_structure = {
             'print2FeedbackConsole': kwargs.get('print2FeedbackConsole'),
             'console_outputs': True,

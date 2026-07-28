@@ -1,6 +1,5 @@
 import os
 import subprocess
-import ctypes
 from datetime import datetime
 from threading import Thread, Lock
 from queue import Queue
@@ -50,7 +49,9 @@ class MainApp(QWidget):
         self.lock = Lock()  
         self.setWindowTitle("TurboVault4dbt")
         self.setWindowIcon(QIcon(r".\frontend\images\app_icon.png")) # Icon image should be replaced with SVG (or .ico)
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")
+        if os.name == 'nt':
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("TurboVault4dbt")
         self.setGeometry(100, 100, 800, 1280)
         self.setupUI()
 
@@ -405,7 +406,14 @@ class MainApp(QWidget):
         self.sourcesList.setDisabled(False)
         self.deselectAllTasksBtn.setDisabled(False)
         self.tasksList.setDisabled(False)
-        subprocess.Popen(f'explorer "{os.path.abspath("./models/")}"')
+        if os.name == 'nt':
+            subprocess.Popen(f'explorer "{os.path.abspath("./models/")}"')
+        elif os.name == 'posix':
+            import platform
+            if platform.system() == 'Darwin':
+                subprocess.Popen(['open', os.path.abspath("./models/")])
+            else:
+                subprocess.Popen(['xdg-open', os.path.abspath("./models/")])
         self.enableWidgets(True)
         
     def onStart(self):

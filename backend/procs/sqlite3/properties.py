@@ -28,7 +28,7 @@ def gen_properties(data_structure):
     for hub in results:
         hub_name = hub[0]
         hub_hk = hub[1]
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","hub_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -60,14 +60,14 @@ def gen_properties(data_structure):
         link_name = link[0]
         link_hk = link[1]
         ref_hub = link[2].split(',')
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","link_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
         ref_hub_tmp = ""
         for hub in ref_hub:
             hub_name,hub_hk = hub.split(';')
-            root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+            root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
             with open(os.path.join(root,"templates","link_hub_test.txt"),"r") as f:
                 hub_tmp = f.read()
             f.close()
@@ -104,7 +104,7 @@ def gen_properties(data_structure):
         sat_name = sat[0]
         parent_name = sat[1]
         parent_hk = sat[2]
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","sat_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
@@ -143,7 +143,7 @@ def gen_properties(data_structure):
         pit_name = pit[0]
         entity_name = pit[1]
         entity_hk = pit[2]
-        root = os.path.join(os.path.dirname(os.path.abspath(__file__)).split('\\procs\\sqlite3')[0])
+        root = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..')
         with open(os.path.join(root,"templates","pit_test.txt"),"r") as f:
             command_tmp = f.read()
         f.close()
