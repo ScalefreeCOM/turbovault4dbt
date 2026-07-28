@@ -1,5 +1,50 @@
 import os
 
+
+def _render_hashed_columns(rows):
+  """Render each hash definition once with ordered, unique columns."""
+  hash_definitions = {}
+
+  for hashkey_name, columns, is_hashdiff in rows:
+    if not hashkey_name or not columns:
+      continue
+
+    is_hashdiff = bool(is_hashdiff)
+    if hashkey_name not in hash_definitions:
+      hash_definitions[hashkey_name] = {
+        "is_hashdiff": is_hashdiff,
+        "columns": [],
+        "seen_columns": set(),
+      }
+
+    hash_definition = hash_definitions[hashkey_name]
+    if hash_definition["is_hashdiff"] != is_hashdiff:
+      raise ValueError(
+        f"Hash definition '{hashkey_name}' is used as both a hash key and a hashdiff."
+      )
+
+    for column in columns.split(","):
+      column = column.strip()
+      if column and column not in hash_definition["seen_columns"]:
+        hash_definition["columns"].append(column)
+        hash_definition["seen_columns"].add(column)
+
+  command = ""
+  for hashkey_name, hash_definition in hash_definitions.items():
+    command += f"\t{hashkey_name}:\n"
+
+    if hash_definition["is_hashdiff"]:
+      command += "\t\tis_hashdiff: true\n\t\tcolumns:\n"
+      indentation = "\t\t\t"
+    else:
+      indentation = "\t\t"
+
+    for column in hash_definition["columns"]:
+      command += f"{indentation}- {column}\n"
+
+  return command
+
+
 def get_groupname(cursor,source_name,source_object):
     query = f"""SELECT DISTINCT GROUP_NAME from source_data 
     where Source_System = '{source_name}' and Source_Object = '{source_object}'
@@ -8,8 +53,6 @@ def get_groupname(cursor,source_name,source_object):
     return cursor.fetchone()[0]
 
 def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
-  
-  command = ""
   query = f"""
               SELECT Target_Primary_Key_Physical_Name, GROUP_CONCAT(Source_Column_Physical_Name), FALSE FROM 
               (SELECT COALESCE(h.Target_Role_Primary_Key_Physical_Name,h.Target_Primary_Key_Physical_Name) as Target_Primary_Key_Physical_Name, h.Source_Column_Physical_Name
@@ -100,24 +143,7 @@ def gen_hashed_columns(cursor, hashdiff_naming, source_name,source_object):
   cursor.execute(query)
   results = cursor.fetchall()
 
-  for hashkey in results:
-  
-    hashkey_name = hashkey[0]
-    bk_list = hashkey[1].split(",")
-
-    command = command + f"\t{hashkey_name}:\n"
-
-    if hashkey[2]: 
-      command = command + "\t\tis_hashdiff: true\n\t\tcolumns:\n"
-
-      for bk in bk_list:
-        command = command + f"\t\t\t- {bk}\n"
-    
-    else:
-      for bk in bk_list:
-        command = command + f"\t\t- {bk}\n"
-
-  return command
+  return _render_hashed_columns(results)
 
 
 def gen_prejoin_columns(cursor, source_name, source_object):
