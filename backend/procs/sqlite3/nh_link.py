@@ -18,6 +18,7 @@ def generate_link_list(cursor, source, source_name, source_object):
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}'
                 and l.Target_Primary_Key_Physical_Name <> ''
+                and l.Is_Primary_Source = '1'
                 order by l.Target_Column_Sort_Order)
                 group by NH_Link_Identifier,Target_link_table_physical_name
                 """

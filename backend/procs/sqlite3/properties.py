@@ -42,15 +42,17 @@ def gen_properties(data_structure):
     INNER JOIN standard_hub h on l.Hub_identifier = h.Hub_Identifier
     INNER JOIN source_data src on l.Source_Table_Identifier = src.Source_table_identifier
     WHERE 1=1
-    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
-    UNION ALL
+    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+    AND l.Is_Primary_Source = '1'
+UNION ALL
     SELECT DISTINCT l.Target_link_table_physical_name,l.Target_Primary_Key_Physical_Name,(h.Target_Hub_table_physical_name || ';' || l.Hub_primary_key_physical_name) as RefHub
     FROM non_historized_link l
     INNER JOIN standard_hub h on l.Hub_identifier = h.Hub_Identifier
     INNER JOIN source_data src on l.Source_Table_Identifier = src.Source_table_identifier
     WHERE 1=1
-    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}' 
-    )
+    AND src.Source_System = '{source_name}' and src.Source_Object = '{source_object}'
+    AND l.Is_Primary_Source = '1'
+)
     GROUP BY Target_link_table_physical_name,Target_Primary_Key_Physical_Name"""
 
     cursor.execute(link_query)
@@ -149,6 +151,12 @@ def gen_properties(data_structure):
         f.close()
         command_tmp = command_tmp.replace('@@PitName',pit_name).replace('@@HK',entity_hk).replace('@@Entity',entity_name)
         command = command + '\n' + command_tmp
+
+    # Stage-only objects produce no RDV entities -> do not write an (empty) yml.
+    # Every entity (Hub/Link/Sat/PIT) adds a '- name:' entry; if none is present,
+    # there are no models to document.
+    if "- name:" not in command:
+        return
 
     model_path = model_path.replace("@@SourceSystem","").replace("@@GroupName",group_name).replace('@@timestamp',generated_timestamp)
     filename = os.path.join(model_path , f"{source_object.lower()}.yml")

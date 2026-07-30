@@ -16,6 +16,7 @@ def generate_link_list(cursor, source, source_name, source_object):
                 where 1=1
                 and src.Source_System = '{source_name}'
                 and src.Source_Object = '{source_object}'
+                and l.Is_Primary_Source = '1'
                 order by l.Target_Column_Sort_Order)
                 group by Link_Identifier,Target_link_table_physical_name
                 """
@@ -45,9 +46,9 @@ def generate_source_models(cursor, link_id):
 
     for source_table_row in results:
         source_table_name = '- name: stg_' + source_table_row[0].lower()
-        fk_columns = set(source_table_row[1].split(','))
+        fk_columns = list(set(source_table_row[1].split(',')))
 
-        if len(fk_columns) > 1: 
+        if len(fk_columns) > 1:
             fk_col_output = ""
             for fk in fk_columns: 
                 fk_col_output += f"\n\t\t\t- '{fk}'"

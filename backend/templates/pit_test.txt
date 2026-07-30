@@ -1,14 +1,17 @@
   - name: @@PitName
-    tags: ['PIT']
+    config:
+      tags: ['PIT']
     tests:
     - dbt_utils.unique_combination_of_columns:
-        combination_of_columns: 
-          - @@HK
-          - ldts    
+        arguments:
+          combination_of_columns:
+            - @@HK
+            - ldts
     columns:
       - name: @@HK
         tests:
           - not_null
           - relationships:
-              to: ref('@@Entity')
-              field: @@HK   
+              arguments:
+                to: ref('@@Entity')
+                field: @@HK

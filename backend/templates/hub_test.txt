@@ -1,5 +1,6 @@
   - name: @@HubName
-    tags: ['HUB']
+    config:
+      tags: ['HUB']
     columns:
       - name: @@HubHK
         tests:

@@ -1,5 +1,6 @@
       - name: @@HubHK
         tests:
           - relationships:
-              to: ref('@@HubName')
-              field: @@HubHK
+              arguments:
+                to: ref('@@HubName')
+                field: @@HubHK
