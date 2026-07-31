@@ -152,7 +152,7 @@ def gen_prejoin_columns(cursor, source_name, source_object):
   
   query = f"""SELECT DISTINCT
               COALESCE(l.Prejoin_Target_Column_Alias,l.Prejoin_Extraction_Column_Name) as Prejoin_Target_Column_Name,
-              pj_src.Source_Schema_Physical_Name, 
+              pj_src.Source_System,
               pj_src.Source_Table_Physical_Name,
               l.Prejoin_Extraction_Column_Name, 
               l.Source_column_physical_name,
@@ -171,14 +171,16 @@ def gen_prejoin_columns(cursor, source_name, source_object):
     if command == "":
       command = "prejoined_columns:\n"
 
-    schema = prejoined_column[1]
+    # src_name must be the dbt SOURCE name (source_system, e.g. 'AwsDataCatalog'),
+    # not the physical schema, so it matches sources.yml / source('<name>', ...).
+    src_name = prejoined_column[1]
     table = prejoined_column[2]
     alias = prejoined_column[0]
     bk_column = prejoined_column[3]
     this_column_name = prejoined_column[4]
     ref_column_name = prejoined_column[5]
 
-    command = command + f"""\t{alias}:\n\t\tsrc_name: '{schema}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
+    command = command + f"""\t{alias}:\n\t\tsrc_name: '{src_name}'\n\t\tsrc_table: '{table}'\n\t\tbk: '{bk_column}'\n\t\tthis_column_name: '{this_column_name}'\n\t\tref_column_name: '{ref_column_name}'\n"""
 
   return command
 
